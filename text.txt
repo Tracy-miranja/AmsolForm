@@ -1,0 +1,15 @@
+const getUserDetails = async (e) => {
+    e.preventDefault(); // Prevent the default form submission
+
+    try {
+      // Send the data to the backend
+      const response = await axios.post("http://localhost:5000/Api/SignUp", {
+        fullName,
+        Email,
+        password
+      });
+      console.log(response.data); // Optional: Log the server response
+    } catch (error) {
+      console.log("Failed to post: ", error.message); // Handle the error
+    }
+  };
