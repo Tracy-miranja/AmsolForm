@@ -4,8 +4,11 @@ import SignUpForm from './SignUpForm';
 import Form from './form';
 import Home from './Home';
 
+
 const App = () => {
   return (
+    <>
+    
     <Router>
       <Routes>
         <Route path="/" element={<SignUpForm />} />
@@ -13,6 +16,7 @@ const App = () => {
         <Route path="/Home" element={<Home />} />
       </Routes>
     </Router>
+    </>
   );
 };
 

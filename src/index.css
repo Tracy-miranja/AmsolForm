@@ -32,11 +32,24 @@ body {
   
 }
 
-.conta{
+.conta {
+  position: relative;
+  background: rgba(228, 12, 12, 0.1);
   background-image: url("./assets/hrsourcing.jpg");
   background-repeat: no-repeat;
+  background-size: cover; 
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 100vh; 
+  display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  backdrop-filter: blur(100px); 
+  z-index: 1; 
 }
 
+.conta-content {
+  position: relative; 
+  z-index: 2; 
+  padding: 20px; 
+}
