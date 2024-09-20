@@ -19,7 +19,7 @@ const Form = () => {
       setPassword("");
       setError(""); 
       setTimeout(()=>{
-        navigate("/")
+        navigate("/Home")
       },[1000])
       ;
     } catch (error) {
@@ -35,6 +35,7 @@ const Form = () => {
 
   return (
     <>
+    <div className="container">
       <div className="flex flex-col bg-blue-500 w-[500px] h-[300px] p-4">
         <h1 className="text-3xl font-bold mb-4">Login</h1>
         <form className="flex flex-col text-xl font-bold" onSubmit={UserLogin}>
@@ -63,6 +64,7 @@ const Form = () => {
        <p>Not signed Up?<Link className="text-white" to="/">Sign Up</Link></p>
         {message && <p className="mt-4 text-green-500">{message}</p>}
         {error && <p className="mt-4 text-red-500">{error}</p>}
+      </div>
       </div>
     </>
   );

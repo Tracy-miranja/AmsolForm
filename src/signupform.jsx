@@ -30,6 +30,7 @@ const SignUpForm = () => {
   };
 
   return (
+    <div className="container">
     <div className="bg-blue-500  p-4 rounded-md">
       <h3 className="text-2xl font-bold mb-4">Sign Up</h3>
       <form className="flex flex-col text-xl font-bold" onSubmit={getUserDetails}>
@@ -87,6 +88,7 @@ const SignUpForm = () => {
           You already have an account? <a href="./form" className="text-blue-300 hover:underline">Log in</a>
         </p>
       </form>
+    </div>
     </div>
   );
 };
