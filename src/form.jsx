@@ -18,12 +18,10 @@ const Form = () => {
       setEmail("");
       setPassword("");
       setError(""); 
-      setTimeout(()=>{
-        navigate("/Home")
-      },[1000])
-      ;
+      setTimeout(() => {
+        navigate("/Home");
+      }, 1000);
     } catch (error) {
-      
       if (error.response && error.response.data.message) {
         setError(error.response.data.message); 
         setMessage(""); 
@@ -34,18 +32,17 @@ const Form = () => {
   };
 
   return (
-    <>
-    <div className="container">
-      <div className="flex flex-col bg-blue-500 w-[500px] h-[300px] p-4">
-        <h1 className="text-3xl font-bold mb-4">Login</h1>
-        <form className="flex flex-col text-xl font-bold" onSubmit={UserLogin}>
+    <div className="flex justify-center items-center h-screen bg-black">
+      <div className="flex flex-col bg-gray-800 w-[350px] h-[350px] p-6 rounded-lg shadow-lg text-center">
+        <h1 className="text-2xl font-semibold mb-4 text-white">Login</h1>
+        <form className="flex flex-col text-sm text-white" onSubmit={UserLogin}>
           <div className="mb-4">
             <label>Email:</label>
             <input
               type="email"
               value={Email}
               onChange={(e) => setEmail(e.target.value)}
-              className="ml-2 p-1 rounded"
+              className="ml-2 w-full p-1 rounded text-gray-900"
               required
             />
           </div>
@@ -55,18 +52,19 @@ const Form = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="ml-2 p-1 rounded"
+              className="ml-2 w-full p-1 rounded text-gray-900"
               required
             />
           </div>
-          <button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800">Log in</button>
+          <button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 mt-2">Log in</button>
         </form>
-       <p>Not signed Up?<Link className="text-white" to="/">Sign Up</Link></p>
+        <p className="text-sm text-white mt-4">Not signed up? 
+          <Link className="text-blue-400 hover:underline" to="/"> Sign Up</Link>
+        </p>
         {message && <p className="mt-4 text-green-500">{message}</p>}
         {error && <p className="mt-4 text-red-500">{error}</p>}
       </div>
-      </div>
-    </>
+    </div>
   );
 };
 
