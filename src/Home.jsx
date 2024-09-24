@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { FaCamera, FaUser } from "react-icons/fa";
 
 const Home = () => {
   const [firstName, setFirstName] = useState("");
@@ -32,7 +33,7 @@ const Home = () => {
       formData.append("company2", company2);
       formData.append("company3", company3);
       formData.append("salaryInfo", salaryInfo);
-      formData.append("salaryInfo", specialization);
+      formData.append("specialization", specialization);
       formData.append("cv", cv); // Append CV file
 
       const response = await axios.post("http://localhost:5000/Api/users", formData, {
@@ -77,7 +78,7 @@ const Home = () => {
       const formData = new FormData();
       formData.append("cv", cv); // Append updated CV file
 
-      const response = await axios.put("http://localhost:5000/Api/users/update-cv", formData, {
+      const response = await axios.put("http://localhost:5000/Api/users/${userId}/cv", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -99,8 +100,8 @@ const Home = () => {
   };
 
   return (
-    <div className="h-fit-content flex items-center justify-center  p-4 ">
-  
+    <div className="h-fit-content flex items-center justify-center flex-col">
+   
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -109,17 +110,25 @@ const Home = () => {
           </div>
         </div>
       )}
-
-      <div className="shadow-lg rounded-lg w-full max-w-4xl flex items-stretch justify-center bg-blue-400">
-        <div className="imagedv bg-blue-400 flex-grow p-2 min-h-full flex ">
-          <h2 className="text-white text-2xl">still working on this part</h2>
+      <div className="w-[100%] h-[20vh] bg-black text-white-100 flex items-center justify-center mb-[10px] flex-col">
+        <div className="w-[5%] h-[10vh] bg-white rounded-full flex items-center justify-center ">
+        <FaUser className='text-blue-500 text-4xl '/>
         </div>
+        <FaCamera className="text-blue-600 -mt-3 position-absolute"/>
+        <div><h5 className="text-white">username</h5></div>
+      </div>
 
-        <div className="flex-grow p-6">
+      <div className="shadow-lg rounded-lg w-full max-w-4xl flex items-stretch justify-center ">
+        {/* <div className="imagedv bg-blue-400 flex-grow p-2 min-h-full flex ">
+          <h2 className="text-white text-2xl">still working on this part</h2>
+        </div> */}
+
+        <div className="flex-grow">
+        <h2 className="text-2xl font-semibold text-center p-1">Submit Your Details</h2>
           {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="bg-blue-600 rounded-lg p-8 text-white space-y-4 h-full">
-            <h2 className="text-2xl font-semibold text-center">Submit Your Details</h2>
-
+          <form onSubmit={handleSubmit} className="bg-blue-800 rounded-lg p-8 text-white space-y-4 h-full flex flex-row items-center justify-around shadow-lg">
+            
+            <div className="w-[45%]">
             <div className="flex flex-col">
               <label className="mb-1">First Name:</label>
               <input
@@ -127,7 +136,7 @@ const Home = () => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="p-2 rounded-lg border border-gray-300 text-black"
+                className="p-2 rounded-lg border border-gray-300 text-black w-full"
               />
             </div>
 
@@ -176,10 +185,22 @@ const Home = () => {
                 <option value="Masters">Master</option>
                 <option value="Degree">Degree</option>
                 <option value="Diploma">Diploma</option>
-                <option value="Diploma">Diploma</option>
+                <option value="Diploma">Certificate</option>
               </select>
             </div>
+            <div className="flex flex-col">
+  <label className="mb-1">Specialization:</label>  {/* Change from "Specification" to "Specialization" */}
+  <input
+    type="text"
+    value={specialization}
+    onChange={(e) => setSpecialization(e.target.value)}
+    required
+    className="p-2 rounded-lg border border-gray-300 text-black"
+  />
+</div>
 
+            </div>
+            <div className="w-[45%]">
             <div className="flex flex-col">
               <label className="mb-1">Work Experience (Company 1):</label>
               <input
@@ -234,10 +255,10 @@ const Home = () => {
               </div>
             )}
 
-            <button type="submit" className="w-full p-3 mt-4 bg-blue-800 rounded-lg hover:bg-blue-900">
+            <button type="submit" className="w-full p-3 mt-4 bg-orange-400 rounded-lg hover:bg-green-900">
               Submit
             </button>
-
+            </div>
             {message && <p className="mt-4 text-green-500">{message}</p>}
             {error && <p className="mt-4 text-red-500">{error}</p>}
           </form>
@@ -255,7 +276,7 @@ const Home = () => {
                     required
                   />
                 </div>
-                <button type="submit" className="w-full p-3 mt-4 bg-blue-800 rounded-lg hover:bg-blue-900">
+                <button type="submit" className="w-full p-3 mt-4 bg-blue-800 rounded-lg hover:bg-white-900">
                   Update CV
                 </button>
               </form>
