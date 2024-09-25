@@ -57,6 +57,7 @@ const Form = () => {
             />
           </div>
           <button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 mt-2">Log in</button>
+          <a className="pt-5 underline" href="#">Forgot Password?</a>
         </form>
         <p className="text-sm text-white mt-4">Not signed up? 
           <Link className="text-blue-400 hover:underline" to="/"> Sign Up</Link>
