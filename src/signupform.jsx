@@ -7,26 +7,44 @@ const SignUpForm = () => {
   const [fullName, setFullName] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(""); 
+  const [confirmPassword,setConfirmPassword]=useState("")
 
   const getUserDetails = async (e) => {
     e.preventDefault();
-
+  
+    // Ensure that you're comparing the latest values of password and confirmPassword
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      setMessage("");
+      return; // Prevent the form from being submitted if passwords don't match
+    }
+  
     try {
-      const response = await axios.post("http://localhost:5000/Api/SignUp", { fullName, Email, password });
+      // If passwords match, proceed with the API request
+      const response = await axios.post("http://localhost:5000/Api/SignUp", {
+        fullName,
+        Email,
+        password
+      });
+  
+      // Reset the form after successful submission
       setMessage(response.data.message);
       setEmail("");
       setPassword("");
       setFullName("");
       setError(""); 
+      setConfirmPassword("");
     } catch (error) {
+      // Handle any errors from the server
       if (error.response && error.response.data.message) {
         setError(error.response.data.message);
-        setMessage(""); 
+        setMessage("");
       } else {
         setError("An unexpected error occurred.");
       }
     }
   };
+  
 
   return (
     <div className="flex justify-center items-center h-screen bg-black">
@@ -64,6 +82,18 @@ const SignUpForm = () => {
                 type="password" 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
+                required
+                className="ml-2 w-full p-1 rounded text-gray-900"
+              />
+            </label>
+          </div>
+          <div className="mb-4">
+            <label>
+              Confirm Password <span className="text-red-500">*</span>:
+              <input 
+                type="password" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
                 required
                 className="ml-2 w-full p-1 rounded text-gray-900"
               />
