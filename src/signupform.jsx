@@ -59,78 +59,81 @@ const SignUpForm = () => {
   return (
     <div>
       <Navbar className="w-[100%]"/>
-     
-    <div className="flex justify-center items-center h-screen ">
-      <div className="flex flex-col bg-gray-800 w-[350px] p-6 rounded-lg shadow-lg text-center">
-        <h3 className="text-2xl font-semibold mb-4 text-white">Sign Up</h3>
-        <form className="flex flex-col text-sm text-white" onSubmit={getUserDetails}>
-          <div className="mb-4">
-            <label>
-             UserName<span className="text-red-500">*</span>:
+     <div className="flex text-center justify-center p-6"><h3 className="font-bold">Welcome to AMSOL, sign up to start your journey here</h3></div>
+    <div className="flex justify-center h-screen p-6 ">
+      <div className="flex flex-col  w-[50%] p-6 rounded-lg shadow-lg  h-fit">
+        <h3 className="text-2xl font-semibold mb-4 ml-2 ">Create Your Personal Account</h3>
+        <form className="flex flex-col text-sm " onSubmit={getUserDetails}>
+          <div className="">
+            <label className="">
+            <span className="font-bold ml-2">UserName</span><span className="text-red-500">*</span>:
               <input 
                 type="text" 
                 value={fullName} 
                 onChange={(e) => setFullName(e.target.value)} 
                 required
                 placeholder="Enter Username"
-                className="ml-2 w-full p-1 rounded text-gray-900"
+                className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
               />
+              <p className="ml-2">This will be your username. It will help employers find you easily</p>
             </label>
           </div>
-          <div className="mb-4">
-            <label>
-              Email <span className="text-red-500">*</span>:
+          <div className="">
+            <label className="">
+            <span className="font-bold ml-2">Email</span> <span className="text-red-500">*</span>:
               <input 
                 type="email" 
                 value={Email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required
                 placeholder="Enter Email"
-                className="ml-2 w-full p-1 rounded text-gray-900"
+                className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
               />
+              <p className="ml-2">We'll never share your email with anyone else</p>
             </label>
           </div>
-          <div className="mb-4 relative">
-              <label>
-                Password <span className="text-red-500">*</span>:
+          <div className=" relative">
+              <label className="">
+              <span className="font-bold ml-2">Password</span> <span className="text-red-500">*</span>:
                 <input
                   type={showPassword ? "text" : "password"}  
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Enter Password"
-                  className="ml-2 w-full p-1 rounded text-gray-900"
+                  className="ml-2 w-full p-2 rounded text-gray-900 border border-gray-300 focus:border-blue-500 "
                 />
-                
+                <p  className="p-2">Make sure it's atleast 8 characters including a number and a special character</p>
                 <span
-                  className="absolute right-3 top-[58%] cursor-pointer"
+                  className="absolute right-3 top-[30%] cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <FaEyeSlash className="text-gray-800"/> : <FaEye className="text-black"/>}
+                  {showPassword ? <FaEye className="text-black"/>: <FaEyeSlash className="text-gray-800"/>}
                 </span>
               </label>
             </div>
-          <div className="mb-4 relative">
-              <label>
-                Confirm Password <span className="text-red-500">*</span>:
+          <div className=" relative">
+              <label  className="">
+               <span className="font-bold ml-2">Confirm Password</span>  <span className="text-red-500">*</span>:
                 <input
                   type={showConfirmPassword ? "text" : "password"}  
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   placeholder="Enter Confirm Password"
-                  className="ml-2 w-full p-1 rounded text-gray-900"
+                  className="ml-2 w-full p-2 rounded text-gray-900 border border-gray-300 focus:border-blue-500"
                 />
               
                 <span
-                  className="absolute right-3 top-[58%] cursor-pointer"
+                  className="absolute right-3 top-[38%] cursor-pointer"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <FaEyeSlash className="text-gray-800"/> : <FaEye className="text-black"/>}
+                  {showConfirmPassword ? <FaEye className="text-black"/>: <FaEyeSlash className="text-gray-800"/>}
                 </span>
               </label>
             </div>
-          <button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 mt-2">
+            <p  className="ml-2">By Clicking "Create account" below, you agree to our terms of service and privacy statement. We'll occasionally send you emails regarding your account. Already have an account?</p>
+          <button type="submit" className="bg-blue-700 text-white ml-2 py-2 px-4 rounded hover:bg-blue-800 mt-2 w-[100px]">
             Sign Up
           </button>
 
@@ -142,8 +145,8 @@ const SignUpForm = () => {
             <p className="mt-4 text-red-500 font-bold">{error}</p>
           )}
 
-          <p className="mt-4">
-            Already have an account? <a href="./form" className="text-blue-300 hover:underline">Log in</a>
+          <p className="mt-4 ml-2">
+            Already have an account? <a href="./form" className="text-blue-800 hover:underline">Log in</a>
           </p>
         </form>
       </div>
