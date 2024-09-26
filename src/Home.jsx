@@ -194,8 +194,9 @@ const Home = () => {
 
             </div>
             <div className="w-[45%]">
+              
             <div className="flex flex-col">
-              <label className="mb-1">Work Experience (Company 1):</label>
+              <label className="mb-1">Work Experience (Company 1)</label>
               <input
                 type="text"
                 value={company1}

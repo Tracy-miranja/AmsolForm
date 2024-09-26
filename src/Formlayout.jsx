@@ -27,7 +27,7 @@ const FormLayout = () => {
             activeSection === "institutionDetails" ? "bg-blue-500 text-white" : ""
           } hover:bg-blue-500 hover:text-white`}
         >
-          <h2 className="font-bold">2. Institutional Details</h2>
+          <h2 className="font-bold">2. Qualifications Details</h2>
         </div>
         <div
           onClick={() => navigateToSection("uploadApply")}
@@ -47,15 +47,47 @@ const FormLayout = () => {
             {/* Personal Details Form Fields */}
             <div className="mb-4 flex flex-row">
               <label className="block text-gray-700 w-[15%] font-bold">Full Name:</label>
-              <input type="text" className="w-full p-2 border rounded" />
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Second Name:</label>
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">last Name:</label>
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">ID Number:</label>
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">WhatApp No.:</label>
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Phone Number:</label>
+              <input type="text" required className="w-full p-2 border rounded" />
             </div>
             <div className="mb-4 flex flex-row">
               <label className="block text-gray-700 w-[15%] font-bold">Email:</label>
+              <input type="email" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Age:</label>
+              <input type="email" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Nationality:</label>
               <input type="email" className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Location:</label>
+              <input type="email" required className="w-full p-2 border rounded" />
             </div>
             <button
               type="button"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+              className="w-[10%] ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
               onClick={() => navigateToSection("institutionDetails")}
             >
               Next
@@ -66,20 +98,52 @@ const FormLayout = () => {
 
       {activeSection === "institutionDetails" && (
         <div className="w-full bg-white p-6 shadow-lg rounded-lg">
-          <h2 className=" font-semibold mb-4">Institutional Details</h2>
+          <h2 className=" font-semibold mb-4">Qualifications</h2>
           <form>
             {/* Institutional Form Fields */}
             <div className="mb-4 flex flex-row">
-              <label className="block text-gray-700 w-[15%] font-bold">Institution Name:</label>
-              <input type="text" className="w-full p-2 border rounded" />
+              <label className="block text-gray-700 w-[15%] font-bold">Specialization:</label>
+              <input type="text" required className="w-full p-2 border rounded" />
             </div>
             <div className="mb-4 flex flex-row">
-              <label className="block text-gray-700 w-[15%] font-bold">Course:</label>
-              <input type="text" className="w-full p-2 border rounded" />
+              <label className="block text-gray-700 w-[15%] font-bold">Academic level:</label>
+              <select
+                value=""
+                onChange=""
+                required
+                className="w-full p-2 rounded-lg border border-gray-300 text-black"
+              >
+                <option value="">Select your qualification</option>
+                <option value="Masters">Master</option>
+                <option value="Degree">Degree</option>
+                <option value="Diploma">Diploma</option>
+                <option value="Diploma">Certificate</option>
+              </select>
+            </div>
+           
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Specialization:</label>
+              <input type="text" required className="w-full p-2 border rounded " />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Work Experience: (Company 1)</label>
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Work Experience: (Company 2)</label>
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Work Experience: (Company 3)</label>
+              <input type="text" required className="w-full p-2 border rounded" />
+            </div>
+            <div className="mb-4 flex flex-row">
+              <label className="block text-gray-700 w-[15%] font-bold">Salary Info:</label>
+              <input type="text" required className="w-full p-2 border rounded" />
             </div>
             <button
               type="button"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+              className="w-[10%] ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
               onClick={() => navigateToSection("uploadApply")}
             >
               Next
@@ -95,11 +159,16 @@ const FormLayout = () => {
             {/* Upload and Apply Form Fields */}
             <div className="mb-4 flex flex-row">
               <label className="block text-gray-700 w-[15%] font-bold">Upload CV:</label>
-              <input type="file" className="w-full p-2 border rounded" />
+              <input
+                  type="file"
+                  onChange={(e) => setCv(e.target.files[0])}
+                  required
+                  className="p-2 rounded-lg border border-gray-300 text-black"
+                />
             </div>
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+              className="w-[10%] ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-green-700"
             >
               Apply
             </button>
