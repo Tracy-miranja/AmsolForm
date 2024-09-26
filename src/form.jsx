@@ -40,7 +40,7 @@ const Form = () => {
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>
         <div className="flex flex-row items-center gap-5">
-          <Link className="text-white flex flex-row gap-2" to="/LanDingPage"><FaHome className="mt-1"/>Home</Link>
+          <Link className="text-white flex flex-row gap-2" to="/"><FaHome className="mt-1"/>Home</Link>
           
         </div>
       </div>
