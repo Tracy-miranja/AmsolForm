@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { FaEye } from "react-icons/fa6";
 import Navbar from "./navbar";
-import chair from "./assets/hiring.png"
+
 
 const SignUpForm = () => {
   const [Email, setEmail] = useState("");
@@ -49,7 +49,7 @@ const SignUpForm = () => {
     <div>
       <Navbar className="w-[100%]"/>
      
-    <div className="flex justify-center items-center h-screen bg-black">
+    <div className="flex justify-center items-center h-screen ">
       <div className="flex flex-col bg-gray-800 w-[350px] p-6 rounded-lg shadow-lg text-center">
         <h3 className="text-2xl font-semibold mb-4 text-white">Sign Up</h3>
         <form className="flex flex-col text-sm text-white" onSubmit={getUserDetails}>
