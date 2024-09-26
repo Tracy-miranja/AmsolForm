@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import { FaEye } from "react-icons/fa6";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import Navbar from "./navbar";
 
 
@@ -11,6 +11,10 @@ const SignUpForm = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState(""); 
   const [confirmPassword,setConfirmPassword]=useState("")
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const passwordRegex = /^(?=.*[!@#$%^&*])(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*]{8,}$/;
 
   const getUserDetails = async (e) => {
     e.preventDefault();
@@ -20,6 +24,13 @@ const SignUpForm = () => {
       setError("Passwords don't match");
       setMessage("");
       return; 
+    }
+    if (!passwordRegex.test(password)) {
+      setError(
+        "Password must be at least 8 characters long and include at least one special character, one letter, and one number."
+      );
+      setMessage("");
+      return;
     }
   
     try {
@@ -79,34 +90,46 @@ const SignUpForm = () => {
               />
             </label>
           </div>
-          <div className="mb-4">
-            <label>
-              Password <span className="text-red-500">*</span>:
-              <input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required
-                placeholder="Enter Password"
-                className="ml-2 w-full p-1 rounded text-gray-900"
-              />
-            </label>
-          </div>
-          <div className="mb-4">
-            <label>
-              Confirm Password <span className="text-red-500">*</span>:
-              <input 
-                type="password" 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                required
-                placeholder="Enter Confirm Password"
-                maxLength="8"
-                className="ml-2 w-full p-1 rounded text-gray-900"
+          <div className="mb-4 relative">
+              <label>
+                Password <span className="text-red-500">*</span>:
+                <input
+                  type={showPassword ? "text" : "password"}  
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter Password"
+                  className="ml-2 w-full p-1 rounded text-gray-900"
+                />
                 
-              />
-            </label>
-          </div>
+                <span
+                  className="absolute right-3 top-[58%] cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash className="text-gray-800"/> : <FaEye className="text-black"/>}
+                </span>
+              </label>
+            </div>
+          <div className="mb-4 relative">
+              <label>
+                Confirm Password <span className="text-red-500">*</span>:
+                <input
+                  type={showConfirmPassword ? "text" : "password"}  
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  placeholder="Enter Confirm Password"
+                  className="ml-2 w-full p-1 rounded text-gray-900"
+                />
+              
+                <span
+                  className="absolute right-3 top-[58%] cursor-pointer"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <FaEyeSlash className="text-gray-800"/> : <FaEye className="text-black"/>}
+                </span>
+              </label>
+            </div>
           <button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 mt-2">
             Sign Up
           </button>
