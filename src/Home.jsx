@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { FaCamera, FaUser } from "react-icons/fa";
+import FormLayout from "./Formlayout";
 
 const Home = () => {
   const [firstName, setFirstName] = useState("");
@@ -110,19 +111,11 @@ const Home = () => {
           </div>
         </div>
       )}
-      <div className="w-[100%] h-[20vh] bg-black text-white-100 flex items-center justify-center mb-[10px] flex-col">
-        <div className="w-[5%] h-[10vh] bg-white rounded-full flex items-center justify-center ">
-        <FaUser className='text-blue-500 text-4xl '/>
-        </div>
-        <FaCamera className="text-blue-600 -mt-3 position-absolute"/>
-        <div><h5 className="text-white">username</h5></div>
-      </div>
-
-      <div className="shadow-lg rounded-lg w-full max-w-4xl flex items-stretch justify-center ">
-        {/* <div className="imagedv bg-blue-400 flex-grow p-2 min-h-full flex ">
-          <h2 className="text-white text-2xl">still working on this part</h2>
-        </div> */}
-
+      <div className="w-[100%] h-[8vh] bg-blue-500 text-white-100 flex items-center justify-center  flex-col"></div>
+      <div className="w-[100%] h-[2vh] bg-gray-500 text-white-100 flex items-center justify-center mb-[10px] flex-col"></div>
+      <FormLayout />
+      <div className="shadow-lg rounded-lg w-full max-w-4xl flex items-stretch justify-center flex-col">
+      
         <div className="flex-grow">
         <h2 className="text-2xl font-semibold text-center p-1">Submit Your Details</h2>
           {/* Registration Form */}
