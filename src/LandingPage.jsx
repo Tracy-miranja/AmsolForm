@@ -21,7 +21,7 @@ const LandingPage = () => {
           <p className="text-lg text-gray-100 max-w-md mb-6">
             Sign Up and Apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey.
           </p>
-          <Link to="/form" className="bg-pink-500 text-white px-6 py-3 rounded-full hover:bg-pink-600 transition shadow-lg">
+          <Link to="/form" className="bg-gray-500 text-white px-6 py-3 rounded-full hover:bg-white hover:text-blue-800 transition shadow-lg">
             Get Started
           </Link>
         </div>
