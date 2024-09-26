@@ -35,7 +35,7 @@ const Form = () => {
 
   return (
     <div>
-      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-[#0922e3] flex items-center justify-around shadow-xl p-8 text-white gap-5">
+      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-[#0922e3] flex items-center justify-around shadow-2xl p-8 text-white gap-5">
         <div className="bg-white rounded-full w-[200px] flex items-center justify-center"> 
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>
@@ -48,34 +48,35 @@ const Form = () => {
       
       <div className="flex mt-10 items-center h-screen  flex-col">
        
-        <div className="flex flex-col bg-gray-800 w-[350px] h-[350px] p-6 rounded-lg shadow-lg text-center">
-          <h1 className="text-2xl font-semibold mb-4 text-white">Login</h1>
-          <form className="flex flex-col text-sm text-white" onSubmit={UserLogin}>
+        <div className="flex flex-col  w-[400px] h-fit p-6 rounded-lg shadow-lg text-center">
+          <h1 className="text-2xl font-semibold mb-4 ">Login</h1>
+          <form className="flex flex-col text-sm " onSubmit={UserLogin}>
             <div className="mb-4">
-              <label>Email:</label>
+              <label>Email <span className="text-red-500">*</span>:</label>
               <input
                 type="email"
                 value={Email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="ml-2 w-full p-1 rounded text-gray-900"
+                className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
                 required
               />
             </div>
             <div className="mb-4">
-              <label>Password:</label>
+              <label className="text-black">Password <span className="text-red-500">*</span>:</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="ml-2 w-full p-1 rounded text-gray-900"
+                className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
                 required
               />
             </div>
-            <button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 mt-2">Log in</button>
-            <Link className="pt-5 underline text-blue-400" to="/forgot-password">Forgot Password?</Link> {/* Link to password recovery */}
+            <div className="flex items-center justify-center"><button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 mt-2 w-[100px]">Log in</button></div>
+            
+            <Link className="pt-5 underline text-blue-700" to="/forgot-password">Forgot Password?</Link> {/* Link to password recovery */}
           </form>
-          <p className="text-sm text-white mt-4">New to AMSOL? 
-            <Link className="text-blue-400 hover:underline" to="/signupform"> Sign Up</Link>
+          <p className="text-sm font-bold mt-4">New to AMSOL? 
+            <Link className="text-blue-700 hover:underline" to="/signupform"> Create Account</Link>
           </p>
           {message && <p className="mt-4 text-green-500">{message}</p>}
           {error && <p className="mt-4 text-red-500">{error}</p>}
