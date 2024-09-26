@@ -1,5 +1,6 @@
 import chair from "./assets/hiring.png"
 import Navbar from "./navbar";
+import { Link } from "react-router-dom";
 
 const LandingPage=()=>{
     return(
@@ -10,9 +11,9 @@ const LandingPage=()=>{
 <div className="text-center flex flex-col items-center justify-center space-y-4 z-10">
   <h1 className="text-5xl font-bold text-white mb-6">Welcome to AMSOL career page</h1>
   <p className="text-lg text-gray-100 max-w-md mb-6">Sign Up and Apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey</p>
-  <button className="bg-pink-500 text-white px-6 py-3 rounded-full hover:bg-pink-600 transition shadow-lg">
-    Get Started
-  </button>
+  <Link to="/form" className="bg-pink-500 text-white px-6 py-3 rounded-full hover:bg-pink-600 transition shadow-lg">
+        Get Started
+      </Link>
 </div>
 
 {/* Decorative White Circle and Image */}
