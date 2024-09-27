@@ -102,7 +102,6 @@ const Home = () => {
 
   return (
     <div className="h-fit-content flex items-center justify-center flex-col">
-   
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -111,8 +110,7 @@ const Home = () => {
           </div>
         </div>
       )}
-      <div className="w-[100%] h-[8vh] bg-blue-500 text-white-100 flex items-center justify-center  flex-col"></div>
-      <div className="w-[100%] h-[2vh] bg-gray-500 text-white-100 flex items-center justify-center mb-[10px] flex-col"></div>
+      
       <FormLayout />
       <div className="shadow-lg rounded-lg w-full max-w-4xl flex items-stretch justify-center flex-col">
       

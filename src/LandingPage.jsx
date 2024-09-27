@@ -19,7 +19,7 @@ const LandingPage = () => {
         <div className="text-center flex flex-col items-center justify-center space-y-4 z-10">
           <h1 className="text-5xl font-bold text-white mb-6">Welcome to AMSOL career page</h1>
           <p className="text-lg text-gray-100 max-w-md mb-6">
-            Sign Up and Apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey.
+            Sign Up and apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey.
           </p>
           <Link to="/form" className="bg-gray-500 text-white px-6 py-3 rounded-full hover:bg-white hover:text-blue-800 transition shadow-lg">
             Get Started
