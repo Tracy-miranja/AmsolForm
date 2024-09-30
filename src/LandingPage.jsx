@@ -14,10 +14,10 @@ const LandingPage = () => {
   return (
     <div>
       <Navbar />
-      <div className="h-[100vh] bg-gradient-to-r from-[#25b2e6] to-[#0922e3] flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="h-[100vh] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex flex-col items-center justify-center relative overflow-hidden">
         {/* Welcome Section */}
-        <div className="text-center flex flex-col items-center justify-center space-y-4 z-10">
-          <h1 className="text-5xl font-bold text-white mb-6">Welcome to AMSOL career page</h1>
+        <div className="text-center flex flex-col items-center justify-center space-y-4 z-10 mt-12">
+          <h1 className="text-5xl font-bold text-white mb-6 mt-[50px]">Welcome to AMSOL career page</h1>
           <p className="text-lg text-gray-100 max-w-md mb-6">
             Sign Up and apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey.
           </p>
