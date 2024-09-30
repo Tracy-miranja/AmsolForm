@@ -329,3 +329,30 @@ const Home = () => {
 };
 
 export default Home;
+const handleCvUpdate = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+      formData.append("cv", cv); // Append updated CV file
+
+      const response = await axios.put("http://localhost:5000/Api/users/${userId}/cv", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setMessage("CV successfully updated!");
+      setError("");
+      setShowPopup(true); 
+
+      // Automatically hide popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
+
+    } catch (err) {
+      setError(err.response?.data?.message || "Error updating CV");
+      setMessage("");
+    }
+  };

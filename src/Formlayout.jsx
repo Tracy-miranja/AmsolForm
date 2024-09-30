@@ -2,6 +2,7 @@ import { useState } from "react";
 import logo from "./assets/amsolJobVacancies.png"
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
+import axios from "axios";
 
 const FormLayout = () => {
   const [activeSection, setActiveSection] = useState("personalDetails");
@@ -20,6 +21,14 @@ const FormLayout = () => {
   const [company1, setCompany1] = useState("");
   const [company2, setCompany2] = useState("");
   const [company3, setCompany3] = useState("");
+  // Add these state declarations
+const [position1, setPosition1] = useState("");
+const [duration1, setDuration1] = useState("");
+const [position2, setPosition2] = useState("");
+const [duration2, setDuration2] = useState("");
+const [position3, setPosition3] = useState("");
+const [duration3, setDuration3] = useState("");
+
   const [salaryInfo, setSalaryInfo] = useState("");
   const [cv, setCv] = useState(null);
   const [message, setMessage] = useState("");
@@ -51,9 +60,18 @@ const FormLayout = () => {
       formData.append("location", location);
       formData.append("specialization", specialization);
       formData.append("academicLevel", academicLevel);
-      formData.append("company1", company1);
-      formData.append("company2", company2);
-      formData.append("company3", company3);
+
+      // Append work experience fields
+  formData.append("company1", company1);
+  formData.append("position1", position1);
+  formData.append("duration1", duration1);
+  formData.append("company2", company2);
+  formData.append("position2", position2);
+  formData.append("duration2", duration2);
+  formData.append("company3", company3);
+  formData.append("position3", position3);
+  formData.append("duration3", duration3);
+
       formData.append("salaryInfo", salaryInfo);
       formData.append("cv", cv); // Append CV file
 
@@ -74,14 +92,18 @@ const FormLayout = () => {
       setPhoneNumber("")
       setEmail("")
       setNationality("")
-      setGender("");
+      
       setLocation("");
-      setAcademic("");
+      setAcademicLevel("");
       setCompany1("");
       setCompany2("");
       setCompany3("");
       setSalaryInfo("");
       setSpecialization("")
+      setAge("");
+      setCv(null);
+      setSpecialization("");
+
 
       setShowPopup(true); // Show success popup
 
@@ -91,39 +113,13 @@ const FormLayout = () => {
       }, 3000);
 
     } catch (err) {
+      console.error(err); // Log the entire error
       setError(err.response?.data?.message || "Error submitting form");
       setMessage("");
     }
   };
 
-  const handleCvUpdate = async (e) => {
-    e.preventDefault();
-
-    try {
-      const formData = new FormData();
-      formData.append("cv", cv); // Append updated CV file
-
-      const response = await axios.put("http://localhost:5000/Api/users/${userId}/cv", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      setMessage("CV successfully updated!");
-      setError("");
-      setShowPopup(true); 
-
-      // Automatically hide popup after 3 seconds
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
-
-    } catch (err) {
-      setError(err.response?.data?.message || "Error updating CV");
-      setMessage("");
-    }
-  };
-
+  
   return (
     <>  
 <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-[#0922e3] flex items-center justify-around shadow-2xl p-8 text-white gap-5">
@@ -140,13 +136,13 @@ const FormLayout = () => {
         {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h3 className="text-xl font-bold text-green-500">{cvSubmitted ? "CV Successfully Updated!" : "Successfully Registered!"}</h3>
-            <p className="text-gray-700 mt-2">{cvSubmitted ? "Your CV has been successfully updated." : "Your details have been successfully submitted."}</p>
+            <h3 className="text-xl font-bold text-green-500">{cvSubmitted ? "Form succesfully submitted!" : "Successfully Registered!"}</h3>
+            <p className="text-gray-700 mt-2">{cvSubmitted ? "Your Form has been successfully submitted." : "Your details have been successfully submitted."}</p>
           </div>
         </div>
       )}
       {/* Row Links */}
-      <div className="w-[100%] h-fit shadow-lg rounded-lg flex flex-row">
+      <div className="w-[100%] h-fit shadow-lg rounded-lg flex flex-row"> 
         <div
           onClick={() => navigateToSection("personalDetails")}
           className={`cursor-pointer p-1 border-b-2 w-[30%] ${
@@ -177,7 +173,7 @@ const FormLayout = () => {
       {activeSection === "personalDetails" && (
         <div className="w-full bg-white p-6 shadow-lg rounded-lg">
           <h2 className="font-bold mb-4">Personal Details</h2>
-          <form>
+          <form action="/Api/users" method="POST">
             {/* Personal Details Form Fields */}
             <div className="mb-4 flex flex-row">
               <label className="block text-black w-[15%] font-semibold">First Name:</label>
@@ -295,7 +291,7 @@ const FormLayout = () => {
       {activeSection === "institutionDetails" && (
         <div className="w-full bg-white p-6 shadow-lg rounded-lg">
           <h2 className="font-semibold mb-4">Qualifications</h2>
-          <form>
+          <form action="/Api/users" method="POST">
             {/* Institutional Form Fields */}
             <div className="mb-4 flex flex-row">
               <label className="block text-black w-[15%] font-semibold">Specialization:</label>
@@ -316,42 +312,34 @@ const FormLayout = () => {
                 className="w-full p-2 rounded-lg border border-gray-300 text-black"
               >
                 <option value="">Select your qualification</option>
-                <option value="Masters">Master</option>
+                <option value="Masters">Masters</option>
                 <option value="Degree">Degree</option>
                 <option value="Diploma">Diploma</option>
                 <option value="Certificate">Certificate</option>
-                <option value="High School">High School</option>
+                
               </select>
             </div>
-            <div className="mb-4 flex flex-row">
-              <label className="blocktext-black w-[15%] font-semibold">Company 1:</label>
-              <input
-                type="text"
-                value={company1}
-                onChange={(e) => setCompany1(e.target.value)}
-                required
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div className="mb-4 flex flex-row">
-              <label className="block text-black w-[15%] font-semibold">Company 2:</label>
-              <input
-                type="text"
-                value={company2}
-                onChange={(e) => setCompany2(e.target.value)}
-                required
-                className="w-full p-2 border rounded"  
-              />
-            </div>
-            <div className="mb-4 flex flex-row">
-              <label className="block text-black w-[15%] font-semibold">Company 3:</label>
-              <input
-                type="text"
-                value={company3}
-                onChange={(e) => setCompany3(e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-            </div>
+            {/* //workexperience part */}
+            
+            <div>
+  <input type="text" placeholder="Company 1" value={company1} onChange={(e) => setCompany1(e.target.value)} />
+  <input type="text" placeholder="Position 1" value={position1} onChange={(e) => setPosition1(e.target.value)} />
+  <input type="text" placeholder="Duration 1" value={duration1} onChange={(e) => setDuration1(e.target.value)} />
+</div>
+
+<div>
+  <input type="text" placeholder="Company 2" value={company2} onChange={(e) => setCompany2(e.target.value)} />
+  <input type="text" placeholder="Position 2" value={position2} onChange={(e) => setPosition2(e.target.value)} />
+  <input type="text" placeholder="Duration 2" value={duration2} onChange={(e) => setDuration2(e.target.value)} />
+</div>
+
+<div>
+  <input type="text" placeholder="Company 3" value={company3} onChange={(e) => setCompany3(e.target.value)} />
+  <input type="text" placeholder="Position 3" value={position3} onChange={(e) => setPosition3(e.target.value)} />
+  <input type="text" placeholder="Duration 3" value={duration3} onChange={(e) => setDuration3(e.target.value)} />
+</div>
+
+           
             <div className="mb-4 flex flex-row">
               <label className="block text-black w-[15%] font-semibold">Salary Information:</label>
               <input
@@ -374,31 +362,38 @@ const FormLayout = () => {
         </div>
       )}
 
-      {activeSection === "uploadApply" && (
-        <div className="w-full bg-white p-6 shadow-lg rounded-lg">
-                    <h2 className="font-semibold mb-4">Upload Documents</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4 flex flex-row">
-              <label className="block text-black w-[15%] font-semibold">Upload CV:</label>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => setCv(e.target.files[0])}
-                required
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-[10%] ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Apply
-            </button>
-          </form>
-          {message && <p className="mt-4 text-green-500">{message}</p>}
-          {error && <p className="mt-4 text-red-500">{error}</p>}
-        </div>
-      )}
+{activeSection === "uploadApply" && (
+  <div className="w-full bg-white p-6 shadow-lg rounded-lg">
+    <h2 className="font-bold mb-4">Upload Documents and Apply</h2>
+    <form onSubmit={handleSubmit}>
+      {/* CV Upload Field */}
+      <div className="mb-4 flex flex-row">
+        <label className="block text-black w-[15%] font-semibold">Upload CV:</label>
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={(e) => setCv(e.target.files[0])}
+          required
+          className="w-full p-2 border rounded"
+        />
+      </div>
+      
+      <div className="flex flex-row justify-center mt-6">
+        <button
+          type="submit"
+          className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+          
+        >
+          Submit Application
+        </button>
+      </div>
+      
+      {error && <p className="mt-4 text-red-500">{error}</p>}
+      {message && <p className="mt-4 text-green-500">{message}</p>}
+    </form>
+  </div>
+)}
+
     </div>
     </> 
   );
