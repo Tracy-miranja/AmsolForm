@@ -1,10 +1,56 @@
-import React, { useState } from "react";
-import chair from "./assets/hiring.png";
+import React, { useState,useEffect } from "react";
 import Navbar from "./navbar";
 import { Link } from "react-router-dom";
+import CountUp from "react-countup";
+import job from "./assets/job.png"
+
+
 
 const LandingPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(true); // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(true); 
+  const [count, setCount] = useState(7000);
+  const [endCount, setEndCount] = useState(9000);
+  const [notifications, setNotifications] = useState([]);
+
+  const showNotification = (message, delay) => {
+    setTimeout(() => {
+      const id = Date.now(); // Unique id for each notification
+      setNotifications((prev) => [...prev, { id, message }]);
+      setTimeout(() => {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+      }, 2000);
+    }, delay);
+  };
+
+  useEffect(() => {
+    const messages = [
+      "New Job Opportunity!",
+      "Director of Finance!",
+      "Strategic Partnerships Lead",
+    ];
+
+    messages.forEach((message, index) => {
+      showNotification(message, 2000 * index); 
+    });
+  }, []);
+
+  
+  // Function to reset count
+  const resetCount = () => {
+    setCount(7000); // Reset to starting value
+    setTimeout(() => {
+      setCount(8000); // Set to end value
+    }, 100); // Delay before starting again
+  };
+
+  useEffect(() => {
+    // Start the loop
+    const interval = setInterval(() => {
+      resetCount();
+    }, 10000); // Reset every 10 seconds (duration of CountUp)
+    
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
 
   // Function to close the modal
   const closeModal = () => {
@@ -13,25 +59,63 @@ const LandingPage = () => {
 
   return (
     <div>
+      <div className="white-fill">hello</div>
       <Navbar />
-      <div className="h-[100vh] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Welcome Section */}
-        <div className="text-center flex flex-col items-center justify-center space-y-4 z-10 mt-12">
-          <h1 className="text-5xl font-bold text-white mb-6 mt-[50px]">Welcome to AMSOL career page</h1>
-          <p className="text-lg text-gray-100 max-w-md mb-6">
-            Sign Up and apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey.
-          </p>
-          <Link to="/form" className="bg-gray-500 text-white px-6 py-3 rounded-full hover:bg-white hover:text-blue-800 transition shadow-lg">
-            Get Started
-          </Link>
-        </div>
+      <div className="h-[90vh] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex flex-row items-center justify-center  overflow-hidden w-full p-20">
+  {/* Welcome Section */}
+  <div className="flex flex-col justify-center items-center z-10 w-[50%] h-auto -mt-40">
+    <h1 className="text-5xl font-bold text-white mb-6 text-center"><span>Welcome</span> to AMSOL<br />career page</h1>
+    <p className="text-sm text-gray-100 max-w-md mb-6 text-center">
+      Sign Up and apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey.
+    </p>
+    <div className="flex gap-5 w-[100%] items-center justify-center">
+      <Link to="/form" className="bg-transparent w-[20%] border text-center border-white rounded-full text-white p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold">Log In</Link>
+      <Link to="/signupform" className="bg-inherit border w-[20%] text-center border-white rounded-full text-white p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold">Sign Up</Link>
+    </div>
+    <div className="flex gap-5 mt-5">
+      <div className="flex flex-col text-white font-bold">
+        <span>
+        <CountUp start={count} end={endCount} duration={10} onComplete={resetCount} />
+          <span className="text-[#FF8000]">+</span>
+        </span>
+        <span> jobs available</span>
+      </div>
+      <div className="flex flex-col text-white font-bold">
+        <span>
+          <CountUp start={700} end={900} duration={4} onComplete={resetCount} />
+          <span className="text-[#FF8000]">+</span>
+        </span>
+        <span> Career</span>
+      </div>
+      <div className="flex flex-col text-white font-bold">
+        <span>
+          <CountUp start={3000} end={5000} duration={4} onComplete={resetCount} />
+          <span className="text-[#FF8000]">+</span>
+        </span>
+        <span> Success story</span>
+      </div>
+    </div>
+  </div>
 
-        {/* Decorative White Circle and Image */}
-        <div className="flex justify-center items-center space-x-8 z-10">
-          <div>
-            <img src={chair} alt="Decorative chair" className="h-[350px] object-cover -ml-10" />
-          </div>
+  {/* Decorative White Circle and Image */}
+  <div className="relative flex justify-center items-center w-[50%] h-auto rounded-r-full">
+        <img src={job} alt="banner image" className="-mt-12 -mt-40" />
+        
+        {/* Render Notifications */}
+        <div className="absolute right-0 top-10 flex flex-col space-y-2">
+          {notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className="bg-blue-500 text-white p-2 rounded shadow-lg transition-transform duration-300 transform translate-x-0"
+              style={{ animation: "slideIn 0.3s forwards" }}
+            >
+              {notification.message}
+            </div>
+          ))}
         </div>
+      </div>
+
+
 
         {/* Mountain-like Shape */}
         <div className="absolute inset-x-0 bottom-0">
