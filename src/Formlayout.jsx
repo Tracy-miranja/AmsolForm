@@ -123,7 +123,7 @@ const FormLayout = () => {
 
   return (
     <>
-      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-[#0922e3] flex items-center justify-around shadow-2xl p-8 text-white gap-5">
+      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5">
         <div className="bg-white rounded-full w-[200px] flex items-center justify-center">
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>

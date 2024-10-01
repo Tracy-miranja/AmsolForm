@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaHome } from "react-icons/fa"; 
+import { FaHome, } from "react-icons/fa"; 
 import logo from "./assets/amsolJobVacancies.png"
 
 const Form = () => {
@@ -35,7 +35,7 @@ const Form = () => {
 
   return (
     <div>
-      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-[#0922e3] flex items-center justify-around shadow-2xl p-8 text-white gap-5">
+      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5">
         <div className="bg-white rounded-full w-[200px] flex items-center justify-center"> 
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>
@@ -70,6 +70,7 @@ const Form = () => {
                 className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
                 required
               />
+             
             </div>
             <div className="flex items-center justify-center"><button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 mt-2 w-[100px]">Log in</button></div>
             
