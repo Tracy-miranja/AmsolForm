@@ -358,24 +358,31 @@ const FormLayout = () => {
               </div>
               {/* //workexperience part */}
 
-              <div>
+              <div className="mb-4 flex flex-row">
+              <label className="block text-black w-[15%] font-semibold mr-2">
+                  WorkExperience:
+                </label>
+                <div>
                 <input
                   type="text"
                   placeholder="Company 1"
                   value={company1}
                   onChange={(e) => setCompany1(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
                   placeholder="Position 1"
                   value={position1}
                   onChange={(e) => setPosition1(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
                   placeholder="Duration 1"
                   value={duration1}
                   onChange={(e) => setDuration1(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
               </div>
 
@@ -385,18 +392,21 @@ const FormLayout = () => {
                   placeholder="Company 2"
                   value={company2}
                   onChange={(e) => setCompany2(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
                   placeholder="Position 2"
                   value={position2}
                   onChange={(e) => setPosition2(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
                   placeholder="Duration 2"
                   value={duration2}
                   onChange={(e) => setDuration2(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
               </div>
 
@@ -406,19 +416,23 @@ const FormLayout = () => {
                   placeholder="Company 3"
                   value={company3}
                   onChange={(e) => setCompany3(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
                   placeholder="Position 3"
                   value={position3}
                   onChange={(e) => setPosition3(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
                   placeholder="Duration 3"
                   value={duration3}
                   onChange={(e) => setDuration3(e.target.value)}
+                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
+              </div>
               </div>
 
               <div className="mb-4 flex flex-row">

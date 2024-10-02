@@ -3,6 +3,8 @@ import Navbar from "./navbar";
 import { Link } from "react-router-dom";
 import CountUp from "react-countup";
 import job from "./assets/job.png"
+import banner from "./assets/banner.json"
+import Lottie from "lottie-react";
 
 
 
@@ -98,9 +100,9 @@ const LandingPage = () => {
   </div>
 
   {/* Decorative White Circle and Image */}
-  <div className="relative flex justify-center items-center w-[50%] h-auto rounded-r-full">
-        <img src={job} alt="banner image" className="-mt-12 -mt-40" />
-        
+  <div className="relative flex justify-center items-center w-[50%] h-auto rounded-r-full pb-20">
+        {/* <img src={job} alt="banner image" className="-mt-12 -mt-40" /> */}
+        <Lottie animationData={banner} className="h-[70vh]"  loop autoplay />
         {/* Render Notifications */}
         <div className="absolute right-0 top-10 flex flex-col space-y-2">
           {notifications.map((notification) => (
@@ -114,9 +116,6 @@ const LandingPage = () => {
           ))}
         </div>
       </div>
-
-
-
         {/* Mountain-like Shape */}
         <div className="absolute inset-x-0 bottom-0">
           <svg viewBox="0 0 1440 320" className="w-full h-full">
