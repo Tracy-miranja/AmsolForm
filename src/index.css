@@ -112,11 +112,35 @@ body {
   }
 }
 
-.login{
-  background-image: url("./assets/loginbanner.jpg");
+.login {
+  position: relative;
   height: 100vh;
   width: 100%;
+  overflow: hidden; /* Ensure content doesn't overflow */
 }
+
+/* Background Image with Blur */
+.login-background {
+  background-image: url("./assets/loginbanner.jpg");
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  inset: 0; /* Ensure it covers the entire parent */
+  filter: blur(5px); /* Apply the blur effect */
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+/* Content on top of the blurred background */
+.login-content {
+  position: relative;
+  z-index: 2; /* Make sure content is on top of the background */
+  text-align: center;
+  padding: 20px;
+}
+
+
 
 
 

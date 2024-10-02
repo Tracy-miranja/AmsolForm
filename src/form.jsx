@@ -35,7 +35,7 @@ const Form = () => {
 
   return (
     <div>
-      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5">
+      <div className=" w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5">
         <div className="bg-white rounded-full w-[200px] flex items-center justify-center"> 
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>
@@ -44,11 +44,14 @@ const Form = () => {
           
         </div>
       </div>
-      <div className="flex items-center justify-center pt-10 font-bold"><h3 className="">Welcome back, Log in to your account</h3></div>
+      <div className="login h-[80vh]">
+      <div class="login-background"></div>
+      <div class="login-content">
+      <div className=" flex items-center justify-center pt-10 font-bold"><h3 className="">Welcome back, Log in to your account</h3></div>
       
       <div className="flex mt-10 items-center h-screen  flex-col">
        
-        <div className="flex flex-col  w-[400px] h-fit p-6 rounded-lg shadow-lg text-center">
+        <div className="flex flex-col  w-[400px] h-fit p-6 rounded-lg shadow-2xl text-center">
           <h1 className="text-2xl font-semibold mb-4 ">Login</h1>
           <form className="flex flex-col text-sm " onSubmit={UserLogin}>
             <div className="mb-4">
@@ -56,6 +59,7 @@ const Form = () => {
               <input
                 type="email"
                 value={Email}
+                placeholder="Enter email"
                 onChange={(e) => setEmail(e.target.value)}
                 className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
                 required
@@ -66,6 +70,7 @@ const Form = () => {
               <input
                 type="password"
                 value={password}
+                placeholder="Enter Password"
                 onChange={(e) => setPassword(e.target.value)}
                 className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
                 required
@@ -82,6 +87,8 @@ const Form = () => {
           {message && <p className="mt-4 text-green-500">{message}</p>}
           {error && <p className="mt-4 text-red-500">{error}</p>}
         </div>
+      </div>
+      </div>
       </div>
     </div>
   );

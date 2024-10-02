@@ -187,7 +187,7 @@ const FormLayout = () => {
         {/* Form Sections */}
         {activeSection === "personalDetails" && (
           <div className="w-full bg-white p-6 shadow-lg rounded-lg">
-            <h2 className="font-bold mb-4">Personal Details</h2>
+            
             <form action="/Api/users" method="POST">
               {/* Personal Details Form Fields */}
               <div className="mb-4 flex flex-row">
@@ -324,7 +324,7 @@ const FormLayout = () => {
 
         {activeSection === "institutionDetails" && (
           <div className="w-full bg-white p-6 shadow-lg rounded-lg">
-            <h2 className="font-semibold mb-4">Qualifications</h2>
+            
             <form action="/Api/users" method="POST">
               {/* Institutional Form Fields */}
               <div className="mb-4 flex flex-row">
@@ -359,7 +359,7 @@ const FormLayout = () => {
               {/* //workexperience part */}
 
               <div className="mb-4 flex flex-row">
-              <label className="block text-black w-[15%] font-semibold mr-2">
+              <label className="block text-black w-[15%] font-semibold">
                   WorkExperience:
                 </label>
                 <div>
@@ -372,14 +372,14 @@ const FormLayout = () => {
                 />
                 <input
                   type="text"
-                  placeholder="Position 1"
+                  placeholder="Position"
                   value={position1}
                   onChange={(e) => setPosition1(e.target.value)}
                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
-                  placeholder="Duration 1"
+                  placeholder="Duration"
                   value={duration1}
                   onChange={(e) => setDuration1(e.target.value)}
                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
@@ -396,14 +396,14 @@ const FormLayout = () => {
                 />
                 <input
                   type="text"
-                  placeholder="Position 2"
+                  placeholder="Position"
                   value={position2}
                   onChange={(e) => setPosition2(e.target.value)}
                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
-                  placeholder="Duration 2"
+                  placeholder="Duration"
                   value={duration2}
                   onChange={(e) => setDuration2(e.target.value)}
                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
@@ -413,21 +413,21 @@ const FormLayout = () => {
               <div>
                 <input
                   type="text"
-                  placeholder="Company 3"
+                  placeholder="Company"
                   value={company3}
                   onChange={(e) => setCompany3(e.target.value)}
                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
-                  placeholder="Position 3"
+                  placeholder="Position"
                   value={position3}
                   onChange={(e) => setPosition3(e.target.value)}
                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 />
                 <input
                   type="text"
-                  placeholder="Duration 3"
+                  placeholder="Duration"
                   value={duration3}
                   onChange={(e) => setDuration3(e.target.value)}
                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
@@ -461,7 +461,7 @@ const FormLayout = () => {
 
         {activeSection === "uploadApply" && (
           <div className="w-full bg-white p-6 shadow-lg rounded-lg">
-            <h2 className="font-bold mb-4">Upload Documents and Apply</h2>
+           
             <form onSubmit={handleSubmit}>
               {/* CV Upload Field */}
               <div className="mb-4 flex flex-row">
