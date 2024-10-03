@@ -5,6 +5,7 @@ import CountUp from "react-countup";
 import job from "./assets/job.png"
 import banner from "./assets/banner.json"
 import Lottie from "lottie-react";
+import RotationPandingPage from "./RotationLandingPage";
 
 
 
@@ -37,61 +38,64 @@ const LandingPage = () => {
   }, []);
 
   
-  // Function to reset count
+ 
   const resetCount = () => {
-    setCount(7000); // Reset to starting value
+    setCount(7000); 
     setTimeout(() => {
-      setCount(8000); // Set to end value
-    }, 100); // Delay before starting again
+      setCount(8000); 
+    }, 100); 
   };
 
   useEffect(() => {
-    // Start the loop
+    
     const interval = setInterval(() => {
       resetCount();
-    }, 10000); // Reset every 10 seconds (duration of CountUp)
+    }, 10000); 
     
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval); 
   }, []);
 
-  // Function to close the modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
   return (
     <div>
+      <RotationPandingPage/>
       <div className="white-fill">hello</div>
       <Navbar />
-      <div className="h-[90vh] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex flex-row items-center justify-center  overflow-hidden w-full p-20">
+      <div className="h-[90vh] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex flex-row items-center justify-center overflow-hidden w-full p-20 hover:bg-black">
+
   {/* Welcome Section */}
-  <div className="flex flex-col justify-center items-center z-10 w-[50%] h-auto -mt-40">
+  <div className="flex flex-col justify-center items-center z-10 w-[50%] h-auto -mt-40 gap-3">
+    <div>
     <h1 className="text-5xl font-bold text-white mb-6 text-center"><span>Welcome</span> to AMSOL<br />career page</h1>
     <p className="text-sm text-gray-100 max-w-md mb-6 text-center">
       Sign Up and apply for your dream job today! Discover opportunities, submit your application, and take the next step in your career journey.
     </p>
+    </div>
     <div className="flex gap-5 w-[100%] items-center justify-center">
       <Link to="/form" className="bg-transparent w-[20%] border text-center border-white rounded-full text-white p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold">Log In</Link>
       <Link to="/signupform" className="bg-inherit border w-[20%] text-center border-white rounded-full text-white p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold">Sign Up</Link>
     </div>
-    <div className="flex gap-5 mt-5">
-      <div className="flex flex-col text-white font-bold">
+    <div className="flex gap-5 mt-5 ">
+      <div className="flex flex-col text-white font-bold items-center text-medium">
         <span>
         <CountUp start={count} end={endCount} duration={10} onComplete={resetCount} />
           <span className="text-[#FF8000]">+</span>
         </span>
         <span> jobs available</span>
       </div>
-      <div className="flex flex-col text-white font-bold">
+      <div className="flex flex-col text-white font-bold items-center">
         <span>
-          <CountUp start={700} end={900} duration={4} onComplete={resetCount} />
+          <CountUp start={200} end={900} duration={4} onComplete={resetCount} />
           <span className="text-[#FF8000]">+</span>
         </span>
         <span> Career</span>
       </div>
-      <div className="flex flex-col text-white font-bold">
+      <div className="flex flex-col text-white font-bold items-center">
         <span>
-          <CountUp start={3000} end={5000} duration={4} onComplete={resetCount} />
+          <CountUp start={2000} end={5000} duration={4} onComplete={resetCount} />
           <span className="text-[#FF8000]">+</span>
         </span>
         <span> Success story</span>
