@@ -52,7 +52,7 @@ const Form = () => {
       <div className="flex mt-10 items-center h-screen  flex-col">
        
         <div className="flex flex-col  w-[400px] h-fit p-6 rounded-lg shadow-2xl text-center">
-          <h1 className="text-2xl font-semibold mb-4 ">Login</h1>
+          <h1 className="text-2xl font-semibold mb-4 text-white ">Login</h1>
           <form className="flex flex-col text-sm " onSubmit={UserLogin}>
             <div className="mb-4">
               <label>Email <span className="text-red-500">*</span>:</label>
@@ -81,7 +81,7 @@ const Form = () => {
             
             <Link className="pt-5 underline text-blue-700" to="/forgot-password">Forgot Password?</Link> {/* Link to password recovery */}
           </form>
-          <p className="text-sm font-bold mt-4">New to AMSOL? 
+          <p className="text-sm font-bold mt-4 text-white">New to AMSOL? 
             <Link className="text-blue-700 hover:underline" to="/signupform"> Create Account</Link>
           </p>
           {message && <p className="mt-4 text-green-500">{message}</p>}
