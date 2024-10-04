@@ -4,6 +4,7 @@ import vacancy from "./assets/vector 2tt.svg"
 import jobvacancy from "./assets/Group1.svg";
 import logo from "./assets/amsolJobVacancies.png";
 import { FaHome } from "react-icons/fa";
+import arrow from "./assets/vector 1.svg"
 
 const RotationPandingPage = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -54,9 +55,11 @@ const RotationPandingPage = () => {
       <div className="flex w-full">
         <div className="flex w-[60%] h-[60vh] relative">
           <img src={vacancy} className="h-[100vh] absolute -mt-[60px] " alt="vacancy" />
+          <h1 className="absolute flex mt-[20%] ml-[20%] flex flex-col font-[10px] "><span className="font-extrabold leading-none text-5xl text-gray-400">We’re <br/>AMSOL</span><br/>
+          The Staffing & HR Solutions<br/> specialists</h1>
         </div>
         {/* Second section */}
-        <div className="flex w-[50%] flex-col gap-5 justify-center h-[80vh]">
+        <div className="flex w-[40%] flex-col gap-5 justify-center h-[80vh]">
           {/* Log in section */}
           <div
             className="flex w-[100%] h-[35vh] justify-center gap-5 flex-col relative parent-container"
@@ -79,9 +82,9 @@ const RotationPandingPage = () => {
             </p>
             <Link
               to="/form"
-              className="bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-[100px] text-center rotate-hover z-10"
+              className="flex gap-2 items-center  justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-[100px] text-center rotate-hover z-10"
             >
-              Log In
+             <span>Log In</span>  <img src={arrow} className="w-5 h-5" />
             </Link>
             <div className="animation login-image">
               <img
@@ -118,9 +121,9 @@ const RotationPandingPage = () => {
             </p>
             <Link
               to="/signupform"
-              className="bg-white rounded-full text-[#0A599E] text-center border border-blue-400  p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-[100px] text-center rotate-hover z-10"
+              className="flex gap-2 items-center justify-center bg-white rounded-full text-[#0A599E] text-center border border-blue-400  p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-[120px] text-center rotate-hover z-10"
             >
-              Sign Up
+              <span>Sign Up</span> <img src={arrow} className="w-5 h-5" />
             </Link>
             <div className="animation signup-image relative">
               <img
