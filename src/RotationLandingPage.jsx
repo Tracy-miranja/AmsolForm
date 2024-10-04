@@ -5,6 +5,8 @@ import jobvacancy from "./assets/Group1.svg";
 import logo from "./assets/amsolJobVacancies.png";
 import { FaHome } from "react-icons/fa";
 import arrow from "./assets/vector 1.svg"
+import jobsKenya from "./assets/Vector 6low.svg"
+import desktopbg from "./assets/Desktop.svg"
 
 const RotationPandingPage = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -54,8 +56,8 @@ const RotationPandingPage = () => {
 
       <div className="flex w-full">
         <div className="flex w-[60%] h-[60vh] relative">
-          <img src={vacancy} className="h-[100vh] absolute -mt-[60px] " alt="vacancy" />
-          <h1 className="absolute flex mt-[20%] ml-[20%] flex flex-col font-[10px] "><span className="font-extrabold leading-none text-5xl text-gray-400">We’re <br/>AMSOL</span><br/>
+          <img src={vacancy} className="h-[100vh] absolute -mt-[55px] " alt="vacancy" />
+          <h1 className="absolute flex mt-[25%] ml-[19%] flex flex-col text-xl "><span className="text-2xl font-extrabold leading-none text-5xl text-gray-100">We’re <br/>AMSOL</span><br/>
           The Staffing & HR Solutions<br/> specialists</h1>
         </div>
         {/* Second section */}
@@ -139,6 +141,7 @@ const RotationPandingPage = () => {
           </div>
         </div>
       </div>
+      <div><img src={jobsKenya} className="flex absolute -mt-[100px] ml-[280px] h-[25vh]" /></div>
     </div>
   );
 };
