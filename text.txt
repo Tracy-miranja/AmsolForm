@@ -356,3 +356,62 @@ const handleCvUpdate = async (e) => {
       setMessage("");
     }
   };
+
+
+/* Initially hide images */
+.hidden-on-hover {
+  opacity: 0;
+  z-index: -3;
+  transition: opacity 1.5s ease, transform 1.5s ease;
+}
+
+/* Keyframes for slide-in and rotate animation */
+@keyframes slideInRotate {
+  0% {
+    transform: rotate(80deg) scale(0.7); /* Offscreen and small */
+    opacity: 0;
+  }
+  40% {
+    transform: rotate(180deg) scale(1.5); /* Slide in, rotate, and zoom */
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg) scale(2); /* Final state */
+    opacity: 1;
+  }
+}
+
+/* Keyframes for slide-out and rotate back */
+@keyframes slideOutRotate {
+  0% {
+    transform: rotate(360deg) scale(2);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-360deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+/* Rotate clockwise and zoom in on hover */
+.rotate-hover:hover ~ .login-image img,
+.rotate-hover:hover ~ .signup-image img {
+  z-index: 1;
+  opacity: 1;
+  animation: slideInRotate 1.5s ease-in-out forwards; /* Smooth in */
+  cursor: pointer;
+}
+
+/* Rotate anticlockwise and shrink on hover out (button hover out, not image) */
+.rotate-hover:hover ~ .login-image img.hidden-on-hover,
+.rotate-hover:hover ~ .signup-image img.hidden-on-hover {
+  animation: slideOutRotate 1.5s ease-in-out forwards; /* Smooth out */
+  opacity: 0; /* Gradually disappear */
+  transition: opacity 0.5s ease-in-out; /* Control opacity separately */
+}
+
+/* Ensure image stays visible after hover */
+.rotate-hover:hover ~ .login-image img,
+.rotate-hover:hover ~ .signup-image img {
+  animation-fill-mode: forwards; /* Maintain final state */
+}
