@@ -79,7 +79,7 @@ const RotationPandingPage = () => {
       </div>
 
       <div className="flex w-full">
-        <div className="flex w-[60%] h-[60vh] relative">
+        <div className="flex w-[70%] h-[60vh] relative">
           <img src={ topimg} className={`h-[7vh] w-[5%] absolute ml-[75%] mt-[40px] ${isHovered? "invisible":"visible"}`}
             alt="vacancy"/>
           <img
