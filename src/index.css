@@ -140,18 +140,25 @@ body {
   padding: 20px;
 }
 
-
-
 /* Rotation animations */
 @keyframes rotateIn {
   0% {
-    transform: rotate(0deg) scale(0.8);
+    transform: rotate(0deg) scale(1.2);
     opacity: 0;
+  }
+  50% {
+    transform: rotate(-160deg) scale(0.8);
+    opacity: 1;
+  }
+  80% {
+    transform: rotate(160deg) scale(1.2);
+    opacity: 1;
   }
   100% {
     transform: rotate(360deg) scale(1.5);
     opacity: 1;
   }
+  
 }
 
 @keyframes rotateOut {
@@ -166,7 +173,7 @@ body {
 }
 
 .animate-rotateIn {
-  animation: rotateIn 4s forwards;
+  animation: rotateIn 5s forwards;
 }
 
 .animate-rotateOut {
