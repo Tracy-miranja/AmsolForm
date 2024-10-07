@@ -80,7 +80,7 @@ const RotationPandingPage = () => {
 
       <div className="flex w-full">
         <div className="flex w-[60%] h-[60vh] relative">
-          <img src={ topimg} className="h-[7vh] w-[5%] absolute ml-[75%] mt-[40px] "
+          <img src={ topimg} className={`h-[7vh] w-[5%] absolute ml-[75%] mt-[40px] ${isHovered? "invisible":"visible"}`}
             alt="vacancy"/>
           <img
             src={vacancy}
@@ -112,11 +112,11 @@ const RotationPandingPage = () => {
             }}
           >
             <h1
-              className={`font-extrabold text-3xl  ${
+              className={`font-extrabold text-3xl z-5  ${
                 isHovered ? "text-white" : "text-[#0A599E]"
               }`}
             >
-               <img src={secimg} className="h-[10vh] w-[18%] absolute ml-[20%] -mt-10"
+               <img src={secimg} className={`h-[10vh] w-[18%] absolute ml-[20%] -mt-10 ${isHovered? "invisible":"visible"}`}
             alt="vacancy"/>
               You <br />
               haven't Logged In?
@@ -134,7 +134,7 @@ const RotationPandingPage = () => {
             <div className="animation login-image">
               <img
                 src={jobvacancy}
-                className={`w-[100%] h-[60vh] absolute -ml-[250px] z-0 -mt-[200px] hidden-on-hover ${
+                className={`w-[100%] h-[50vh] absolute -ml-[250px] z-0 -mt-[250px] hidden-on-hover ${
                   hoveredSection === "login"
                     ? "animate-rotateIn"
                     : "animate-rotateOut"
@@ -186,7 +186,7 @@ const RotationPandingPage = () => {
                 alt="jobvacancy"
               />
             </div>
-            <img src={sideimg} className="h-[20vh] w-[20%] absolute ml-[70%] -mt-15"
+            <img src={sideimg} className={`h-[20vh] w-[20%] absolute ml-[70%] -mt-15 ${isHovered? "invisible":"visible"}`}
             alt="vacancy"/>
           </div>
         </div>
@@ -194,7 +194,7 @@ const RotationPandingPage = () => {
       <div>
         <img
           src={jobsKenya}
-          className="flex absolute -mt-[100px] ml-[280px] h-[25vh]"
+          className={`flex absolute -mt-[100px] ml-[280px] h-[25vh] ${isHovered? "invisible":"visible"}`}
         />
       </div>
     </div>
