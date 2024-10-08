@@ -56,7 +56,6 @@ const SignUpForm = () => {
       }
     }
   };
-  
 
   return (
     <div>

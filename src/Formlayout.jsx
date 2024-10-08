@@ -3,6 +3,7 @@ import logo from "./assets/amsolJobVacancies.png";
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import axios from "axios";
+import arrow from "./assets/vector 1.svg";
 
 const FormLayout = () => {
   const [activeSection, setActiveSection] = useState("personalDetails");
@@ -36,90 +37,125 @@ const FormLayout = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [cvSubmitted, setCvSubmitted] = useState(false);
 
-  const navigateToSection = (section) => {
-    setActiveSection(section);
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!firstName || !secondName || !lastName || !email || !cv) {
-      alert("Please fill out all required fields.");
-      return;
-    }
+  const [isFormValid, setIsFormValid] = useState(false);
 
-    try {
-      const formData = new FormData();
-      formData.append("firstName", firstName);
-      formData.append("lastName", lastName);
-      formData.append("secondName", secondName);
-      formData.append("idNumber", idNumber);
-      formData.append("whatAppNo", whatAppNo);
-      formData.append("phoneNumber", phoneNumber);
-      formData.append("email", email);
-      formData.append("age", age);
-      formData.append("nationality", nationality);
-      formData.append("location", location);
-      formData.append("specialization", specialization);
-      formData.append("academicLevel", academicLevel);
+const navigateToSection = (section) => {
+  setActiveSection(section);
+};
 
-      // Append work experience fields
-      formData.append("company1", company1);
-      formData.append("position1", position1);
-      formData.append("duration1", duration1);
-      formData.append("company2", company2);
-      formData.append("position2", position2);
-      formData.append("duration2", duration2);
-      formData.append("company3", company3);
-      formData.append("position3", position3);
-      formData.append("duration3", duration3);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!firstName || !secondName || !lastName || !email || !cv) {
+    alert("Please fill out all required fields.");
+    return;
+  }
 
-      formData.append("salaryInfo", salaryInfo);
-      formData.append("cv", cv); // Append CV file
+  try {
+    const formData = new FormData();
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("secondName", secondName);
+    formData.append("idNumber", idNumber);
+    formData.append("whatAppNo", whatAppNo);
+    formData.append("phoneNumber", phoneNumber);
+    formData.append("email", email);
+    formData.append("age", age);
+    formData.append("nationality", nationality);
+    formData.append("location", location);
+    formData.append("specialization", specialization);
+    formData.append("academicLevel", academicLevel);
 
-      const response = await axios.post(
-        "http://localhost:5000/Api/users",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+    // Append work experience fields
+    formData.append("company1", company1);
+    formData.append("position1", position1);
+    formData.append("duration1", duration1);
+    formData.append("company2", company2);
+    formData.append("position2", position2);
+    formData.append("duration2", duration2);
+    formData.append("company3", company3);
+    formData.append("position3", position3);
+    formData.append("duration3", duration3);
 
-      setMessage(response.data.message);
-      setError("");
-      setCvSubmitted(true); // Mark that CV has been submitted
-      setFirstName("");
-      setSecondName("");
-      setLastName("");
-      setIdNumber("");
-      setWhatAppNo("");
-      setPhoneNumber("");
-      setEmail("");
-      setNationality("");
+    formData.append("salaryInfo", salaryInfo);
+    formData.append("cv", cv); // Append CV file
 
-      setLocation("");
-      setAcademicLevel("");
-      setCompany1("");
-      setCompany2("");
-      setCompany3("");
-      setSalaryInfo("");
-      setSpecialization("");
-      setAge("");
-      setCv(null);
-      setSpecialization("");
+    const response = await axios.post(
+      "http://localhost:5000/Api/users",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-      setShowPopup(true); // Show success popup
+    setMessage(response.data.message);
+    setError("");
+    setCvSubmitted(true); // Mark that CV has been submitted
+    // Clear form fields
+    setFirstName("");
+    setSecondName("");
+    setLastName("");
+    setIdNumber("");
+    setWhatAppNo("");
+    setPhoneNumber("");
+    setEmail("");
+    setNationality("");
+    setCompany1("");
+    setLocation("");
+    setAcademicLevel("");
+    setCompany1("");
+    setCompany2("");
+    setCompany3("");
+    setSalaryInfo("");
+    setDuration1("");
+    setDuration2("");
+    setDuration3("");
+    setPosition1("");
+    setPosition2("");
+    setPosition3("");
+    setSpecialization("");
+    setAge("");
+    setCv(null);
+    setSpecialization("");
 
-      // Automatically hide popup after 3 seconds
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
-    } catch (err) {
-      console.error(err); // Log the entire error
-      setError(err.response?.data?.message || "Error submitting form");
-      setMessage("");
-    }
-  };
+    setShowPopup(true); // Show success popup
+
+    // Automatically hide popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+    }, 3000);
+  } catch (err) {
+    console.error(err); // Log the entire error
+    setError(err.response?.data?.message || "Error submitting form");
+    setMessage("");
+  }
+};
+
+const validateForm = () => {
+  return (
+    firstName &&
+    secondName &&
+    lastName &&
+    idNumber &&
+    whatAppNo &&
+    phoneNumber &&
+    email &&
+    age &&
+    nationality &&
+    location
+  );
+};
+
+const handleNextButtonClick = () => {
+  if (validateForm()) {
+    setIsFormValid(true);
+    setActiveSection("institutionDetails");  // Navigate to the next section if valid
+  } else {
+    setIsFormValid(false);
+    setError("Please fill out all required fields before proceeding.");  // Show error message
+  }
+};
 
   return (
     <>
@@ -127,11 +163,30 @@ const FormLayout = () => {
         <div className="bg-white rounded-full w-[200px] flex items-center justify-center">
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>
+        <div className="flex gap-3">
         <div className="flex flex-row items-center gap-5">
           <Link className="text-white flex flex-row gap-2" to="/">
             <FaHome className="mt-1" />
             Home
           </Link>
+        </div>
+        <div>
+        <Link
+              to="/cvupdate"
+              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
+            >
+              <span>Update CV</span> <img src={arrow} className="w-5 h-5" />
+            </Link>
+        </div>
+        <div>
+        <Link
+              to="/form"
+              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
+              
+            >             
+              <span>Log out</span>
+            </Link>
+        </div>
         </div>
       </div>
 
@@ -165,7 +220,7 @@ const FormLayout = () => {
             <h2 className="font-bold">1. Personal Details</h2>
           </div>
           <div
-            onClick={() => navigateToSection("institutionDetails")}
+             onClick={handleNextButtonClick}
             className={`cursor-pointer p-1 border-b-2 w-[30%] ${
               activeSection === "institutionDetails"
                 ? "bg-blue-500 text-white"
@@ -175,7 +230,7 @@ const FormLayout = () => {
             <h2 className="font-bold">2. Qualifications Details</h2>
           </div>
           <div
-            onClick={() => navigateToSection("uploadApply")}
+             onClick={handleNextButtonClick}
             className={`cursor-pointer p-1 w-[30%] ${
               activeSection === "uploadApply" ? "bg-blue-500 text-white" : ""
             } hover:bg-blue-500 hover:text-white`}
@@ -192,7 +247,7 @@ const FormLayout = () => {
               {/* Personal Details Form Fields */}
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  First Name:
+                  First Name <span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="text"
@@ -204,7 +259,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Second Name:
+                  Second Name<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="text"
@@ -216,7 +271,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Last Name:
+                  Last Name<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="text"
@@ -228,7 +283,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  ID Number:
+                  ID Number<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="Number"
@@ -240,7 +295,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  WhatsApp No.:
+                  WhatsApp No.<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="tel"
@@ -252,7 +307,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Phone Number:
+                  Phone Number<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="tel"
@@ -264,7 +319,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Email:
+                  Email<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="email"
@@ -276,7 +331,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Age:
+                  Age<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="Number"
@@ -288,7 +343,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Nationality:
+                  Nationality<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="text"
@@ -299,7 +354,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Location:
+                  Location<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="text"
@@ -312,7 +367,7 @@ const FormLayout = () => {
               <button
                 type="button"
                 className="w-[10%] ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-                onClick={() => navigateToSection("institutionDetails")}
+                onClick={handleNextButtonClick}
               >
                 Next
               </button>
@@ -329,7 +384,7 @@ const FormLayout = () => {
               {/* Institutional Form Fields */}
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Specialization:
+                  Specialization<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="text"
@@ -341,7 +396,7 @@ const FormLayout = () => {
               </div>
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Academic level:
+                  Academic level<span className="text-red-500">*</span>:
                 </label>
                 <select
                   value={academicLevel}
@@ -350,17 +405,20 @@ const FormLayout = () => {
                   className="w-full p-2 rounded-lg border border-gray-300 text-black"
                 >
                   <option value="">Select your qualification</option>
-                  <option value="Masters">Masters</option>
-                  <option value="Degree">Degree</option>
+                  <option value="Master's Degree">Master's Degree</option>
+                  <option value="Postgraduate Diploma">Postgraduate Diploma </option>
+                  <option value="Bachelor’s Degree">Bachelor’s Degree</option>
+                  <option value="Associate's Degree">Associate's Degree</option>
                   <option value="Diploma">Diploma</option>
                   <option value="Certificate">Certificate</option>
+                  <option value="Degree">others</option>
                 </select>
               </div>
               {/* //workexperience part */}
 
               <div className="mb-4 flex flex-row">
               <label className="block text-black w-[15%] font-semibold">
-                  WorkExperience:
+                  WorkExperience<span className="text-red-500">*</span>:
                 </label>
                 <div>
                 <input
@@ -437,7 +495,7 @@ const FormLayout = () => {
 
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Salary Information:
+                  Salary Information<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="number"
@@ -466,7 +524,7 @@ const FormLayout = () => {
               {/* CV Upload Field */}
               <div className="mb-4 flex flex-row">
                 <label className="block text-black w-[15%] font-semibold">
-                  Upload CV:
+                  Upload CV<span className="text-red-500">*</span>:
                 </label>
                 <input
                   type="file"

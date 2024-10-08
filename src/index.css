@@ -116,7 +116,7 @@ body {
   position: relative;
   height: 100vh;
   width: 100%;
-  overflow: hidden; /* Ensure content doesn't overflow */
+  overflow: hidden; 
 }
 
 /* Background Image with Blur */

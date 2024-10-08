@@ -15,11 +15,21 @@ const Form = () => {
     e.preventDefault();
     try {
       const response = await axios.post("http://localhost:5000/Api/login", { Email, password });
+  
+      // Assuming the response contains a user token or user ID
+      const userId = response.data.userId;
+      localStorage.setItem("userId",userId)
       
-      setMessage(response.data.message); 
+      // Store the token or user ID in local storage  using JWT & userId
+      // localStorage.setItem('token', token); 
+      // localStorage.setItem('userId', userId);  
+  
+      setMessage(response.data.message);
       setEmail("");
       setPassword("");
-      setError(""); 
+      setError("");
+      
+      // Redirect the user after successful login
       setTimeout(() => {
         navigate("/Home");
       }, 1000);
@@ -32,6 +42,7 @@ const Form = () => {
       }
     }
   };
+  
 
   return (
     <div>
@@ -45,8 +56,8 @@ const Form = () => {
         </div>
       </div>
       <div className="login h-[80vh]">
-      <div class="login-background"></div>
-      <div class="login-content">
+      <div className="login-background"></div>
+      <div className="login-content">
       <div className=" flex items-center justify-center pt-10 font-bold"><h3 className="">Welcome back, Log in to your account</h3></div>
       
       <div className="flex mt-10 items-center h-screen  flex-col">

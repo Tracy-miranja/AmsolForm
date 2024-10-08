@@ -30,7 +30,7 @@ const RotationPandingPage = () => {
         </h1>
       </div>
       <div className="w-[100%] h-[50px] flex items-center justify-center p-8 text-blue-400 gap-5 z-10">
-        <div className="bg-inherit rounded-full w-[200px] flex items-center justify-center">
+        <div className="bg-inherit rounded-full w-[450px] flex items-center justify-between">
           {" "}
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>
@@ -71,15 +71,23 @@ const RotationPandingPage = () => {
             to="/signupform"
             className={`rounded-full ${
               hoveredSection ? "text-white" : "text-[#0A599E]"
-            } hover:text-white p-1 pl-2 pr-2 hover:bg-gray-400 font-semibold`}
+            } hover:text-white hover:-mt-2 p-1 pl-2 pr-2 hover:bg-gray-400 font-semibold`}
           >
             Career
           </Link>
         </div>
+        <div>
+        <Link
+              to="/cvupdate"
+              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
+            >
+              <span>Update CV</span> <img src={arrow} className="w-5 h-5" />
+            </Link>
+        </div>
       </div>
 
       <div className="flex w-full">
-        <div className="flex w-[70%] h-[60vh] relative">
+        <div className="flex w-[60%] h-[60vh] relative">
           <img src={ topimg} className={`h-[7vh] w-[5%] absolute ml-[75%] mt-[40px] ${isHovered? "invisible":"visible"}`}
             alt="vacancy"/>
           <img
@@ -87,7 +95,7 @@ const RotationPandingPage = () => {
             className="h-[100vh] absolute -mt-[55px] "
             alt="vacancy"
           />
-          <h1 className="absolute mt-[25%] ml-[19%] flex flex-col font-extrabold text-5xl text-gray-100 ">
+          <h1 className="absolute mt-[20%] ml-[19%] flex flex-col font-extrabold text-5xl text-gray-100 ">
             We’re <br />
             AMSOL
             <span className="text-2xl font-normal">
