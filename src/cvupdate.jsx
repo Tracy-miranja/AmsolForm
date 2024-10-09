@@ -3,6 +3,7 @@ import axios from 'axios';
 import logo from "./assets/amsolJobVacancies.png";
 import { Link } from 'react-router-dom';
 import { FaHome } from 'react-icons/fa';
+import HandleLogout from './logout';
 
 const UpdateCV = ({ userId }) => {
   const [cvFile, setCvFile] = useState(null);
@@ -45,7 +46,9 @@ const UpdateCV = ({ userId }) => {
         </div>
         <div className="flex flex-row items-center gap-5">
           <Link className="text-white flex flex-row gap-2" to="/"><FaHome className="mt-1"/>Home</Link>
+          <HandleLogout />
         </div>
+            
       </div>
       <div className='flex justify-center items-center justify-center'>
         

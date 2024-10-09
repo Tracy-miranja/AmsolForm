@@ -19,7 +19,7 @@ const App = () => {
           <Route path="/form" element={<Form />} />
           {/* Protect the Home route */}
           <Route path='/logout' element={<HandleLogout />}/>
-          <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+          <Route path="/Home" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path='/cvupdate' element={<PrivateRoute><UpdateCV /></PrivateRoute>}/>
         </Routes>
       </Router>

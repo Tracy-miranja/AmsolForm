@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import axios from "axios";
 import arrow from "./assets/vector 1.svg";
+import HandleLogout from "./logout";
 
 const FormLayout = () => {
   const [activeSection, setActiveSection] = useState("personalDetails");
@@ -179,13 +180,7 @@ const handleNextButtonClick = () => {
             </Link>
         </div>
         <div>
-        <Link
-              to="/form"
-              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
-              
-            >             
-              <span>Log out</span>
-            </Link>
+        <HandleLogout />
         </div>
         </div>
       </div>

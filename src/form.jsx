@@ -14,15 +14,9 @@ const Form = () => {
   const UserLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/Api/login", { Email, password });
-  
-      // Assuming the response contains a user token or user ID
-      const userId = response.data.userId;
-      localStorage.setItem("userId",userId)
-      
-      // Store the token or user ID in local storage  using JWT & userId
-      // localStorage.setItem('token', token); 
-      // localStorage.setItem('userId', userId);  
+      const response = await axios.post("http://localhost:5000/Api/login", { Email, password },{
+        withCredentials: true,  // This sends the cookie with the request
+      });
   
       setMessage(response.data.message);
       setEmail("");
