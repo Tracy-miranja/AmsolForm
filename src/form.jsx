@@ -17,6 +17,7 @@ const Form = () => {
       const response = await axios.post("http://localhost:5000/Api/login", { Email, password },{
         withCredentials: true,  // This sends the cookie with the request
       });
+      console.log(response.data)
   
       setMessage(response.data.message);
       setEmail("");
@@ -37,7 +38,6 @@ const Form = () => {
     }
   };
   
-
   return (
     <div>
       <div className=" w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5">
