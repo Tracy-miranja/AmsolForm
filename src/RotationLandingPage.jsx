@@ -34,101 +34,96 @@ const RotationPandingPage = () => {
           Guidebook
         </h1>
       </div>
-      <div className="w-[100%] h-[50px] justify-around flex lg:items-center lg:justify-center text-blue-400 gap-5 z-10">
-        {/* Navbar Section */}
-        <div className="w-full flex  justify-between p-3 pb-0">
-          <div className="pl-2">
-            <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
-          </div>
-          <div>
-            {/* Toggle Button for Small Screens */}
-            <button
-              onClick={toggleMenu}
-              className="md:hidden text-2xl focus:outline-none"
-            >
-              {isMenuOpen ? <FaTimes /> : <FaBars />}
-            </button>
+      <div className="w-[100%] h-[50px] flex justify-around lg:items-center text-blue-400 gap-5 z-10">
+  {/* Navbar Section */}
+  <div className="w-full flex justify-around items-center p-3 pb-0">
+    {/* Logo */}
+    <div className="pl-2">
+      <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
+    </div>
 
-            {/* Desktop Menu */}
-            <div
-              className={`w-[100%] hidden md:flex flex-row items-center gap-5  ${
-                hoveredSection ? "text-white" : "text-[#0A599E]"
-              }`}
-            >
-              <Link to="/" className="hover:text-white flex items-center gap-2">
-                <FaHome /> Home
-              </Link>
-              <Link
-                to="/form"
-                className={`rounded-full ${
-                  hoveredSection ? "text-white" : "text-[#0A599E]"
-                } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-              >
-                About
-              </Link>
-              <Link
-                to="/signupform"
-                className={`rounded-full ${
-                  hoveredSection ? "text-white" : "text-[#0A599E]"
-                } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-              >
-                Jobs
-              </Link>
-              <Link
-                to="/signupform"
-                className={`rounded-full ${
-                  hoveredSection ? "text-white" : "text-[#0A599E]"
-                } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-              >
-                Career
-              </Link>
-            </div>
-          </div>
-        </div>
+    {/* Toggle Button for Small Screens */}
+    <button
+      onClick={toggleMenu}
+      className="md:hidden text-2xl focus:outline-none"
+    >
+      {isMenuOpen ? <FaTimes /> : <FaBars />}
+    </button>
 
-        {/* Mobile Menu */}
-        <div
-          className={`fixed top-0 left-0 w-full h-full bg-white transition-transform duration-300 ${
-            isMenuOpen
-              ? "transform translate-x-0"
-              : "transform -translate-x-full"
-          } md:hidden z-50`}
-        >
-          <div className="p-4 flex justify-between items-start">
-            <h2 className="text-lg font-bold">Menu</h2>
-            {/* Close Button */}
-            <button
-              onClick={toggleMenu}
-              className="text-2xl focus:outline-none"
-            >
-              <FaTimes />
-            </button>
-          </div>
-          <div className="p-4 space-y-4">
-            <Link to="/" className="flex items-center gap-2 text-[#0A599E]">
-              <FaHome /> Home
-            </Link>
-            <Link
-              to="/form"
-              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
-            >
-              About
-            </Link>
-            <Link
-              to="/signupform"
-              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
-            >
-              Jobs
-            </Link>
-            <Link
-              to="/signupform"
-              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
-            >
-              Career
-            </Link>
-          </div>
-        </div>
-      </div>
+    {/* Desktop Menu */}
+    <div
+      className={`hidden md:flex flex-row items-center gap-5 ${
+        hoveredSection ? "text-white" : "text-[#0A599E]"
+      }`}
+    >
+      <Link to="/" className="hover:text-white flex items-center gap-2">
+        <FaHome /> Home
+      </Link>
+      <Link
+        to="/form"
+        className={`rounded-full ${
+          hoveredSection ? "text-white" : "text-[#0A599E]"
+        } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+      >
+        About
+      </Link>
+      <Link
+        to="/signupform"
+        className={`rounded-full ${
+          hoveredSection ? "text-white" : "text-[#0A599E]"
+        } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+      >
+        Jobs
+      </Link>
+      <Link
+        to="/signupform"
+        className={`rounded-full ${
+          hoveredSection ? "text-white" : "text-[#0A599E]"
+        } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+      >
+        Career
+      </Link>
+    </div>
+  </div>
+
+  {/* Mobile Menu */}
+  <div
+    className={`fixed top-0 left-0 w-full h-full bg-white transition-transform duration-300 ${
+      isMenuOpen ? "transform translate-x-0" : "transform -translate-x-full"
+    } md:hidden z-50`}
+  >
+    <div className="p-4 flex justify-between items-start">
+      <h2 className="text-lg font-bold">Menu</h2>
+      <button onClick={toggleMenu} className="text-2xl focus:outline-none">
+        <FaTimes />
+      </button>
+    </div>
+    <div className="p-4 space-y-4">
+      <Link to="/" className="flex items-center gap-2 text-[#0A599E]">
+        <FaHome /> Home
+      </Link>
+      <Link
+        to="/form"
+        className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+      >
+        About
+      </Link>
+      <Link
+        to="/signupform"
+        className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+      >
+        Jobs
+      </Link>
+      <Link
+        to="/signupform"
+        className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+      >
+        Career
+      </Link>
+    </div>
+  </div>
+</div>
+
 
       <div className="flex flex-col  w-[100%] h-[180vh] gap-10 md:w-full md:flex-row lg:gap-0">
         <div className="flex w-[80%] h-[60vh] md:w-[60%] md:h-[50vh] lg:w-[60%] relative ">
