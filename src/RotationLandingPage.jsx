@@ -38,52 +38,51 @@ const RotationPandingPage = () => {
         {/* Navbar Section */}
         <div className="w-full flex items-center justify-around p-4">
           <div>
-          <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
+            <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
           </div>
           <div>
+            {/* Toggle Button for Small Screens */}
+            <button
+              onClick={toggleMenu}
+              className="md:hidden text-2xl focus:outline-none"
+            >
+              {isMenuOpen ? <FaTimes /> : <FaBars />}
+            </button>
 
-          {/* Toggle Button for Small Screens */}
-          <button
-            onClick={toggleMenu}
-            className="md:hidden text-2xl focus:outline-none"
-          >
-            {isMenuOpen ? <FaTimes /> : <FaBars />}
-          </button>
-
-          {/* Desktop Menu */}
-          <div
-            className={`w-[100%] hidden md:flex flex-row items-center gap-5  ${
-              hoveredSection ? "text-white" : "text-[#0A599E]"
-            }`}
-          >
-            <Link to="/" className="hover:text-white flex items-center gap-2">
-              <FaHome /> Home
-            </Link>
-            <Link
-              to="/form"
-              className={`rounded-full ${
+            {/* Desktop Menu */}
+            <div
+              className={`w-[100%] hidden md:flex flex-row items-center gap-5  ${
                 hoveredSection ? "text-white" : "text-[#0A599E]"
-              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+              }`}
             >
-              About
-            </Link>
-            <Link
-              to="/signupform"
-              className={`rounded-full ${
-                hoveredSection ? "text-white" : "text-[#0A599E]"
-              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-            >
-              Jobs
-            </Link>
-            <Link
-              to="/signupform"
-              className={`rounded-full ${
-                hoveredSection ? "text-white" : "text-[#0A599E]"
-              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-            >
-              Career
-            </Link>
-          </div>
+              <Link to="/" className="hover:text-white flex items-center gap-2">
+                <FaHome /> Home
+              </Link>
+              <Link
+                to="/form"
+                className={`rounded-full ${
+                  hoveredSection ? "text-white" : "text-[#0A599E]"
+                } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+              >
+                About
+              </Link>
+              <Link
+                to="/signupform"
+                className={`rounded-full ${
+                  hoveredSection ? "text-white" : "text-[#0A599E]"
+                } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+              >
+                Jobs
+              </Link>
+              <Link
+                to="/signupform"
+                className={`rounded-full ${
+                  hoveredSection ? "text-white" : "text-[#0A599E]"
+                } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+              >
+                Career
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -131,8 +130,8 @@ const RotationPandingPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col  w-[100%] h-[180vh] gap-10 md:w-full md:flex-row">
-        <div className="flex w-[100%] h-[60vh] md:w-[60%] md:h-[60vh] lg:w-[60%] relative">
+      <div className="flex flex-col  w-[100%] h-[180vh] gap-10 md:w-full md:flex-row lg:gap-0">
+        <div className="flex w-[80%] h-[60vh] md:w-[60%] md:h-[60vh] lg:w-[60%] relative">
           <img
             src={topimg}
             className={`h-[4vh] md:h-[7vh] ml-[85%] md:w-[5%] absolute md:ml-[75%] mt-[40px] ${
@@ -140,12 +139,11 @@ const RotationPandingPage = () => {
             }`}
             alt="vacancy"
           />
-        <img
-  src={vacancy}
-  className="sm:w-[65%] max-w-[100%] md:h-[100vh] absolute md:-mt-[55px] lg:h-[100vh] k"
-  alt="vacancy"
-/>
-
+          <img
+            src={vacancy}
+            className="sm:w-[65%] max-w-[100%] md:h-[100vh] absolute md:-mt-[55px] lg:h-[100vh] k"
+            alt="vacancy"
+          />
 
           <h1 className="absolute mt-[40%] w-[100%] -ml-[10%] text-center justify-center text-4xl md:mt-[20%] md:ml-[19%] flex flex-col font-extrabold md:text-5xl text-gray-100 ">
             We’re <br />
@@ -158,10 +156,10 @@ const RotationPandingPage = () => {
           </h1>
         </div>
         {/* Second section */}
-        <div className="flex w-[100%] md:w-[40%] flex-col gap-5 items-center justify-center h-[80vh]">
+        <div className="flex w-[100%] md:w-[40%] flex-col gap-5  justify-center h-[80vh] lg:w-[40%] lg:gap-0">
           {/* Log in section */}
           <div
-            className="flex w-[100%] h-[35vh] items-center justify-center gap-5 flex-col relative parent-container"
+            className="flex w-[100%] h-[35vh] gap-5 flex-col relative parent-container"
             onMouseEnter={() => {
               setHoveredSection("login");
               setIsHovered(true);
@@ -211,7 +209,7 @@ const RotationPandingPage = () => {
           <div className="flex  items-center justify-center w-[50%] h-[2px] bg-[#0A599E] "></div>
           {/* Sign up section */}
           <div
-            className="flex h-[30vh] flex-col gap-5 items-center justify-center relative parent-container"
+            className="flex h-[30vh] flex-col gap-5  relative parent-container"
             onMouseEnter={() => {
               setHoveredSection("signup");
               setIsHovered(true);
