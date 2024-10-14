@@ -2,7 +2,7 @@ import FormLayout from "./Formlayout";
 
 const Home = () => {
   return (
-    <div className="h-fit-content flex items-center justify-center flex-col">
+    <div className="h-screen w-screen overflow-hidden flex items-center justify-center">
       <FormLayout />
     </div>
   );

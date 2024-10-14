@@ -415,3 +415,20 @@ const handleCvUpdate = async (e) => {
 .rotate-hover:hover ~ .signup-image img {
   animation-fill-mode: forwards; /* Maintain final state */
 }
+
+<div>
+        <img
+          src={jobsKenya}
+          className={`absolute -mt-[100px] ml-[280px] h-[25vh] ${
+            isHovered ? "invisible" : "visible"
+          }`}
+          alt="jobsKenya"
+        />
+      </div>
+
+      <div>
+        <img
+          src={jobsKenya}
+          className={`flex absolute -mt-[100px] ml-[280px] h-[25vh] overflow-hidden ${isHovered? "invisible":"visible"}`}
+        />
+      </div>

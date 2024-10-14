@@ -7,98 +7,150 @@ import { FaHome } from "react-icons/fa";
 import arrow from "./assets/vector 1.svg";
 import jobsKenya from "./assets/Vector 6low.svg";
 import desktopbg from "./assets/Desktop.svg";
-import topimg from "./assets/Vector 1se.svg"
-import secimg from "./assets/Vector 2top.svg"
-import sideimg from "./assets/Vector 2side.svg"
+import topimg from "./assets/Vector 1se.svg";
+import secimg from "./assets/Vector 2top.svg";
+import sideimg from "./assets/Vector 2side.svg";
+import { FaBars } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 
 const RotationPandingPage = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredSection, setHoveredSection] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for menu toggle
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
     <div
-      className={`flex flex-col h-[100vh] ${
+      className={`flex flex-col h-[100vh] md:overflow-hidden  ${
         isHovered
           ? "bg-gradient-to-r from-[#25b2e6] to-[#0A599E] text-white"
           : "bg-white"
       } transition-colors duration-500`}
     >
-      <div className="w-[100%] h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E] flex items-center justify-center p-2">
-        <h1 className="text-white font-bold">
+      <div className="w-[100%] flex  text-center md:h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E]  p-2 lg:items-center lg:justify-center">
+        <h1 className="text-white font-bold lg:items-center">
           Empowering Organizations To Achieve Emiratization With Our Latest
           Guidebook
         </h1>
       </div>
       <div className="w-[100%] h-[50px] flex items-center justify-center p-8 text-blue-400 gap-5 z-10">
-        <div className="bg-inherit rounded-full w-[450px] flex items-center justify-between">
-          {" "}
-          <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
-        </div>
-        <div
-          className={`flex flex-row items-center gap-5 z-10 ${
-            hoveredSection ? "text-white" : "text-[#0A599E]"
-          }`}
-        >
-          <a
-            className={`hover:text-white flex flex-row gap-2" href="#" ${
-              isHovered ? "text-white" : "text-[#0A599E]"
+        {/* Navbar Section */}
+        <div className="w-full flex items-center justify-around p-4">
+          <div>
+          <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
+          </div>
+          <div>
+
+          {/* Toggle Button for Small Screens */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden text-2xl focus:outline-none"
+          >
+            {isMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+
+          {/* Desktop Menu */}
+          <div
+            className={`w-[100%] hidden md:flex flex-row items-center gap-5  ${
+              hoveredSection ? "text-white" : "text-[#0A599E]"
             }`}
           >
-            <FaHome
-              className={`mt-1 hover:bg-gray-400  hover:text-white ${
-                isHovered ? "text:white" : "text-[#0A599E]"
-              }`}
-            />
-            Home
-          </a>
-          <Link
-            to="/form"
-            className={`rounded-full ${
-              hoveredSection ? "text-white" : "text-[#0A599E]"
-            } hover:text-white hover:-mt-2 p-1 pl-2 pr-2 hover:bg-gray-400 font-semibold`}
-          >
-            About
-          </Link>
-          <Link
-            to="/signupform"
-            className={`rounded-full ${
-              hoveredSection ? "text-white" : "text-[#0A599E]"
-            } hover:text-white hover:-mt-2 p-1 pl-2 pr-2 hover:bg-gray-400 font-semibold`}
-          >
-            Jobs
-          </Link>
-          <Link
-            to="/signupform"
-            className={`rounded-full ${
-              hoveredSection ? "text-white" : "text-[#0A599E]"
-            } hover:text-white hover:-mt-2 p-1 pl-2 pr-2 hover:bg-gray-400 font-semibold`}
-          >
-            Career
-          </Link>
-        </div>
-        <div>
-        <Link
-              to="/cvupdate"
-              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
-            >
-              <span>Update CV</span> <img src={arrow} className="w-5 h-5" />
+            <Link to="/" className="hover:text-white flex items-center gap-2">
+              <FaHome /> Home
             </Link>
+            <Link
+              to="/form"
+              className={`rounded-full ${
+                hoveredSection ? "text-white" : "text-[#0A599E]"
+              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+            >
+              About
+            </Link>
+            <Link
+              to="/signupform"
+              className={`rounded-full ${
+                hoveredSection ? "text-white" : "text-[#0A599E]"
+              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+            >
+              Jobs
+            </Link>
+            <Link
+              to="/signupform"
+              className={`rounded-full ${
+                hoveredSection ? "text-white" : "text-[#0A599E]"
+              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+            >
+              Career
+            </Link>
+          </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div
+          className={`fixed top-0 left-0 w-full h-full bg-white transition-transform duration-300 ${
+            isMenuOpen
+              ? "transform translate-x-0"
+              : "transform -translate-x-full"
+          } md:hidden z-50`}
+        >
+          <div className="p-4 flex justify-between items-start">
+            <h2 className="text-lg font-bold">Menu</h2>
+            {/* Close Button */}
+            <button
+              onClick={toggleMenu}
+              className="text-2xl focus:outline-none"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          <div className="p-4 space-y-4">
+            <Link to="/" className="flex items-center gap-2 text-[#0A599E]">
+              <FaHome /> Home
+            </Link>
+            <Link
+              to="/form"
+              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+            >
+              About
+            </Link>
+            <Link
+              to="/signupform"
+              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+            >
+              Jobs
+            </Link>
+            <Link
+              to="/signupform"
+              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+            >
+              Career
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="flex w-full">
-        <div className="flex w-[60%] h-[60vh] relative">
-          <img src={ topimg} className={`h-[7vh] w-[5%] absolute ml-[75%] mt-[40px] ${isHovered? "invisible":"visible"}`}
-            alt="vacancy"/>
+      <div className="flex flex-col  w-[100%] h-[180vh] gap-10 md:w-full md:flex-row">
+        <div className="flex w-[100%] h-[60vh] md:w-[60%] md:h-[60vh] lg:w-[60%] relative">
           <img
-            src={vacancy}
-            className="h-[100vh] absolute -mt-[55px] "
+            src={topimg}
+            className={`h-[4vh] md:h-[7vh] ml-[85%] md:w-[5%] absolute md:ml-[75%] mt-[40px] ${
+              isHovered ? "invisible" : "visible"
+            }`}
             alt="vacancy"
           />
-          <h1 className="absolute mt-[20%] ml-[19%] flex flex-col font-extrabold text-5xl text-gray-100 ">
+        <img
+  src={vacancy}
+  className="sm:w-[65%] max-w-[100%] md:h-[100vh] absolute md:-mt-[55px] lg:h-[100vh] k"
+  alt="vacancy"
+/>
+
+
+          <h1 className="absolute mt-[40%] w-[100%] -ml-[10%] text-center justify-center text-4xl md:mt-[20%] md:ml-[19%] flex flex-col font-extrabold md:text-5xl text-gray-100 ">
             We’re <br />
             AMSOL
-            <span className="text-2xl font-normal">
+            <span className="text-black text-xl w-[80%] font-normal mt-[35%] ml-[13%] md:text-2xl w-[100%] md:text-white">
               <br />
               The Staffing & HR Solutions
               <br /> specialists
@@ -106,10 +158,10 @@ const RotationPandingPage = () => {
           </h1>
         </div>
         {/* Second section */}
-        <div className="flex w-[40%] flex-col gap-5 justify-center h-[80vh]">
+        <div className="flex w-[100%] md:w-[40%] flex-col gap-5 items-center justify-center h-[80vh]">
           {/* Log in section */}
           <div
-            className="flex w-[100%] h-[35vh] justify-center gap-5 flex-col relative parent-container"
+            className="flex w-[100%] h-[35vh] items-center justify-center gap-5 flex-col relative parent-container"
             onMouseEnter={() => {
               setHoveredSection("login");
               setIsHovered(true);
@@ -120,12 +172,17 @@ const RotationPandingPage = () => {
             }}
           >
             <h1
-              className={`font-extrabold text-3xl z-5  ${
+              className={` font-extrabold text-3xl z-5  ${
                 isHovered ? "text-white" : "text-[#0A599E]"
               }`}
             >
-               <img src={secimg} className={`h-[10vh] w-[18%] absolute ml-[20%] -mt-10 ${isHovered? "invisible":"visible"}`}
-            alt="vacancy"/>
+              <img
+                src={secimg}
+                className={`w-[1%] md:h-[10vh] md:w-[18%] absolute ml-[20%] -mt-10 overflow-hidden ${
+                  isHovered ? "invisible" : "visible"
+                }`}
+                alt="vacancy"
+              />
               You <br />
               haven't Logged In?
             </h1>
@@ -142,7 +199,7 @@ const RotationPandingPage = () => {
             <div className="animation login-image">
               <img
                 src={jobvacancy}
-                className={`w-[100%] h-[50vh] absolute -ml-[250px] z-0 -mt-[250px] hidden-on-hover ${
+                className={`md:w-[100%] md:h-[50vh] absolute -ml-[250px] z-0 -mt-[250px] hidden-on-hover overflow-hidden ${
                   hoveredSection === "login"
                     ? "animate-rotateIn"
                     : "animate-rotateOut"
@@ -151,10 +208,10 @@ const RotationPandingPage = () => {
               />
             </div>
           </div>
-          <div className="w-[50%] h-[2px] bg-[#0A599E] "></div>
+          <div className="flex  items-center justify-center w-[50%] h-[2px] bg-[#0A599E] "></div>
           {/* Sign up section */}
           <div
-            className="flex h-[30vh] flex-col gap-5 justify-center relative parent-container"
+            className="flex h-[30vh] flex-col gap-5 items-center justify-center relative parent-container"
             onMouseEnter={() => {
               setHoveredSection("signup");
               setIsHovered(true);
@@ -173,7 +230,6 @@ const RotationPandingPage = () => {
               <br /> haven't signed Up?
             </h1>
             <p>
-
               See the latest vacancies and <br />
               how we can supercharge your search
             </p>
@@ -194,16 +250,15 @@ const RotationPandingPage = () => {
                 alt="jobvacancy"
               />
             </div>
-            <img src={sideimg} className={`h-[20vh] w-[20%] absolute ml-[70%] -mt-15 ${isHovered? "invisible":"visible"}`}
-            alt="vacancy"/>
+            <img
+              src={sideimg}
+              className={`w-[1%] md:h-[20vh] md:w-[20%] absolute ml-[70%] -mt-15 ${
+                isHovered ? "invisible" : "visible"
+              }`}
+              alt="vacancy"
+            />
           </div>
         </div>
-      </div>
-      <div>
-        <img
-          src={jobsKenya}
-          className={`flex absolute -mt-[100px] ml-[280px] h-[25vh] ${isHovered? "invisible":"visible"}`}
-        />
       </div>
     </div>
   );
