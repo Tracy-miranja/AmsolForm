@@ -16,28 +16,28 @@ import { FaTimes } from "react-icons/fa";
 const RotationPandingPage = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredSection, setHoveredSection] = useState(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for menu toggle
+  const [isMenuOpen, setIsMenuOpen] = useState(false); 
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
     <div
-      className={`flex flex-col h-[100vh] md:overflow-hidden  ${
+      className={`flex flex-col h-[100vh] lg:overflow-hidden  ${
         isHovered
           ? "bg-gradient-to-r from-[#25b2e6] to-[#0A599E] text-white"
           : "bg-white"
       } transition-colors duration-500`}
     >
-      <div className="w-[100%] flex  text-center md:h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E]  p-2 lg:items-center lg:justify-center">
+      <div className="w-[100%] flex  text-center md:h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E] md:justify-center  p-2 lg:items-center lg:justify-center">
         <h1 className="text-white font-bold lg:items-center">
           Empowering Organizations To Achieve Emiratization With Our Latest
           Guidebook
         </h1>
       </div>
-      <div className="w-[100%] h-[50px] flex items-center justify-center p-8 text-blue-400 gap-5 z-10">
+      <div className="w-[100%] h-[50px] justify-around flex lg:items-center lg:justify-center text-blue-400 gap-5 z-10">
         {/* Navbar Section */}
-        <div className="w-full flex items-center justify-around p-4">
-          <div>
+        <div className="w-full flex  justify-between p-3 pb-0">
+          <div className="pl-2">
             <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
           </div>
           <div>
@@ -131,7 +131,7 @@ const RotationPandingPage = () => {
       </div>
 
       <div className="flex flex-col  w-[100%] h-[180vh] gap-10 md:w-full md:flex-row lg:gap-0">
-        <div className="flex w-[80%] h-[60vh] md:w-[60%] md:h-[60vh] lg:w-[60%] relative">
+        <div className="flex w-[80%] h-[60vh] md:w-[60%] md:h-[50vh] lg:w-[60%] relative ">
           <img
             src={topimg}
             className={`h-[4vh] md:h-[7vh] ml-[85%] md:w-[5%] absolute md:ml-[75%] mt-[40px] ${
@@ -139,16 +139,17 @@ const RotationPandingPage = () => {
             }`}
             alt="vacancy"
           />
-          <img
-            src={vacancy}
-            className="sm:w-[65%] max-w-[100%] md:h-[100vh] absolute md:-mt-[55px] lg:h-[100vh] k"
-            alt="vacancy"
-          />
+         <img
+  src={vacancy}
+  className="w-full h-auto md:w-[100%] md:mt-[19px] object-cover absolute md:-mt-[55px] lg:-mt-[2px] lg:w-[70%]"
+  alt="vacancy"
+/>
 
-          <h1 className="absolute mt-[40%] w-[100%] -ml-[10%] text-center justify-center text-4xl md:mt-[20%] md:ml-[19%] flex flex-col font-extrabold md:text-5xl text-gray-100 ">
+
+          <h1 className="absolute mt-[44%] w-[100%] ml-[21%] text-4xl  md:ml-[22%] md:mt-[40%]  lg:ml-[20%] lg:mt-[30%] flex flex-col font-extrabold md:text-5xl text-gray-100 ">
             We’re <br />
             AMSOL
-            <span className="text-black text-xl w-[80%] font-normal mt-[35%] ml-[13%] md:text-2xl w-[100%] md:text-white">
+            <span className="text-black text-xl w-[100%] font-normal mt-[38%] md:mt-[1%] -ml-[12%] md:-ml-[1%] md:text-1xl w-[100%] md:text-white lg:ml-[0%] lg:mt-[1%]">
               <br />
               The Staffing & HR Solutions
               <br /> specialists
@@ -156,10 +157,10 @@ const RotationPandingPage = () => {
           </h1>
         </div>
         {/* Second section */}
-        <div className="flex w-[100%] md:w-[40%] flex-col gap-5  justify-center h-[80vh] lg:w-[40%] lg:gap-0">
+        <div className="flex w-[100%] md:w-[45%] md:pr-2 flex-col gap-5  justify-center h-[80vh] lg:w-[40%] lg:gap-0">
           {/* Log in section */}
           <div
-            className="flex w-[100%] h-[35vh] gap-5 flex-col relative parent-container"
+            className="flex w-[100%] h-[35vh] gap-5 p-5 flex-col relative parent-container"
             onMouseEnter={() => {
               setHoveredSection("login");
               setIsHovered(true);
@@ -176,7 +177,7 @@ const RotationPandingPage = () => {
             >
               <img
                 src={secimg}
-                className={`w-[1%] md:h-[10vh] md:w-[18%] absolute ml-[20%] -mt-10 overflow-hidden ${
+                className={`w-[1%] lg:h-[10vh] lg:w-[18%] absolute ml-[20%] -mt-10 overflow-hidden ${
                   isHovered ? "invisible" : "visible"
                 }`}
                 alt="vacancy"
@@ -206,10 +207,12 @@ const RotationPandingPage = () => {
               />
             </div>
           </div>
-          <div className="flex  items-center justify-center w-[50%] h-[2px] bg-[#0A599E] "></div>
+          <div className="p-5">
+          <div className="flex  items-center justify-center w-[80%] h-[2px] bg-[#0A599E] lg:w-[50%] "></div>
+          </div>
           {/* Sign up section */}
           <div
-            className="flex h-[30vh] flex-col gap-5  relative parent-container"
+            className="flex h-[30vh] flex-col gap-5 p-5 relative parent-container"
             onMouseEnter={() => {
               setHoveredSection("signup");
               setIsHovered(true);
@@ -240,7 +243,7 @@ const RotationPandingPage = () => {
             <div className="animation signup-image relative">
               <img
                 src={jobvacancy}
-                className={`w-[100%] h-[60vh] absolute -ml-[250px] -mt-[320px] z-0 transition-all duration-500 ${
+                className={`w-[100%] h-[60vh] absolute -ml-[250px] -mt-[300px] z-0 transition-all duration-500 ${
                   hoveredSection === "signup"
                     ? "animate-rotateIn"
                     : "animate-rotateOut"
@@ -250,7 +253,7 @@ const RotationPandingPage = () => {
             </div>
             <img
               src={sideimg}
-              className={`w-[1%] md:h-[20vh] md:w-[20%] absolute ml-[70%] -mt-15 ${
+              className={`w-[1%] lg:h-[20vh] lg:w-[20%] absolute ml-[70%] -mt-15 ${
                 isHovered ? "invisible" : "visible"
               }`}
               alt="vacancy"
