@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import vacancy from "./assets/vector 2tt.svg";
+import vacancy from "./assets/vector-2tt.svg";
 import jobvacancy from "./assets/Group1.svg";
 import logo from "./assets/amsolJobVacancies.png";
 import { FaHome } from "react-icons/fa";
 import arrow from "./assets/vector 1.svg";
-import jobsKenya from "./assets/Vector 6low.svg";
+import jobsKenya from "./assets/Vector-6low.svg";
 import desktopbg from "./assets/Desktop.svg";
-import topimg from "./assets/Vector 1se.svg";
-import secimg from "./assets/Vector 2top.svg";
-import sideimg from "./assets/Vector 2side.svg";
+import topimg from "./assets/Vector-1se.svg";
+import secimg from "./assets/Vector-2top.svg";
+import sideimg from "./assets/Vector-2side.svg";
 import { FaBars } from "react-icons/fa";
 import { FaTimes } from "react-icons/fa";
 
