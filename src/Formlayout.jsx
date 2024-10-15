@@ -3,7 +3,7 @@ import logo from "./assets/amsolJobVacancies.png";
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import axios from "axios";
-import arrow from "./assets/vector-1.svg";
+import arrow from "./assets/Vector1.svg";
 import HandleLogout from "./logout";
 
 const FormLayout = () => {
