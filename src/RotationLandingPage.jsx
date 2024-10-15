@@ -4,7 +4,7 @@ import vacancy from "./assets/Vector2tt.svg";
 import jobvacancy from "./assets/Group1.svg";
 import logo from "./assets/amsolJobVacancies.png";
 import { FaHome } from "react-icons/fa";
-import arrow from "./assets/vector1.svg";
+import arrow from "./assets/Vector1.svg";
 import jobsKenya from "./assets/Vector-6low.svg";
 import desktopbg from "./assets/Desktop.svg";
 import topimg from "./assets/Vector-1se.svg";
