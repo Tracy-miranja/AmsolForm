@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import vacancy from "./assets/vector2tt.svg";
+import vacancy from "./assets/Vector2tt.svg";
 import jobvacancy from "./assets/Group1.svg";
 import logo from "./assets/amsolJobVacancies.png";
 import { FaHome } from "react-icons/fa";
