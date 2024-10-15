@@ -5,7 +5,7 @@ import Form from './form';
 import Home from './Home';
 // import LandingPage from './LandingPage';
 import RotationPandingPage from './RotationLandingPage';
-import PrivateRoute from './PrivateRoute'; // Import the PrivateRoute component
+import PrivateRoute from './privateroute';
 import UpdateCV from './cvupdate';
 import HandleLogout from './logout';
 
