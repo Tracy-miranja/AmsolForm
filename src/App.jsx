@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SignUpForm from './SignUpForm';
+import SignUpForm from "./signupform"
 import Form from './form';
 import Home from './Home';
 // import LandingPage from './LandingPage';
@@ -17,7 +17,6 @@ const App = () => {
           <Route path="/" element={<RotationPandingPage />} />
           <Route path="/signupform" element={<SignUpForm />} />
           <Route path="/form" element={<Form />} />
-          {/* Protect the Home route */}
           <Route path='/logout' element={<HandleLogout />}/>
           <Route path="/Home" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path='/cvupdate' element={<PrivateRoute><UpdateCV /></PrivateRoute>}/>
