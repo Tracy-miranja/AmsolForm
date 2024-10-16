@@ -47,90 +47,92 @@ const navigateToSection = (section) => {
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (!firstName || !secondName || !lastName || !email || !cv) {
-    alert("Please fill out all required fields.");
-    return;
+      alert("Please fill out all required fields.");
+      return;
   }
 
   try {
-    const formData = new FormData();
-    formData.append("firstName", firstName);
-    formData.append("lastName", lastName);
-    formData.append("secondName", secondName);
-    formData.append("idNumber", idNumber);
-    formData.append("whatAppNo", whatAppNo);
-    formData.append("phoneNumber", phoneNumber);
-    formData.append("email", email);
-    formData.append("age", age);
-    formData.append("nationality", nationality);
-    formData.append("location", location);
-    formData.append("specialization", specialization);
-    formData.append("academicLevel", academicLevel);
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("secondName", secondName);
+      formData.append("idNumber", idNumber);
+      formData.append("whatAppNo", whatAppNo);
+      formData.append("phoneNumber", phoneNumber);
+      formData.append("email", email);
+      formData.append("age", age);
+      formData.append("nationality", nationality);
+      formData.append("location", location);
+      formData.append("specialization", specialization);
+      formData.append("academicLevel", academicLevel);
+      
+      // Append work experience fields
+      formData.append("company1", company1);
+      formData.append("position1", position1);
+      formData.append("duration1", duration1);
+      formData.append("company2", company2);
+      formData.append("position2", position2);
+      formData.append("duration2", duration2);
+      formData.append("company3", company3);
+      formData.append("position3", position3);
+      formData.append("duration3", duration3);
 
-    // Append work experience fields
-    formData.append("company1", company1);
-    formData.append("position1", position1);
-    formData.append("duration1", duration1);
-    formData.append("company2", company2);
-    formData.append("position2", position2);
-    formData.append("duration2", duration2);
-    formData.append("company3", company3);
-    formData.append("position3", position3);
-    formData.append("duration3", duration3);
+      formData.append("salaryInfo", salaryInfo);
+      formData.append("cv", cv); // Append CV file
 
-    formData.append("salaryInfo", salaryInfo);
-    formData.append("cv", cv); // Append CV file
+      const response = await axios.post(
+          "http://localhost:5000/api/applications", // Use the correct API endpoint
+          formData,
+          {
+              headers: {
+                  "Content-Type": "multipart/form-data",
+              },
+              withCredentials: true,
+          }
+      );
 
-    const response = await axios.post(
-      "http://localhost:5000/Api/users",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+      setMessage(response.data.message);
+      setError("");
+      setCvSubmitted(true); 
+      // Clear form fields
+      setFirstName("");
+      setSecondName("");
+      setLastName("");
+      setIdNumber("");
+      setWhatAppNo("");
+      setPhoneNumber("");
+      setEmail("");
+      setNationality("");
+      setCompany1("");
+      setLocation("");
+      setAcademicLevel("");
+      setCompany1("");
+      setCompany2("");
+      setCompany3("");
+      setSalaryInfo("");
+      setDuration1("");
+      setDuration2("");
+      setDuration3("");
+      setPosition1("");
+      setPosition2("");
+      setPosition3("");
+      setSpecialization("");
+      setAge("");
+      setCv(null);
+      setSpecialization("");
+      setShowPopup(true); // Show success popup
 
-    setMessage(response.data.message);
-    setError("");
-    setCvSubmitted(true); // Mark that CV has been submitted
-    // Clear form fields
-    setFirstName("");
-    setSecondName("");
-    setLastName("");
-    setIdNumber("");
-    setWhatAppNo("");
-    setPhoneNumber("");
-    setEmail("");
-    setNationality("");
-    setCompany1("");
-    setLocation("");
-    setAcademicLevel("");
-    setCompany1("");
-    setCompany2("");
-    setCompany3("");
-    setSalaryInfo("");
-    setDuration1("");
-    setDuration2("");
-    setDuration3("");
-    setPosition1("");
-    setPosition2("");
-    setPosition3("");
-    setSpecialization("");
-    setAge("");
-    setCv(null);
-    setSpecialization("");
-    setShowPopup(true); // Show success popup
-
-    // Automatically hide popup after 3 seconds
-    setTimeout(() => {
-      setShowPopup(false);
-    }, 3000);
+      // Automatically hide popup after 3 seconds
+      setTimeout(() => {
+          setShowPopup(false);
+      }, 3000);
   } catch (err) {
-    console.error(err); // Log the entire error
-    setError(err.response?.data?.message || "Error submitting form");
-    setMessage("");
+      console.error(err); // Log the entire error
+      setError(err.response?.data?.message || "Error submitting form");
+      setMessage("");
   }
 };
+
 
 const validateForm = () => {
   return (
@@ -159,7 +161,7 @@ const handleNextButtonClick = () => {
 
   return (
     <>
-      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5 overflow-auto">
+      <div className="w-[100%] h-[50px] bg-gradient-to-r overflow-hidden from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5 overflow-auto">
         <div className="bg-white rounded-full w-[200px] flex items-center justify-center">
           <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
         </div>
@@ -183,7 +185,7 @@ const handleNextButtonClick = () => {
         </div>
         </div>
       </div>
-
+      <div className="flex justify-center">
       <div className="w-[70%] h-screen flex flex-col items-center p-2 mt-10 border border-b-6 shadow-lg">
         {showPopup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -543,6 +545,7 @@ const handleNextButtonClick = () => {
             </form>
           </div>
         )}
+      </div>
       </div>
     </>
   );

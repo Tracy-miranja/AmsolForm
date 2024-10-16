@@ -22,7 +22,7 @@ const RotationPandingPage = () => {
 
   return (
     <div
-      className={`flex flex-col h-[100vh] lg:overflow-hidden  ${
+      className={`flex flex-col h-[100vh] lg:overflow-auto  ${
         isHovered
           ? "bg-gradient-to-r from-[#25b2e6] to-[#0A599E] text-white"
           : "bg-white"

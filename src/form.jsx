@@ -5,7 +5,7 @@ import { FaHome, } from "react-icons/fa";
 import logo from "./assets/amsolJobVacancies.png"
 
 const Form = () => {
-  const [Email, setEmail] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -14,8 +14,8 @@ const Form = () => {
   const UserLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/Api/login", { Email, password },{
-        withCredentials: true,  // This sends the cookie with the request
+      const response = await axios.post("http://localhost:5000/api/login", { email, password },{
+        withCredentials: true,  
       });
       console.log(response.data)
   
@@ -26,7 +26,7 @@ const Form = () => {
       
       // Redirect the user after successful login
       setTimeout(() => {
-        navigate("/Home");
+        navigate("/FormLayout");
       }, 1000);
     } catch (error) {
       if (error.response && error.response.data.message) {
@@ -63,7 +63,7 @@ const Form = () => {
               <label>Email <span className="text-red-500">*</span>:</label>
               <input
                 type="email"
-                value={Email}
+                value={email}
                 placeholder="Enter email"
                 onChange={(e) => setEmail(e.target.value)}
                 className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"

@@ -8,6 +8,8 @@ import RotationPandingPage from './RotationLandingPage';
 import PrivateRoute from './privateroute';
 import UpdateCV from './cvupdate';
 import HandleLogout from './logout';
+import FormLayout from './Formlayout';
+
 
 const App = () => {
   return (
@@ -18,8 +20,9 @@ const App = () => {
           <Route path="/signupform" element={<SignUpForm />} />
           <Route path="/form" element={<Form />} />
           <Route path='/logout' element={<HandleLogout />}/>
-          <Route path="/Home" element={<PrivateRoute><Home /></PrivateRoute>} />
-          <Route path='/cvupdate' element={<PrivateRoute><UpdateCV /></PrivateRoute>}/>
+          <Route path="/Formlayout" element={<FormLayout />} />
+          <Route path="/Home" element={<Home />} />
+          <Route path='/cvupdate' element={<UpdateCV />}/>
         </Routes>
       </Router>
     </>
