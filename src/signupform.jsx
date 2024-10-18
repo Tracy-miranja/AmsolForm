@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import logo from "./assets/amsolJobVacancies.png";
+import { Route } from "react-router-dom";
 
 const SignUpForm = () => {
   const [email, setEmail] = useState("");
@@ -125,7 +126,7 @@ const SignUpForm = () => {
                   className="ml-2 w-full p-2 rounded border border-gray-300 focus:border-blue-500"
                 />
                 <span
-                  className="absolute right-3 top-[30%] cursor-pointer"
+                  className="absolute right-3 top-[55%] cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <FaEye /> : <FaEyeSlash />}
@@ -146,7 +147,7 @@ const SignUpForm = () => {
                   className="ml-2 w-full p-2 rounded border border-gray-300 focus:border-blue-500"
                 />
                 <span
-                  className="absolute right-3 top-[30%] cursor-pointer"
+                  className="absolute right-3 top-[50%] cursor-pointer"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
@@ -167,7 +168,8 @@ const SignUpForm = () => {
             {error && <p className="mt-4 text-red-500">{error}</p>}
 
             <p className="mt-4">
-              Already have an account? <Link to="/login" className="text-blue-800 hover:underline">Log in</Link>
+          
+              Already have an account? <Link to="/form" className="text-blue-800 hover:underline">Log in</Link>
             </p>
           </form>
         </div>
