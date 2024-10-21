@@ -15,12 +15,15 @@ const Form = () => {
   useEffect(() => {
     const checkUserSession = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/check-session", {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          "http://localhost:5000/api/check-session",
+          {
+            withCredentials: true,
+          }
+        );
         if (response.data.loggedIn) {
           // Redirect if the user is already logged in
-          navigate("/FormLayout");
+          navigate("/ProfilePage");
         }
       } catch (error) {
         console.error("Session check failed", error);
@@ -34,7 +37,7 @@ const Form = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/login",
+        "https://amsol-api.onrender.com/api/login",
         { email, password },
         { withCredentials: true }
       );
@@ -47,7 +50,7 @@ const Form = () => {
 
       // Redirect the user after successful login
       setTimeout(() => {
-        navigate("/FormLayout");
+        navigate("/ProfilePage");
       }, 1000);
     } catch (error) {
       if (error.response && error.response.data.message) {
@@ -90,7 +93,7 @@ const Form = () => {
                     value={email}
                     placeholder="Enter email"
                     onChange={(e) => setEmail(e.target.value)}
-                    className="ml-2 w-full p-1 rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
+                    className="ml-2 w-full rounded text-gray-900 border border-gray-300 focus:border-blue-500 p-2"
                     required
                   />
                 </div>
@@ -115,13 +118,19 @@ const Form = () => {
                     Log in
                   </button>
                 </div>
-                <Link className="pt-5 underline text-blue-700" to="/forgot-password">
+                <Link
+                  className="pt-5 underline text-blue-700"
+                  to="/forgot-password"
+                >
                   Forgot Password?
                 </Link>
               </form>
               <p className="text-sm font-bold mt-4 text-white">
                 New to AMSOL?{" "}
-                <Link className="text-blue-700 hover:underline" to="/signupform">
+                <Link
+                  className="text-blue-700 hover:underline"
+                  to="/signupform"
+                >
                   Create Account
                 </Link>
               </p>

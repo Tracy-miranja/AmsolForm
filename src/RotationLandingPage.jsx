@@ -16,13 +16,13 @@ import { FaTimes } from "react-icons/fa";
 const RotationPandingPage = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [hoveredSection, setHoveredSection] = useState(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
     <div
-      className={`flex flex-col h-[100vh] lg:overflow-auto  ${
+      className={`flex flex-col h-[100vh] lg:overflow-hidden  ${
         isHovered
           ? "bg-gradient-to-r from-[#25b2e6] to-[#0A599E] text-white"
           : "bg-white"
@@ -35,95 +35,99 @@ const RotationPandingPage = () => {
         </h1>
       </div>
       <div className="w-[100%] h-[50px] flex justify-around lg:items-center text-blue-400 gap-5 z-10">
-  {/* Navbar Section */}
-  <div className="w-full flex justify-around items-center p-3 pb-0">
-    {/* Logo */}
-    <div className="pl-2">
-      <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
-    </div>
+        {/* Navbar Section */}
+        <div className="w-full flex justify-around items-center p-3 pb-0">
+          {/* Logo */}
+          <div className="pl-2">
+            <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
+          </div>
 
-    {/* Toggle Button for Small Screens */}
-    <button
-      onClick={toggleMenu}
-      className="md:hidden text-2xl focus:outline-none"
-    >
-      {isMenuOpen ? <FaTimes /> : <FaBars />}
-    </button>
+          {/* Toggle Button for Small Screens */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden text-2xl focus:outline-none"
+          >
+            {isMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
 
-    {/* Desktop Menu */}
-    <div
-      className={`hidden md:flex flex-row items-center gap-5 ${
-        hoveredSection ? "text-white" : "text-[#0A599E]"
-      }`}
-    >
-      <Link to="/" className="hover:text-white flex items-center gap-2">
-        <FaHome /> Home
-      </Link>
-      <Link
-        to="/form"
-        className={`rounded-full ${
-          hoveredSection ? "text-white" : "text-[#0A599E]"
-        } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-      >
-        About
-      </Link>
-      <Link
-        to="/signupform"
-        className={`rounded-full ${
-          hoveredSection ? "text-white" : "text-[#0A599E]"
-        } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-      >
-        Jobs
-      </Link>
-      <Link
-        to="/signupform"
-        className={`rounded-full ${
-          hoveredSection ? "text-white" : "text-[#0A599E]"
-        } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-      >
-        Career
-      </Link>
-    </div>
-  </div>
+          {/* Desktop Menu */}
+          <div
+            className={`hidden md:flex flex-row items-center gap-5 ${
+              hoveredSection ? "text-white" : "text-[#0A599E]"
+            }`}
+          >
+            <Link to="/" className="hover:text-white flex items-center gap-2">
+              <FaHome /> Home
+            </Link>
+            <Link
+              to="/form"
+              className={`rounded-full ${
+                hoveredSection ? "text-white" : "text-[#0A599E]"
+              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+            >
+              About
+            </Link>
+            <Link
+              to="/signupform"
+              className={`rounded-full ${
+                hoveredSection ? "text-white" : "text-[#0A599E]"
+              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+            >
+              Jobs
+            </Link>
+            <Link
+              to="/signupform"
+              className={`rounded-full ${
+                hoveredSection ? "text-white" : "text-[#0A599E]"
+              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+            >
+              Career
+            </Link>
+          </div>
+        </div>
 
-  {/* Mobile Menu */}
-  <div
-    className={`fixed top-0 left-0 w-full h-full bg-white transition-transform duration-300 ${
-      isMenuOpen ? "transform translate-x-0" : "transform -translate-x-full"
-    } md:hidden z-50`}
-  >
-    <div className="p-4 flex justify-between items-start">
-      <h2 className="text-lg font-bold">Menu</h2>
-      <button onClick={toggleMenu} className="text-2xl focus:outline-none">
-        <FaTimes />
-      </button>
-    </div>
-    <div className="p-4 space-y-4">
-      <Link to="/" className="flex items-center gap-2 text-[#0A599E]">
-        <FaHome /> Home
-      </Link>
-      <Link
-        to="/form"
-        className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
-      >
-        About
-      </Link>
-      <Link
-        to="/signupform"
-        className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
-      >
-        Jobs
-      </Link>
-      <Link
-        to="/signupform"
-        className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
-      >
-        Career
-      </Link>
-    </div>
-  </div>
-</div>
-
+        {/* Mobile Menu */}
+        <div
+          className={`fixed top-0 left-0 w-full h-full bg-white transition-transform duration-300 ${
+            isMenuOpen
+              ? "transform translate-x-0"
+              : "transform -translate-x-full"
+          } md:hidden z-50`}
+        >
+          <div className="p-4 flex justify-between items-start">
+            <h2 className="text-lg font-bold">Menu</h2>
+            <button
+              onClick={toggleMenu}
+              className="text-2xl focus:outline-none"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          <div className="p-4 space-y-4">
+            <Link to="/" className="flex items-center gap-2 text-[#0A599E]">
+              <FaHome /> Home
+            </Link>
+            <Link
+              to="/form"
+              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+            >
+              About
+            </Link>
+            <Link
+              to="/signupform"
+              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+            >
+              Jobs
+            </Link>
+            <Link
+              to="/signupform"
+              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+            >
+              Career
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <div className="flex flex-col  w-[100%] h-[180vh] gap-10 md:w-full md:flex-row lg:gap-0">
         <div className="flex w-[80%] h-[60vh] md:w-[60%] md:h-[50vh] lg:w-[60%] relative ">
@@ -134,17 +138,16 @@ const RotationPandingPage = () => {
             }`}
             alt="vacancy"
           />
-         <img
-  src={vacancy}
-  className="w-full h-auto md:w-[100%] md:mt-[19px] object-cover absolute md:-mt-[55px] lg:-mt-[2px] lg:w-[70%]"
-  alt="vacancy"
-/>
-
+          <img
+            src={vacancy}
+            className="w-full h-auto md:w-[100%]  object-cover absolute md:-mt-[55px] lg:-mt-[2px] lg:w-[70%]"
+            alt="vacancy"
+          />
 
           <h1 className="absolute mt-[44%] w-[100%] ml-[21%] text-4xl  md:ml-[22%] md:mt-[40%]  lg:ml-[20%] lg:mt-[30%] flex flex-col font-extrabold md:text-5xl text-gray-100 ">
             We’re <br />
             AMSOL
-            <span className="text-black text-xl w-[100%] font-normal mt-[38%] md:mt-[1%] -ml-[12%] md:-ml-[1%] md:text-1xl w-[100%] md:text-white lg:ml-[0%] lg:mt-[1%]">
+            <span className="text-black text-xl font-normal mt-[38%] md:mt-[1%] -ml-[12%] md:-ml-[1%] md:text-1xl w-[100%] md:text-white lg:ml-[0%] lg:mt-[1%]">
               <br />
               The Staffing & HR Solutions
               <br /> specialists
@@ -203,7 +206,7 @@ const RotationPandingPage = () => {
             </div>
           </div>
           <div className="p-5">
-          <div className="flex  items-center justify-center w-[80%] h-[2px] bg-[#0A599E] lg:w-[50%] "></div>
+            <div className="flex  items-center justify-center w-[80%] h-[2px] bg-[#0A599E] lg:w-[50%] "></div>
           </div>
           {/* Sign up section */}
           <div
