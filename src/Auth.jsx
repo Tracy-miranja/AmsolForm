@@ -63,7 +63,7 @@ const Auth = ({ setIsLoggedIn, onSuccess, onError }) => {
 
         setIsLoggedIn(true);
         onSuccess();
-        navigate("/update-profile");
+        navigate("/update-profile"); // Navigate to profile update after registration
       } else {
         // Display error messages based on backend response
         const errorMessages = data.errors

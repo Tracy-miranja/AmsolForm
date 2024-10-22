@@ -18,20 +18,19 @@ const ProfilePage = () => {
     phone: "",
     email: "",
     summary: "",
-    skills: [], // Initialize as an empty array
-    workExperience: [], // Initialize as an empty array
-    education: [], // Initialize as an empty array
-    certifications: [], // Initialize as an empty array
-    hobbies: [], // Initialize as an empty array
-    references: "", // Initialize as an empty string
+    skills: [],
+    workExperience: [],
+    education: [],
+    certifications: [],
+    hobbies: [],
+    references: "",
   });
   const [resumeFile, setResumeFile] = useState(null);
-  const [profilePicFile, setProfilePicFile] = useState(null); // New state for profile picture
+  const [profilePicFile, setProfilePicFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(0); // Track the active tab
+  const [selectedTab, setSelectedTab] = useState(0);
   const navigate = useNavigate();
 
-  // Fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -49,7 +48,6 @@ const ProfilePage = () => {
     fetchUserData();
   }, [userId, token]);
 
-  // Handle CV upload and proceed to the next tab
   const handleCVUpload = async (file) => {
     if (!file) return;
 
@@ -69,7 +67,7 @@ const ProfilePage = () => {
         }
       );
       toast.success("CV uploaded successfully");
-      setSelectedTab(1); // Move to the 'Profile Details' tab
+      setSelectedTab(1);
     } catch (error) {
       toast.error(error.response?.data?.message || "CV upload failed");
     } finally {
@@ -77,7 +75,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Handle profile picture upload
   const handleProfilePictureUpload = async (file) => {
     if (!file) return;
 
@@ -106,11 +103,9 @@ const ProfilePage = () => {
     }
   };
 
-  // Handle form submission for profile update
   const handleProfileUpdate = async () => {
     const { firstName, lastName, phone, address, email, summary } = userData;
 
-    // Ensure required fields are filled out
     if (!phone || !summary) {
       toast.error("Please fill out all required fields.");
       return;
@@ -145,18 +140,28 @@ const ProfilePage = () => {
         }
       );
       toast.success("Profile updated successfully!");
-      setSelectedTab(2); // Move to the 'Upload Profile Picture' tab
+      setSelectedTab(2);
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center items-center py-12">
       <Toaster />
-      <div className="max-w-xl w-full space-y-8">
-        <h2 className="text-2xl font-semibold text-center">Update Profile</h2>
+      <div className="max-w-4xl w-full space-y-8">
+        {/* Salutation */}
+        <h2 className="text-2xl font-semibold text-center text-gray-700">
+          Welcome, {userData.username}!
+        </h2>
 
+        {/* Heading */}
+        <h2 className="text-xl text-gray-700 text-center ">
+          Complete Your Profile
+        </h2>
+        {/* Paragraph */}
+        <p className="text-gray-600 text-center">
+          Please follow the steps below to update your profile.
+        </p>
         <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
           <Tab.List className="flex space-x-1 bg-blue-900/20 p-1 rounded-md">
             <Tab
@@ -198,7 +203,6 @@ const ProfilePage = () => {
           </Tab.List>
 
           <Tab.Panels className="mt-2">
-            {/* Tab for CV Upload */}
             <Tab.Panel>
               <div className="flex justify-center items-center border-dashed border-2 border-gray-300 rounded-md p-4 cursor-pointer">
                 <label
@@ -217,59 +221,69 @@ const ProfilePage = () => {
                   onChange={(e) => {
                     const file = e.target.files[0];
                     setResumeFile(file);
-                    handleCVUpload(file); // Upload CV on file selection
+                    handleCVUpload(file);
                   }}
                 />
               </div>
             </Tab.Panel>
 
-            {/* Tab for Editing Profile Details */}
             <Tab.Panel>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-700">First Name</label>
-                  <input
-                    type="text"
-                    value={userData.firstName}
-                    onChange={(e) =>
-                      setUserData({ ...userData, firstName: e.target.value })
-                    }
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
+                {/* Row for First and Last Name */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700">First Name</label>
+                    <input
+                      type="text"
+                      value={userData.firstName}
+                      onChange={(e) =>
+                        setUserData({ ...userData, firstName: e.target.value })
+                      }
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700">Last Name</label>
+                    <input
+                      type="text"
+                      value={userData.lastName}
+                      onChange={(e) =>
+                        setUserData({ ...userData, lastName: e.target.value })
+                      }
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-gray-700">Last Name</label>
-                  <input
-                    type="text"
-                    value={userData.lastName}
-                    onChange={(e) =>
-                      setUserData({ ...userData, lastName: e.target.value })
-                    }
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
+
+                {/* Row for Phone and Address */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700">Phone</label>
+                    <input
+                      type="tel"
+                      value={userData.phone}
+                      onChange={(e) =>
+                        setUserData({ ...userData, phone: e.target.value })
+                      }
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700">Address</label>
+                    <input
+                      type="text"
+                      value={userData.address}
+                      onChange={(e) =>
+                        setUserData({ ...userData, address: e.target.value })
+                      }
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-gray-700">Phone</label>
-                  <input
-                    type="tel"
-                    value={userData.phone}
-                    onChange={(e) =>
-                      setUserData({ ...userData, phone: e.target.value })
-                    }
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700">Address</label>
-                  <input
-                    type="text"
-                    value={userData.address}
-                    onChange={(e) =>
-                      setUserData({ ...userData, address: e.target.value })
-                    }
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
-                </div>
+
+                {/* Email */}
                 <div>
                   <label className="block text-gray-700">Email</label>
                   <input
@@ -282,82 +296,126 @@ const ProfilePage = () => {
                     disabled
                   />
                 </div>
+
+                {/* Bio */}
                 <div>
-                  <label className="block text-gray-700">Summary</label>
+                  <label className="block text-gray-700">Bio</label>
                   <textarea
                     value={userData.summary}
                     onChange={(e) =>
                       setUserData({ ...userData, summary: e.target.value })
                     }
                     className="w-full mt-1 border rounded-lg p-2"
-                    rows="3"
-                  />
-                </div>
-                {/* Skills Section */}
-                <div>
-                  <label className="block text-gray-700">Skills</label>
-                  <input
-                    type="text"
-                    value={userData.skills ? userData.skills.join(", ") : ""}
-                    onChange={(e) =>
-                      setUserData({
-                        ...userData,
-                        skills: e.target.value.split(", "),
-                      })
-                    }
-                    className="w-full mt-1 border rounded-lg p-2"
-                    placeholder="e.g. JavaScript, React, Node.js"
                   />
                 </div>
 
-                {/* Hobbies Section */}
+                {/* Skills and Hobbies */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700">Skills</label>
+                    <input
+                      type="text"
+                      value={userData.skills}
+                      onChange={(e) =>
+                        setUserData({ ...userData, skills: e.target.value })
+                      }
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700">Hobbies</label>
+                    <input
+                      type="text"
+                      value={userData.hobbies}
+                      onChange={(e) =>
+                        setUserData({ ...userData, hobbies: e.target.value })
+                      }
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
+                </div>
+
+                {/* Work Experience, Education, Certifications, and References */}
                 <div>
-                  <label className="block text-gray-700">Hobbies</label>
-                  <input
-                    type="text"
-                    value={userData.hobbies ? userData.hobbies.join(", ") : ""}
+                  <label className="block text-gray-700">Work Experience</label>
+                  <textarea
+                    value={userData.workExperience}
                     onChange={(e) =>
                       setUserData({
                         ...userData,
-                        hobbies: e.target.value.split(", "),
+                        workExperience: e.target.value,
                       })
                     }
                     className="w-full mt-1 border rounded-lg p-2"
-                    placeholder="e.g. Reading, Traveling, Cooking"
                   />
                 </div>
 
-                {/* Add buttons for submitting the profile update */}
+                <div>
+                  <label className="block text-gray-700">Education</label>
+                  <textarea
+                    value={userData.education}
+                    onChange={(e) =>
+                      setUserData({ ...userData, education: e.target.value })
+                    }
+                    className="w-full mt-1 border rounded-lg p-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700">Certifications</label>
+                  <textarea
+                    value={userData.certifications}
+                    onChange={(e) =>
+                      setUserData({
+                        ...userData,
+                        certifications: e.target.value,
+                      })
+                    }
+                    className="w-full mt-1 border rounded-lg p-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700">References</label>
+                  <textarea
+                    value={userData.references}
+                    onChange={(e) =>
+                      setUserData({ ...userData, references: e.target.value })
+                    }
+                    className="w-full mt-1 border rounded-lg p-2"
+                  />
+                </div>
+
+                {/* Update Button */}
                 <button
                   onClick={handleProfileUpdate}
-                  className="mt-4 w-full bg-blue-500 text-white p-2 rounded-lg"
-                  disabled={isUploading}
+                  className="bg-blue-600 text-white py-2 px-4 rounded-lg"
                 >
                   {isUploading ? "Updating..." : "Update Profile"}
                 </button>
               </div>
             </Tab.Panel>
 
-            {/* Tab for Uploading Profile Picture */}
             <Tab.Panel>
               <div className="flex justify-center items-center border-dashed border-2 border-gray-300 rounded-md p-4 cursor-pointer">
                 <label
-                  htmlFor="profile-picture-upload"
+                  htmlFor="profile-pic-upload"
                   className="text-gray-500 cursor-pointer"
                 >
                   {profilePicFile
                     ? `Selected File: ${profilePicFile.name}`
-                    : "Drag and drop a profile picture or click to upload"}
+                    : "Drag and drop profile picture or click to upload"}
                 </label>
                 <input
-                  id="profile-picture-upload"
+                  id="profile-pic-upload"
                   type="file"
-                  accept="image/*"
+                  accept=".jpg,.jpeg,.png"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files[0];
                     setProfilePicFile(file);
-                    handleProfilePictureUpload(file); // Upload profile picture on file selection
+                    handleProfilePictureUpload(file);
                   }}
                 />
               </div>
