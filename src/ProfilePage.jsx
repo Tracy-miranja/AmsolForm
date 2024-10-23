@@ -94,6 +94,7 @@ const ProfilePage = () => {
         }
       );
       toast.success("Profile picture uploaded successfully");
+      navigate("/profile-details", { state: { userData } });
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Profile picture upload failed"

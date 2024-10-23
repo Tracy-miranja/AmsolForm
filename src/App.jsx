@@ -13,6 +13,7 @@ import UpdateCV from "./cvupdate";
 import HandleLogout from "./logout";
 import ProfilePage from "./ProfilePage";
 import { UserProvider } from "./Context/UserContext"; // Adjust the import according to your file structure
+import ProfileDetailsPage from "./ProfileDetailsPage";
 
 // PrivateRoute component to protect routes
 const PrivateRoute = ({ element, isAuthenticated, ...rest }) => {
@@ -97,6 +98,7 @@ const App = () => {
                 <PrivateRoute isAuthenticated={isLoggedIn} element={<Home />} />
               }
             />
+           <Route path="/profile-details" element={<ProfileDetailsPage />} />
           </Routes>
         </Router>
       </>
