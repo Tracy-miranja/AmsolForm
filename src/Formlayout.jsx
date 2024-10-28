@@ -161,8 +161,8 @@ const FormLayout = () => {
   return (
     <>
       <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5 overflow-auto">
-        <div className="bg-white rounded-full w-[200px] flex items-center justify-center">
-          <img src={logo} alt="hrOutsourcing" className="w-[110px] p-1" />
+        <div className="bg-white rounded-full sm:w-[100px] md:w-[200px] flex items-center justify-center">
+          <img src={logo} alt="hrOutsourcing" className="sm:w-[50px] md:w-[110px] p-1" />
         </div>
         <div className="flex gap-3">
           <div className="flex flex-row items-center gap-5">
@@ -171,21 +171,22 @@ const FormLayout = () => {
               Home
             </Link>
           </div>
-          <div>
-            <Link
-              to="/cvupdate"
-              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
-            >
-              <span>Update CV</span> <img src={arrow} className="w-5 h-5" />
-            </Link>
-          </div>
+          <div className="hidden md:block">
+  <Link
+    to="/cvupdate"
+    className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
+  >
+    <span>Update CV</span> 
+    <img src={arrow} className="w-5 h-5" />
+  </Link>
+</div>
           <div>
             <HandleLogout />
           </div>
         </div>
       </div>
       <div className="flex justify-center">
-        <div className="w-[70%] h-screen flex flex-col items-center p-2 mt-10 border border-b-6 shadow-lg">
+        <div className="sm:w-[98%] md:w-[70%] h-screen flex flex-col items-center p-2 mt-10 border border-b-6 shadow-lg">
           {showPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -203,10 +204,11 @@ const FormLayout = () => {
             </div>
           )}
           {/* Row Links */}
-          <div className="w-[100%] h-fit shadow-lg rounded-lg flex flex-row">
+          
+          <div className="w-[100%] h-fit shadow-lg rounded-lg flex flex:col md:flex-row">
             <div
               onClick={() => navigateToSection("personalDetails")}
-              className={`cursor-pointer p-1 border-b-2 w-[30%] ${
+              className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[30%] ${
                 activeSection === "personalDetails"
                   ? "bg-blue-500 text-white"
                   : ""
@@ -216,7 +218,7 @@ const FormLayout = () => {
             </div>
             <div
               onClick={handleNextButtonClick}
-              className={`cursor-pointer p-1 border-b-2 w-[30%] ${
+              className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[100%] w-[30%] ${
                 activeSection === "institutionDetails"
                   ? "bg-blue-500 text-white"
                   : ""
@@ -239,8 +241,8 @@ const FormLayout = () => {
             <div className="w-full bg-white p-6 shadow-lg rounded-lg">
               <form action="/Api/users" method="POST">
                 {/* Personal Details Form Fields */}
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex flex-col md:flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     First Name <span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -251,8 +253,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Second Name<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -263,8 +265,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Last Name<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -275,8 +277,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     ID Number<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -287,8 +289,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     WhatsApp No.<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -299,8 +301,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Phone Number<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -311,8 +313,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Email<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -323,8 +325,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col sm:flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Age<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -335,8 +337,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Nationality<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -346,8 +348,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Location<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -360,7 +362,7 @@ const FormLayout = () => {
                 </div>
                 <button
                   type="button"
-                  className="w-[10%] ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                  className=" sm:w-[40%]  md:w-[30%] md:ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                   onClick={handleNextButtonClick}
                 >
                   Next
@@ -373,10 +375,10 @@ const FormLayout = () => {
 
           {activeSection === "institutionDetails" && (
             <div className="w-full bg-white p-6 shadow-lg rounded-lg">
-              <form action="/Api/users" method="POST">
+              <form action="/api/users" method="POST">
                 {/* Institutional Form Fields */}
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex flex-col flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Specialization<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -387,8 +389,8 @@ const FormLayout = () => {
                     className="w-full p-2 border rounded"
                   />
                 </div>
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  sm:flex-col md:flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Academic level<span className="text-red-500">*</span>:
                   </label>
                   <select
@@ -413,11 +415,15 @@ const FormLayout = () => {
                 </div>
                 {/* //workexperience part */}
 
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  flex-row">
+                 
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     WorkExperience<span className="text-red-500">*</span>:
                   </label>
+                  
                   <div>
+                  <div className=" ">
+                    
                     <input
                       type="text"
                       placeholder="Company 1"
@@ -488,10 +494,11 @@ const FormLayout = () => {
                       className="w-full p-2 rounded-lg border border-gray-300 text-black"
                     />
                   </div>
+                  </div>
                 </div>
 
-                <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                <div className="mb-4 flex  sm:flex-col md:flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Salary Information<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -503,7 +510,7 @@ const FormLayout = () => {
                 </div>
                 <button
                   type="button"
-                  className="w-[10%] ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                  className="sm:w-[40%]  md:w-[30%] md:ml-40 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                   onClick={() => navigateToSection("uploadApply")}
                 >
                   Next
@@ -519,7 +526,7 @@ const FormLayout = () => {
               <form onSubmit={handleSubmit}>
                 {/* CV Upload Field */}
                 <div className="mb-4 flex flex-row">
-                  <label className="block text-black w-[15%] font-semibold">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Upload CV<span className="text-red-500">*</span>:
                   </label>
                   <input
