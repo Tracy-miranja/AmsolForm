@@ -14,6 +14,11 @@ import HandleLogout from "./logout";
 import ProfilePage from "./ProfilePage";
 import { UserProvider } from "./Context/UserContext"; // Adjust the import according to your file structure
 import ProfileDetailsPage from "./ProfileDetailsPage";
+import FormLayout from "./Formlayout";
+import ForgetPassword from "./ForgetPassword";
+import ResetPassword from "./ResetPassword";
+import ForgetPrompt from "./forgetprompt";
+
 
 // PrivateRoute component to protect routes
 const PrivateRoute = ({ element, isAuthenticated, ...rest }) => {
@@ -99,6 +104,10 @@ const App = () => {
               }
             />
            <Route path="/profile-details" element={<ProfileDetailsPage />} />
+           <Route path="/Formlayout" element={<FormLayout />} />
+           <Route path="/forgetPassword" element={<ForgetPassword />}/>
+           <Route path="/reset-password/:token" element={<ResetPassword />} />
+           <Route path="/forgetPrompt" element={<ForgetPrompt />} />
           </Routes>
         </Router>
       </>
