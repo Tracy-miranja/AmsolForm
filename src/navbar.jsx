@@ -60,7 +60,7 @@ const Navbar = () => {
             About
           </Link>
           <Link
-            to="/signupform"
+            to="https://www.amsol.africa/about-amsol/"
             className={`rounded-full ${
               hoveredSection ? "text-white" : "text-[#0A599E]"
             } hover:text-white hover:-mt-2 p-1 pl-2 pr-2 hover:bg-gray-400 font-semibold`}
