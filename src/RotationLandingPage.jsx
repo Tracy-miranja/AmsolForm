@@ -30,8 +30,7 @@ const RotationPandingPage = () => {
     >
       <div className="w-[100%] flex  text-center md:h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E] md:justify-center  p-2 lg:items-center lg:justify-center">
         <h1 className="text-white font-bold lg:items-center">
-          Empowering Organizations To Achieve Emiratization With Our Latest
-          Guidebook
+          Empowering Your Next Career Move – Start Your Journey Today
         </h1>
       </div>
       <div className="w-[100%] h-[50px] flex justify-around lg:items-center text-blue-400 gap-5 z-10">
@@ -60,7 +59,7 @@ const RotationPandingPage = () => {
               <FaHome /> Home
             </Link>
             <Link
-              to="/auth"
+              to="https://www.amsol.africa/about-amsol"
               className={`rounded-full ${
                 hoveredSection ? "text-white" : "text-[#0A599E]"
               } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
@@ -68,7 +67,7 @@ const RotationPandingPage = () => {
               About
             </Link>
             <Link
-              to="/auth"
+              to="https://www.amsol.africa/job-vacancies/"
               className={`rounded-full ${
                 hoveredSection ? "text-white" : "text-[#0A599E]"
               } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
@@ -229,8 +228,8 @@ const RotationPandingPage = () => {
               <br /> haven't signed Up?
             </h1>
             <p>
-              See the latest vacancies and <br />
-              how we can supercharge your search
+              Sign up, complete your application,
+              <br /> and secure an interview invitation.
             </p>
             <Link
               to="/auth"

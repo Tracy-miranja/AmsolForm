@@ -58,12 +58,10 @@ const Auth = ({ setIsLoggedIn, onSuccess, onError }) => {
     }
 
     const url = isLogin
-      ? "http://localhost:5000/api/login"
-      : "http://localhost:5000/api/register";
+      ? "https://amsol-api.onrender.com/api/login"
+      : "https://amsol-api.onrender.com/api/register";
 
-    const body = isLogin
-      ? { email, password }
-      : { username, email, password };
+    const body = isLogin ? { email, password } : { username, email, password };
 
     try {
       const response = await fetch(url, {
@@ -218,7 +216,7 @@ const Auth = ({ setIsLoggedIn, onSuccess, onError }) => {
           >
             {isLogin ? "Login" : "Register"}
           </button>
-          
+
           {isLogin && (
             <Link to="/forgetPassword" className="text-blue-500">
               Forget Password?
