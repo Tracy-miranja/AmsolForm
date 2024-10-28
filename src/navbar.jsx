@@ -21,7 +21,7 @@ const Navbar = () => {
       {/* Top Banner */}
       <div className="w-full h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E] flex items-center justify-center p-2">
         <h1 className="text-white font-bold">
-          Empowering Organizations To Achieve Emiratization With Our Latest Guidebook
+        Empowering Your Next Career Move – Start Your Journey Today
         </h1>
       </div>
 
