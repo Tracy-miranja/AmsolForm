@@ -30,8 +30,7 @@ const RotationPandingPage = () => {
     >
       <div className="w-[100%] flex  text-center md:h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E] md:justify-center  p-2 lg:items-center lg:justify-center">
         <h1 className="text-white font-bold lg:items-center">
-          Empowering Organizations To Achieve Emiratization With Our Latest
-          Guidebook
+        Empowering Your Next Career Move – Start Your Journey Today
         </h1>
       </div>
       <div className="w-[100%] h-[50px] flex justify-around lg:items-center text-blue-400 gap-5 z-10">
@@ -68,7 +67,7 @@ const RotationPandingPage = () => {
               About
             </Link>
             <Link
-              to="/auth"
+              to="https://www.amsol.africa/job-vacancies"
               className={`rounded-full ${
                 hoveredSection ? "text-white" : "text-[#0A599E]"
               } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
@@ -76,12 +75,12 @@ const RotationPandingPage = () => {
               Jobs
             </Link>
             <Link
-              to="/auth"
+              to="/cv-update"
               className={`rounded-full ${
                 hoveredSection ? "text-white" : "text-[#0A599E]"
-              } hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+              } hover:text-blue  border border-blue-900 p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
             >
-              Career
+              cv-update
             </Link>
           </div>
         </div>
@@ -108,22 +107,24 @@ const RotationPandingPage = () => {
               <FaHome /> Home
             </Link>
             <Link
-              to="/form"
+              to="https://www.amsol.africa/about-amsol"
               className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
             >
               About
             </Link>
             <Link
-              to="/auth"
+              to="https://www.amsol.africa/job-vacancies/"
               className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
             >
               Jobs
             </Link>
             <Link
-              to="/auth"
-              className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+              to="/cv-update"
+              className={`rounded-full ${
+                hoveredSection ? "text-white" : "text-[#0A599E]"
+              } hover:text-blue  border border-blue-900 p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
             >
-              Career
+              cv-update
             </Link>
           </div>
         </div>
@@ -229,11 +230,10 @@ const RotationPandingPage = () => {
               <br /> haven't signed Up?
             </h1>
             <p>
-              See the latest vacancies and <br />
-              how we can supercharge your search
-            </p>
+  Sign up now to secure your <br/>interview opportunity and boost your career!
+</p>
             <Link
-              to="/auth"
+              to="/register"
               className="flex gap-2 items-center justify-center bg-white rounded-full text-[#0A599E] text-center border border-blue-400  p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-[120px] text-center rotate-hover z-10"
             >
               <span>Sign Up</span> <img src={arrow} className="w-5 h-5" />

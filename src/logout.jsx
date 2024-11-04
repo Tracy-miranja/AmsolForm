@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Cookies from "js-cookie"; // Make sure to install js-cookie
+import Cookies from "js-cookie"; // Ensure js-cookie is installed
 import { toast } from "react-hot-toast"; // For notifications
 
 const HandleLogout = () => {
@@ -8,22 +8,29 @@ const HandleLogout = () => {
 
   const handleLogoutClick = async () => {
     try {
+      // Log current cookies for debugging
+      console.log("Current cookies before logout:", Cookies.get());
+  
       // Call the logout API
-      await axios.post("http://localhost:5000/logout", { withCredentials: true });
+      await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+  
+     Cookies.remove("token");
+Cookies.remove("authToken");
+Cookies.remove("userId");
 
-      // Clear cookies manually if needed (depends on your backend implementation)
-      Cookies.remove("authToken"); // Remove token from cookies
-      Cookies.remove("userId"); // Remove user ID from cookies (if stored)
-
-      // Redirect to the login page or another specified page
-      navigate('/'); // Adjust this path as needed
-      toast.success("Logged out successfully!"); // Show success message
+  
+      // Log cookies after logout attempt
+      console.log("Current cookies after logout:", Cookies.get());
+  
+      // Redirect and show toast
+      navigate('/'); 
+      toast.success("Logged out successfully!");
     } catch (error) {
       console.error("Logout failed:", error);
-      toast.error("Logout failed. Please try again."); // Show error message
+      toast.error("Logout failed. Please try again.");
     }
   };
-
+  
   return (
     <button 
       onClick={handleLogoutClick} 

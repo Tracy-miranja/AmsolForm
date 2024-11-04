@@ -1,15 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaCamera, FaEdit, FaSave } from 'react-icons/fa';
 
 const ProfileDetailsPage = () => {
   const { state } = useLocation();
-  const { userData } = state || {};
+  const { userId } = state || {}; // Assuming you pass userId in state for fetching data
 
   // Initialize the profile picture and editing state
-  const [profilePicture, setProfilePicture] = useState(userData.profilePicture || 'default-profile.png');
+  const [profilePicture, setProfilePicture] = useState('default-profile.png');
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...userData });
+  const [formData, setFormData] = useState({}); // Initialize empty object
+
+  // Function to fetch user data from the backend
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(`/api/users/${userId}`); // Adjust the API endpoint accordingly
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const data = await response.json();
+      setFormData(data);
+      setProfilePicture(data.profilePicture || 'default-profile.png'); // Update profile picture if available
+    } catch (error) {
+      console.error(error);
+      // Handle the error appropriately in your UI
+    }
+  };
+
+  // Fetch user data when the component mounts
+  useEffect(() => {
+    fetchUserData();
+  }, [userId]); // Dependency array includes userId to refetch data if it changes
 
   // Handle profile picture change
   const handlePictureChange = (event) => {
@@ -30,9 +51,25 @@ const ProfileDetailsPage = () => {
 
   // Save changes to the backend
   const handleSave = async () => {
-    console.log('Updated data:', formData);
-    setIsEditing(false);
-    // Make your API call here to save formData
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT', // or 'PATCH' depending on your API design
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save user data');
+      }
+      setIsEditing(false);
+      // Optionally, you can re-fetch the user data to get the latest state from the server
+      fetchUserData();
+    } catch (error) {
+      console.error(error);
+      // Handle the error appropriately in your UI
+    }
   };
 
   // Handle input changes
@@ -83,7 +120,7 @@ const ProfileDetailsPage = () => {
               <div key={key} className="flex justify-between items-center">
                 <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>
                 {isEditing ? (
-                  <input
+                  <input 
                     type="text"
                     name={key}
                     value={value}

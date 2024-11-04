@@ -28,6 +28,7 @@ body {
   /* display: flex; */
   min-width: 100%;
   min-height: 100vh;
+  background-color: #f6f6fa;
   /* align-items: center; */
   
 }
@@ -175,3 +176,19 @@ body {
 .animate-rotateOut {
   animation: rotateOut 4s forwards;
 }
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-left-color: #ffffff;
+  border-radius: 50%;
+  width: 1em;
+  height: 1em;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+

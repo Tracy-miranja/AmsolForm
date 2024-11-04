@@ -5,8 +5,10 @@ import { FaHome } from "react-icons/fa";
 import axios from "axios";
 import arrow from "./assets/Vector1.svg";
 import HandleLogout from "./logout";
+import { useNavigate } from "react-router-dom";
 
 const FormLayout = () => {
+  const navigate=useNavigate()
   const [activeSection, setActiveSection] = useState("personalDetails");
   const [firstName, setFirstName] = useState("");
   const [secondName, setSecondName] = useState("");
@@ -19,6 +21,7 @@ const FormLayout = () => {
   const [nationality, setNationality] = useState("");
   const [location, setLocation] = useState("");
   const [specialization, setSpecialization] = useState("");
+  const [positionapplied, setPositionapplied]=useState("")
   const [academicLevel, setAcademicLevel] = useState("");
   const [company1, setCompany1] = useState("");
   const [company2, setCompany2] = useState("");
@@ -64,6 +67,7 @@ const FormLayout = () => {
       formData.append("nationality", nationality);
       formData.append("location", location);
       formData.append("specialization", specialization);
+      formData.append("positionapplied", positionapplied)
       formData.append("academicLevel", academicLevel);
 
       // Append work experience fields
@@ -78,7 +82,7 @@ const FormLayout = () => {
       formData.append("duration3", duration3);
 
       formData.append("salaryInfo", salaryInfo);
-      formData.append("cv", cv); // Append CV file
+      formData.append('cv', cv);
 
       const response = await axios.post(
         "http://localhost:5000/api/applications", // Use the correct API endpoint
@@ -91,46 +95,21 @@ const FormLayout = () => {
         }
       );
 
-      setMessage(response.data.message);
-      setError("");
-      setCvSubmitted(true);
-      // Clear form fields
-      setFirstName("");
-      setSecondName("");
-      setLastName("");
-      setIdNumber("");
-      setWhatAppNo("");
-      setPhoneNumber("");
-      setEmail("");
-      setNationality("");
-      setCompany1("");
-      setLocation("");
-      setAcademicLevel("");
-      setCompany1("");
-      setCompany2("");
-      setCompany3("");
-      setSalaryInfo("");
-      setDuration1("");
-      setDuration2("");
-      setDuration3("");
-      setPosition1("");
-      setPosition2("");
-      setPosition3("");
-      setSpecialization("");
-      setAge("");
-      setCv(null);
-      setSpecialization("");
-      setShowPopup(true); // Show success popup
+      // Set success message and show popup
+    setMessage("Form submitted successfully!");
+    setError(""); // Clear previous errors
+    setShowPopup(true);
 
-      // Automatically hide popup after 3 seconds
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
-    } catch (err) {
-      console.error(err); // Log the entire error
-      setError(err.response?.data?.message || "Error submitting form");
-      setMessage("");
-    }
+    // Automatically hide popup after 3 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+      navigate("/profile");
+    }, 3000);
+  } catch (err) {
+    console.error(err); // Log the entire error
+    setError(err.response?.data?.message || "Error submitting form");
+    setMessage("");
+  }
   };
 
   const validateForm = () => {
@@ -160,7 +139,7 @@ const FormLayout = () => {
 
   return (
     <>
-      <div className="w-[100%] h-[50px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5 overflow-auto">
+      <div className="w-[100%] h-[20px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5 overflow-fixed">
         <div className="bg-white rounded-full sm:w-[100px] md:w-[200px] flex items-center justify-center">
           <img src={logo} alt="hrOutsourcing" className="sm:w-[50px] md:w-[110px] p-1" />
         </div>
@@ -171,15 +150,15 @@ const FormLayout = () => {
               Home
             </Link>
           </div>
-          <div className="hidden md:block">
-  <Link
-    to="/cvupdate"
-    className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
-  >
-    <span>Update CV</span> 
-    <img src={arrow} className="w-5 h-5" />
-  </Link>
-</div>
+          {/* <div className="hidden md:block">
+            <Link
+              to="/cvupdate"
+              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
+            >
+              <span>Update CV</span>
+              
+            </Link>
+          </div> */}
           <div>
             <HandleLogout />
           </div>
@@ -194,6 +173,7 @@ const FormLayout = () => {
                   {cvSubmitted
                     ? "Form succesfully submitted!"
                     : "Successfully Registered!"}
+                    
                 </h3>
                 <p className="text-gray-700 mt-2">
                   {cvSubmitted
@@ -204,33 +184,30 @@ const FormLayout = () => {
             </div>
           )}
           {/* Row Links */}
-          
+
           <div className="w-[100%] h-fit shadow-lg rounded-lg flex flex:col md:flex-row">
             <div
               onClick={() => navigateToSection("personalDetails")}
-              className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[30%] ${
-                activeSection === "personalDetails"
+              className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[30%] ${activeSection === "personalDetails"
                   ? "bg-blue-500 text-white"
                   : ""
-              } hover:bg-blue-500 hover:text-white`}
+                } hover:bg-blue-500 hover:text-white`}
             >
               <h2 className="font-bold">1. Personal Details</h2>
             </div>
             <div
               onClick={handleNextButtonClick}
-              className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[100%] w-[30%] ${
-                activeSection === "institutionDetails"
+              className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[100%] w-[30%] ${activeSection === "institutionDetails"
                   ? "bg-blue-500 text-white"
                   : ""
-              } hover:bg-blue-500 hover:text-white`}
+                } hover:bg-blue-500 hover:text-white`}
             >
               <h2 className="font-bold">2. Qualifications Details</h2>
             </div>
             <div
               onClick={handleNextButtonClick}
-              className={`cursor-pointer p-1 w-[30%] ${
-                activeSection === "uploadApply" ? "bg-blue-500 text-white" : ""
-              } hover:bg-blue-500 hover:text-white`}
+              className={`cursor-pointer p-1 w-[30%] ${activeSection === "uploadApply" ? "bg-blue-500 text-white" : ""
+                } hover:bg-blue-500 hover:text-white`}
             >
               <h2 className="font-bold">3. Upload Documents and Apply</h2>
             </div>
@@ -250,10 +227,10 @@ const FormLayout = () => {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col flex-row">
+                <div className="mb-4 flex  flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Second Name<span className="text-red-500">*</span>:
                   </label>
@@ -262,10 +239,10 @@ const FormLayout = () => {
                     value={secondName}
                     onChange={(e) => setSecondName(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col flex-row">
+                <div className="mb-4 flex  flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Last Name<span className="text-red-500">*</span>:
                   </label>
@@ -274,10 +251,10 @@ const FormLayout = () => {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col flex-row">
+                <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     ID Number<span className="text-red-500">*</span>:
                   </label>
@@ -286,10 +263,10 @@ const FormLayout = () => {
                     value={idNumber}
                     onChange={(e) => setIdNumber(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col flex-row">
+                <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     WhatsApp No.<span className="text-red-500">*</span>:
                   </label>
@@ -298,10 +275,10 @@ const FormLayout = () => {
                     value={whatAppNo}
                     onChange={(e) => setWhatAppNo(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col flex-row">
+                <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Phone Number<span className="text-red-500">*</span>:
                   </label>
@@ -310,10 +287,10 @@ const FormLayout = () => {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col flex-row">
+                <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Email<span className="text-red-500">*</span>:
                   </label>
@@ -322,10 +299,10 @@ const FormLayout = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col sm:flex-row">
+                <div className="mb-4 flex sm:flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Age<span className="text-red-500">*</span>:
                   </label>
@@ -334,10 +311,10 @@ const FormLayout = () => {
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  flex-col flex-row">
+                <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Nationality<span className="text-red-500">*</span>:
                   </label>
@@ -345,10 +322,10 @@ const FormLayout = () => {
                     type="text"
                     value={nationality}
                     onChange={(e) => setNationality(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex flex-col flex-row">
+                <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Location<span className="text-red-500">*</span>:
                   </label>
@@ -357,7 +334,7 @@ const FormLayout = () => {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
                 <button
@@ -377,7 +354,7 @@ const FormLayout = () => {
             <div className="w-full bg-white p-6 shadow-lg rounded-lg">
               <form action="/api/users" method="POST">
                 {/* Institutional Form Fields */}
-                <div className="mb-4 flex flex-col flex-row">
+                <div className="mb-4 flex  flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Specialization<span className="text-red-500">*</span>:
                   </label>
@@ -386,10 +363,22 @@ const FormLayout = () => {
                     value={specialization}
                     onChange={(e) => setSpecialization(e.target.value)}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
-                <div className="mb-4 flex  sm:flex-col md:flex-row">
+                <div className="mb-4 flex  flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
+                   Position Applied:<span className="text-red-500">*</span>:
+                  </label>
+                  <input
+                    type="text"
+                    value={positionapplied}
+                    onChange={(e) => setPositionapplied(e.target.value)}
+                    required
+                    className="w-full p-2 border rounded text-black bg-gray-100"
+                  />
+                </div>
+                <div className="mb-4 flex  md:flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Academic level<span className="text-red-500">*</span>:
                   </label>
@@ -397,9 +386,10 @@ const FormLayout = () => {
                     value={academicLevel}
                     onChange={(e) => setAcademicLevel(e.target.value)}
                     required
-                    className="w-full p-2 rounded-lg border border-gray-300 text-black"
+                    className="w-full p-2 rounded-lg border text-black bg-gray-100"
                   >
                     <option value="">Select your qualification</option>
+                    <option value="Master's Degree">Doctorate(PhD)</option>
                     <option value="Master's Degree">Master's Degree</option>
                     <option value="Postgraduate Diploma">
                       Postgraduate Diploma{" "}
@@ -409,6 +399,7 @@ const FormLayout = () => {
                       Associate's Degree
                     </option>
                     <option value="Diploma">Diploma</option>
+                    <option value="Diploma">Professional Certificate</option>
                     <option value="Certificate">Certificate</option>
                     <option value="Degree">others</option>
                   </select>
@@ -416,96 +407,96 @@ const FormLayout = () => {
                 {/* //workexperience part */}
 
                 <div className="mb-4 flex  flex-row">
-                 
+
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     WorkExperience<span className="text-red-500">*</span>:
                   </label>
-                  
-                  <div>
-                  <div className=" ">
-                    
-                    <input
-                      type="text"
-                      placeholder="Company 1"
-                      value={company1}
-                      onChange={(e) => setCompany1(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Position"
-                      value={position1}
-                      onChange={(e) => setPosition1(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Duration"
-                      value={duration1}
-                      onChange={(e) => setDuration1(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                  </div>
 
                   <div>
-                    <input
-                      type="text"
-                      placeholder="Company 2"
-                      value={company2}
-                      onChange={(e) => setCompany2(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Position"
-                      value={position2}
-                      onChange={(e) => setPosition2(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Duration"
-                      value={duration2}
-                      onChange={(e) => setDuration2(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                  </div>
+                    <div className=" ">
 
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Company"
-                      value={company3}
-                      onChange={(e) => setCompany3(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Position"
-                      value={position3}
-                      onChange={(e) => setPosition3(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Duration"
-                      value={duration3}
-                      onChange={(e) => setDuration3(e.target.value)}
-                      className="w-full p-2 rounded-lg border border-gray-300 text-black"
-                    />
-                  </div>
+                      <input
+                        type="text"
+                        placeholder="Company 1"
+                        value={company1}
+                        onChange={(e) => setCompany1(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Position"
+                        value={position1}
+                        onChange={(e) => setPosition1(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Duration"
+                        value={duration1}
+                        onChange={(e) => setDuration1(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                    </div>
+
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Company 2"
+                        value={company2}
+                        onChange={(e) => setCompany2(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Position"
+                        value={position2}
+                        onChange={(e) => setPosition2(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Duration"
+                        value={duration2}
+                        onChange={(e) => setDuration2(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                    </div>
+
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Company"
+                        value={company3}
+                        onChange={(e) => setCompany3(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Position"
+                        value={position3}
+                        onChange={(e) => setPosition3(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Duration"
+                        value={duration3}
+                        onChange={(e) => setDuration3(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mb-4 flex  sm:flex-col md:flex-row">
+                <div className="mb-4 flex  md:flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
-                    Salary Information<span className="text-red-500">*</span>:
+                    Current Salary<span className="text-red-500">*</span>:
                   </label>
                   <input
                     type="number"
                     value={salaryInfo}
                     onChange={(e) => setSalaryInfo(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded text-black bg-gray-100"
                   />
                 </div>
                 <button
@@ -532,9 +523,11 @@ const FormLayout = () => {
                   <input
                     type="file"
                     accept=".pdf,.doc,.docx"
+
+                    name="cv"
                     onChange={(e) => setCv(e.target.files[0])}
                     required
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded bg-gray-100 text-black"
                   />
                 </div>
 

@@ -432,3 +432,35 @@ const handleCvUpdate = async (e) => {
           className={`flex absolute -mt-[100px] ml-[280px] h-[25vh] overflow-hidden ${isHovered? "invisible":"visible"}`}
         />
       </div>
+
+
+setMessage(response.data.message);
+      setError("");
+      setCvSubmitted(true);
+      // Clear form fields
+      setFirstName("");
+      setSecondName("");
+      setLastName("");
+      setIdNumber("");
+      setWhatAppNo("");
+      setPhoneNumber("");
+      setEmail("");
+      setNationality("");
+      setCompany1("");
+      setLocation("");
+      setAcademicLevel("");
+      setCompany1("");
+      setCompany2("");
+      setCompany3("");
+      setSalaryInfo("");
+      setDuration1("");
+      setDuration2("");
+      setDuration3("");
+      setPosition1("");
+      setPosition2("");
+      setPosition3("");
+      setSpecialization("");
+      setAge("");
+      setCv(null);
+      setSpecialization("");
+      setShowPopup(true); 
