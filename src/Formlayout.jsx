@@ -85,7 +85,7 @@ const FormLayout = () => {
       formData.append('cv', cv);
 
       const response = await axios.post(
-        "http://localhost:5000/api/applications", // Use the correct API endpoint
+        "https://amsol-api.onrender.com/api/applications", // Use the correct API endpoint
         formData,
         {
           headers: {
@@ -141,7 +141,11 @@ const FormLayout = () => {
     <>
       <div className="w-[100%] h-[20px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5 overflow-fixed">
         <div className="bg-white rounded-full sm:w-[100px] md:w-[200px] flex items-center justify-center">
-          <img src={logo} alt="hrOutsourcing" className="sm:w-[50px] md:w-[110px] p-1" />
+          <img
+            src={logo}
+            alt="hrOutsourcing"
+            className="sm:w-[50px] md:w-[110px] p-1"
+          />
         </div>
         <div className="flex gap-3">
           <div className="flex flex-row items-center gap-5">
@@ -150,15 +154,25 @@ const FormLayout = () => {
               Home
             </Link>
           </div>
+<<<<<<< HEAD
           {/* <div className="hidden md:block">
+=======
+          <div className="hidden md:block">
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
             <Link
               to="/cvupdate"
               className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
             >
               <span>Update CV</span>
+<<<<<<< HEAD
               
             </Link>
           </div> */}
+=======
+              <img src={arrow} className="w-5 h-5" />
+            </Link>
+          </div>
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
           <div>
             <HandleLogout />
           </div>
@@ -407,13 +421,17 @@ const FormLayout = () => {
                 {/* //workexperience part */}
 
                 <div className="mb-4 flex  flex-row">
+<<<<<<< HEAD
 
+=======
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     WorkExperience<span className="text-red-500">*</span>:
                   </label>
 
                   <div>
                     <div className=" ">
+<<<<<<< HEAD
 
                       <input
                         type="text"
@@ -438,27 +456,64 @@ const FormLayout = () => {
                       />
                     </div>
 
+=======
+                      <input
+                        type="text"
+                        placeholder="Company 1"
+                        value={company1}
+                        onChange={(e) => setCompany1(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Position"
+                        value={position1}
+                        onChange={(e) => setPosition1(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Duration"
+                        value={duration1}
+                        onChange={(e) => setDuration1(e.target.value)}
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+                      />
+                    </div>
+
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                     <div>
                       <input
                         type="text"
                         placeholder="Company 2"
                         value={company2}
                         onChange={(e) => setCompany2(e.target.value)}
+<<<<<<< HEAD
                         className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+=======
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                       />
                       <input
                         type="text"
                         placeholder="Position"
                         value={position2}
                         onChange={(e) => setPosition2(e.target.value)}
+<<<<<<< HEAD
                         className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+=======
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                       />
                       <input
                         type="text"
                         placeholder="Duration"
                         value={duration2}
                         onChange={(e) => setDuration2(e.target.value)}
+<<<<<<< HEAD
                         className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+=======
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                       />
                     </div>
 
@@ -468,21 +523,33 @@ const FormLayout = () => {
                         placeholder="Company"
                         value={company3}
                         onChange={(e) => setCompany3(e.target.value)}
+<<<<<<< HEAD
                         className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+=======
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                       />
                       <input
                         type="text"
                         placeholder="Position"
                         value={position3}
                         onChange={(e) => setPosition3(e.target.value)}
+<<<<<<< HEAD
                         className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+=======
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                       />
                       <input
                         type="text"
                         placeholder="Duration"
                         value={duration3}
                         onChange={(e) => setDuration3(e.target.value)}
+<<<<<<< HEAD
                         className="w-full p-2 rounded-lg border border-gray-300 text-black bg-gray-100"
+=======
+                        className="w-full p-2 rounded-lg border border-gray-300 text-black"
+>>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
                       />
                     </div>
                   </div>
