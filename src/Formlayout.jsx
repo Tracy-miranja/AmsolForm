@@ -85,7 +85,7 @@ const FormLayout = () => {
       formData.append('cv', cv);
 
       const response = await axios.post(
-        "http://localhost:5000/api/applications", // Use the correct API endpoint
+        "https://amsol-api.onrender.com/api/applications", // Use the correct API endpoint
         formData,
         {
           headers: {
