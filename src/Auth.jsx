@@ -31,19 +31,9 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
     if (!isLogin && password !== confirmPassword) {
       return toast.error("Passwords do not match!");
     }
-<<<<<<< HEAD
   
     setLoading(true);
   
-=======
-
-    const url = isLogin
-      ? "https://amsol-api.onrender.com/api/login"
-      : "https://amsol-api.onrender.com/api/register";
-
-    const body = isLogin ? { email, password } : { username, email, password };
-
->>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
     try {
       const endpoint = isLogin
         ? "https://amsol-api.onrender.com/api/login"
@@ -67,7 +57,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
           setUserId(data.id);
           setToken(data.token);
           onSuccess();
-          navigate("/profile"); // Redirect after login
+          navigate("/Formlayout"); // Redirect after login
         } else {
           // On signup, redirect to login page with a success message
           toast.success("Signup successful! Please login.");
@@ -106,7 +96,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Username"
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none "
             />
           )}
           <input
@@ -115,7 +105,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full  px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
           />
           <div className="relative">
             <input
@@ -151,7 +141,6 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
           >
             {loading ? "Loading..." : isLogin ? "Login" : "Signup"}
           </button>
-<<<<<<< HEAD
         </form>
         <p className="text-center mt-4">
           {isLogin ? (
@@ -161,12 +150,6 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
           ) : (
             <Link to="/auth" className="text-blue-500 hover:underline">
               Already have an account? Login
-=======
-
-          {isLogin && (
-            <Link to="/forgetPassword" className="text-blue-500">
-              Forget Password?
->>>>>>> ee348076dcdd38e81e0d94ce250c05fd635bcef0
             </Link>
           )}
         </p>

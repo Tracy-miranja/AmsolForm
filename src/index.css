@@ -23,16 +23,6 @@ a:hover {
   color: #535bf2;
 }
 
-body {
-  margin: 0;
-  /* display: flex; */
-  min-width: 100%;
-  min-height: 100vh;
-  background-color: #f6f6fa;
-  /* align-items: center; */
-  
-}
-
 .conta {
   position: relative;
   background: rgba(228, 12, 12, 0.1);
@@ -191,4 +181,86 @@ body {
     transform: rotate(1turn);
   }
 }
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px rgb(255, 253, 253) inset;
+  -webkit-text-fill-color: black; /* Placeholder text color */
+}
+
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px rgb(250, 247, 247) inset;
+}
+
+
+@media (max-width: 768px) {
+  .home {
+    width: 100%;
+    height:100vh !important;
+    overflow: auto;
+  
+  }
+  .home p{
+    font-size: 14px;
+   
+  }
+  .home h1{
+    font-size: 18px;
+    line-height: normal;
+  }
+  .section{
+    font-size: 25px !important;
+   
+   }
+   .sectionA{
+    height: fit-content;
+  }
+  .login-image{
+    display: none;
+  }
+  .signup-image{
+    display: none;
+    height: 1vh;
+  }
+}
+
+/* Media query for screens smaller than 480px (like small phones) */
+@media (max-width: 480px) {
+  .home {
+    width: 100%;
+    overflow: auto;
+  
+  }
+  .home p{
+    font-size: 14px;
+   
+  }
+  .home h1{
+    font-size: 18px;
+    line-height: normal;
+  }
+
+  .section{
+   font-size: 25px !important;
+  
+  }
+  .mainh{
+    position: absolute;
+    display: flex;
+    text-align: center;
+    padding: 20%;
+    background-color: #535bf2;
+    width: 100%;
+    height: 100%;
+  }
+  .section h1{
+    margin-left: 35% !important;
+  }
+  .sectionA{
+    height: fit-content;
+  }
+}
+body{
+  background-color: #ffffff;
+}
+
 
