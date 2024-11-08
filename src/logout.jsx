@@ -10,13 +10,13 @@ const HandleLogout = () => {
     try {
       // Log current cookies for debugging
       console.log("Current cookies before logout:", Cookies.get());
-  
+
       // Call the logout API
-      await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
-  
-     Cookies.remove("token");
-Cookies.remove("authToken");
-Cookies.remove("userId");
+      await axios.post("https://amsol-api.onrender.com/logout", {}, { withCredentials: true });
+
+      Cookies.remove("token");
+      Cookies.remove("authToken");
+      Cookies.remove("userId");
 
       // Redirect to the login page or another specified page
       navigate("/"); // Adjust this path as needed
@@ -27,7 +27,7 @@ Cookies.remove("userId");
       toast.error("Logout failed. Please try again.");
     }
   };
-  
+
   return (
     <button
       onClick={handleLogoutClick}

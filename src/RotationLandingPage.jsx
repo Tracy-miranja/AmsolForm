@@ -33,7 +33,8 @@ const RotationPandingPage = () => {
         Empowering Your Next Career Move – Start Your Journey Today
         </h2>
       </div>
-      <><div className="w-[100%] h-[50px] flex justify-around lg:items-center text-blue-400 gap-5 z-10">
+      <>
+      <div className="w-[100%] h-[50px] flex justify-around lg:items-center text-blue-400 gap-5 z-10">
           {/* Navbar Section */}
           <div className="w-full flex justify-around items-center p-3 pb-0">
             {/* Logo */}

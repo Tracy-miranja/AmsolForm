@@ -6,8 +6,10 @@ import axios from "axios";
 import arrow from "./assets/Vector1.svg";
 import HandleLogout from "./logout";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "./Context/UserContext";
 
 const FormLayout = () => {
+  const { token } = useUser(); // Get the token from UserContext
   const navigate=useNavigate()
   const [activeSection, setActiveSection] = useState("personalDetails");
   const [firstName, setFirstName] = useState("");
@@ -49,11 +51,12 @@ const FormLayout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!firstName || !secondName || !lastName || !email || !cv) {
       alert("Please fill out all required fields.");
       return;
     }
-
+  
     try {
       const formData = new FormData();
       formData.append("firstName", firstName);
@@ -67,10 +70,8 @@ const FormLayout = () => {
       formData.append("nationality", nationality);
       formData.append("location", location);
       formData.append("specialization", specialization);
-      formData.append("positionapplied", positionapplied)
+      formData.append("positionapplied", positionapplied);
       formData.append("academicLevel", academicLevel);
-
-      // Append work experience fields
       formData.append("company1", company1);
       formData.append("position1", position1);
       formData.append("duration1", duration1);
@@ -80,36 +81,34 @@ const FormLayout = () => {
       formData.append("company3", company3);
       formData.append("position3", position3);
       formData.append("duration3", duration3);
-
       formData.append("salaryInfo", salaryInfo);
-      formData.append('cv', cv);
-
+      formData.append("cv", cv);
+  
       const response = await axios.post(
-        "https://amsol-api.onrender.com/api/applications", // Use the correct API endpoint
+        "https://amsol-api.onrender.com/api/applications",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`, // Include the token in the header
           },
-          withCredentials: true,
+          withCredentials: true, // Ensures cookies (including auth token) are sent
         }
       );
-
-      // Set success message and show popup
-    setMessage("Form submitted successfully!");
-    setError(""); // Clear previous errors
-    setShowPopup(true);
-
-    // Automatically hide popup after 3 seconds
-    setTimeout(() => {
-      setShowPopup(false);
-      navigate("/");
-    }, 3000);
-  } catch (err) {
-    console.error(err); // Log the entire error
-    setError(err.response?.data?.message || "Error submitting form");
-    setMessage("");
-  }
+  
+      setMessage("Form submitted successfully!");
+      setError("");
+      setShowPopup(true);
+  
+      setTimeout(() => {
+        setShowPopup(false);
+        navigate("/");
+      }, 3000);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Error submitting form");
+      setMessage("");
+    }
   };
 
   const validateForm = () => {
