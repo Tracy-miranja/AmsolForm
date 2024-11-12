@@ -139,7 +139,7 @@ const fetchUserId = async () => {
               >
                 Login
               </button>
-              {message && <p className="text-center text-red-500">{message}</p>}
+              {message && <p className="text-center text-green-500">{message}</p>}
             </form>
           )}
         </div>

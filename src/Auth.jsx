@@ -10,16 +10,15 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [role, setRole] = useState("job applicant"); // Default role
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setUserId, setToken } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already logged in
     const token = Cookies.get("token");
     if (token) {
-      // Redirect to the form layout if the token exists
       navigate("/Formlayout");
     }
   }, [navigate]);
@@ -31,38 +30,34 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
     if (!isLogin && password !== confirmPassword) {
       return toast.error("Passwords do not match!");
     }
-  
+
     setLoading(true);
-  
+
     try {
       const endpoint = isLogin
-        ? "https://amsol-api.onrender.com/api/login"
-        : "https://amsol-api.onrender.com/api/register";
-  
+        ? "http://localhost:5000/api/login"
+        : "http://localhost:5000/api/register";
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username }),
+        body: JSON.stringify({ email, password, username, role }), // Ensure role is passed on register
       });
-  
+
       const data = await response.json();
-      console.log(data)
       setLoading(false);
-  
+
       if (response.ok) {
-        if (isLogin) {
-          // On login, store token and navigate to the form layout
-          Cookies.set("token", data.token, { expires: 7 });
-          
-          setUserId(data.id);
-          setToken(data.token);
-          onSuccess();
-          navigate("/Formlayout"); // Redirect after login
+        Cookies.set("token", data.token, { expires: 7 });
+        setUserId(data.id);
+        setToken(data.token);
+
+        if (data.role === "nurse") {
+          navigate("/NurseForm");
         } else {
-          // On signup, redirect to login page with a success message
-          toast.success("Signup successful! Please login.");
-          navigate("/auth"); // Redirect to login page
+          navigate("/Formlayout");
         }
+        onSuccess();
       } else {
         if (data.errors) {
           data.errors.forEach((error) => toast.error(error.msg));
@@ -73,13 +68,11 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
     } catch (error) {
       setLoading(false);
       if (typeof onError === "function") {
-        onError(); // Call onError if it's a function
+        onError();
       }
       toast.error("Failed to connect to the server!");
     }
-};
-
-
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -90,14 +83,29 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none "
-            />
+            <>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+                required
+                className="w-full px-4 py-2 border rounded-md focus:outline-none"
+              />
+              
+              <select
+                id="role"
+                name="role" 
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none"
+                required
+              >
+              <option value="nurse">Nurse</option>
+              <option value="job applicant">Other roles</option>
+                
+              </select>
+            </>
           )}
           <input
             type="email"
@@ -105,7 +113,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
-            className="w-full  px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <div className="relative">
             <input
@@ -153,7 +161,6 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
             </Link>
           )}
         </p>
-       
       </div>
     </div>
   );

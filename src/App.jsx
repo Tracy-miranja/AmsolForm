@@ -16,6 +16,7 @@ import ResetPassword from "./ResetPassword";
 import ForgetPrompt from "./forgetprompt";
 import Register from "./Register";
 import Profile from "./userProfile";
+import NurseForm from "./NurseForm";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -115,7 +116,7 @@ const App = () => {
              
             }
           />
-
+        <Route path="/NurseForm" element={<NurseForm />}/>
           {/* Logout Route */}
           <Route
             path="/logout"
