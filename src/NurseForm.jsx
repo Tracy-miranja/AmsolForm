@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "./Context/UserContext";
 
 const NurseForm = () => {
-  const { token } = useUser(); // Get the token from UserContext
+  const { token } = useUser(); 
   const navigate=useNavigate()
   const [activeSection, setActiveSection] = useState("personalDetails");
   const [fullName, setFullName] = useState("");
@@ -18,17 +18,16 @@ const NurseForm = () => {
   const [age, setAge] = useState("");
   const [nationality, setNationality] = useState("");
   const [location, setLocation] = useState("");
-  const [specialization, setSpecialization] = useState("");
-  const [positionapplied, setPositionapplied]=useState("");
+  const [positionApplied, setPositionApplied]=useState("");
   const [yearsOfExperience,setYearsOfExperience]=useState("");
   const [currentJobTitle, setCurrentJobTitle]=useState("");
-  const [academicLevel, setAcademicLevel] = useState("");
   const [currentCompany,setcurrentCompany]=useState("");
   const [currentSalary, setCurrentSalary] = useState("");
   const [expectedSalary,setExpectedSalary]=useState("");
   const [desiredAllowance, setDesiredAllowance]=useState("");
+  const [highestEducation, setHighestEducation]=useState("")
   const [levelOfEducation, setlevelOfEducation]=useState("");
-  const [nursingLicense,setnursingLicense]=useState("");
+  const [nursingLicense,setNursingLicense]=useState("");
   const [cv, setCv] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -57,9 +56,8 @@ const NurseForm = () => {
       formData.append("age", age);
       formData.append("nationality", nationality);
       formData.append("location", location);
-      formData.append("specialization", specialization);
-      formData.append("positionapplied", positionapplied);
-      formData.append("academicLevel", academicLevel);
+      formData.append("positionApplied", positionApplied);
+      formData.append("highestEducation", highestEducation);
       formData.append("yearsOfExperience", yearsOfExperience);
       formData.append("currentJobTitle", currentJobTitle);
       formData.append("currentCompany", currentCompany);
@@ -76,9 +74,9 @@ const NurseForm = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // Include the token in the header
+            Authorization: `Bearer ${token}`, 
           },
-          withCredentials: true, // Ensures cookies (including auth token) are sent
+          withCredentials: true, 
         }
       );
   
@@ -112,10 +110,10 @@ const NurseForm = () => {
   const handleNextButtonClick = () => {
     if (validateForm()) {
       setIsFormValid(true);
-      setActiveSection("institutionDetails"); // Navigate to the next section if valid
+      setActiveSection("institutionDetails"); 
     } else {
       setIsFormValid(false);
-      setError("Please fill out all required fields before proceeding."); // Show error message
+      setError("Please fill out all required fields before proceeding."); 
     }
   };
 
@@ -293,37 +291,15 @@ const NurseForm = () => {
             <div className="w-full bg-white p-6 shadow-lg rounded-lg">
               <form action="/api/users" method="POST">
                 {/* Institutional Form Fields */}
-                <div className="mb-4 flex  flex-row">
-                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
-                    Specialization<span className="text-red-500">*</span>:
-                  </label>
-                  <input
-                    type="text"
-                    value={specialization}
-                    onChange={(e) => setSpecialization(e.target.value)}
-                    required
-                    className="w-full p-2 border rounded text-black bg-gray-100"
-                  />
-                </div>
-                <div className="mb-4 flex  flex-row">
-                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
-                   Position Applied:<span className="text-red-500">*</span>:
-                  </label>
-                  <input
-                    type="text"
-                    value={positionapplied}
-                    onChange={(e) => setPositionapplied(e.target.value)}
-                    required
-                    className="w-full p-2 border rounded text-black bg-gray-100"
-                  />
-                </div>
+                
                 <div className="mb-4 flex  md:flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
-                    Academic level<span className="text-red-500">*</span>:
+                  Highest Education<span className="text-red-500">*</span>:
                   </label>
                   <select
-                    value={academicLevel}
-                    onChange={(e) => setAcademicLevel(e.target.value)}
+                    id="highestEducation"
+                    value={highestEducation}
+                    onChange={(e) => setHighestEducation(e.target.value)}
                     required
                     className="w-full p-2 rounded-lg border text-black bg-gray-100"
                   >
@@ -334,8 +310,8 @@ const NurseForm = () => {
                       Postgraduate Diploma{" "}
                     </option>
                     <option value="Bachelor’s Degree">Bachelor’s Degree</option>
-                    <option value="Associate's Degree">
-                      Associate's Degree
+                    <option value="Higher Diploma">
+                    Higher Diploma
                     </option>
                     <option value="Diploma">Diploma</option>
                     <option value="Diploma">Professional Certificate</option>
@@ -343,7 +319,32 @@ const NurseForm = () => {
                     <option value="Degree">others</option>
                   </select>
                 </div>       
-
+                <div className="mb-4 flex  flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
+                    Specify Level Of Education<span className="text-red-500">*</span>:
+                  </label>
+                  <input
+                  id="levelOfEducation"
+                    type="text"
+                    value={levelOfEducation}
+                    onChange={(e) => setlevelOfEducation(e.target.value)}
+                    required
+                    className="w-full p-2 border rounded text-black bg-gray-100"
+                  />
+                </div>
+                <div className="mb-4 flex  flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
+                   Position Applied:<span className="text-red-500">*</span>:
+                  </label>
+                  <input
+                  id="positionApplied"
+                    type="text"
+                    value={positionApplied}
+                    onChange={(e) => setPositionApplied(e.target.value)}
+                    required
+                    className="w-full p-2 border rounded text-black bg-gray-100"
+                  />
+                </div>
                 <div className="mb-4 flex  md:flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Current Salary<span className="text-red-500">*</span>:
@@ -437,9 +438,13 @@ const NurseForm = () => {
   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
     Nursing license<span className="text-red-500">*</span>:
   </label>
-  <select className="w-full p-2 border rounded bg-gray-100 text-black">
-    <option>No</option>  
-    <option>Yes</option> 
+  <select 
+  id="nursingLicense"
+  value={nursingLicense}
+  onChange={(e)=>setNursingLicense(e.target.value)}
+   className="w-full p-2 border rounded bg-gray-100 text-black">
+    <option value="No">No</option>  
+    <option value="Yes">Yes</option> 
   </select>
 </div>
                 {/* CV Upload Field */}

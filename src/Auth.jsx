@@ -10,7 +10,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState("job applicant"); // Default role
+  const [role, setRole] = useState("job applicant"); 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setUserId, setToken } = useUser();
