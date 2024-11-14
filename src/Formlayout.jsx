@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "./Context/UserContext";
 
 const FormLayout = () => {
-  const { token } = useUser(); // Get the token from UserContext
+  const { token } = useUser(); 
   const navigate=useNavigate()
   const [activeSection, setActiveSection] = useState("personalDetails");
   const [firstName, setFirstName] = useState("");
@@ -28,7 +28,7 @@ const FormLayout = () => {
   const [company1, setCompany1] = useState("");
   const [company2, setCompany2] = useState("");
   const [company3, setCompany3] = useState("");
-  // Add these state declarations
+
   const [position1, setPosition1] = useState("");
   const [duration1, setDuration1] = useState("");
   const [position2, setPosition2] = useState("");
@@ -90,9 +90,9 @@ const FormLayout = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // Include the token in the header
+            Authorization: `Bearer ${token}`, 
           },
-          withCredentials: true, // Ensures cookies (including auth token) are sent
+          withCredentials: true, 
         }
       );
   
@@ -129,10 +129,9 @@ const FormLayout = () => {
   const handleNextButtonClick = () => {
     if (validateForm()) {
       setIsFormValid(true);
-      setActiveSection("institutionDetails"); // Navigate to the next section if valid
-    } else {
+      setActiveSection("institutionDetails"); 
       setIsFormValid(false);
-      setError("Please fill out all required fields before proceeding."); // Show error message
+      setError("Please fill out all required fields before proceeding."); 
     }
   };
 
@@ -153,15 +152,7 @@ const FormLayout = () => {
               Home
             </Link>
           </div>
-          {/* <div className="hidden md:block">
-            <Link
-              to="/cvupdate"
-              className="flex gap-2 items-center justify-center bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-fit text-center rotate-hover z-10"
-            >
-              <span>Update CV</span>
-              
-            </Link>
-          </div> */}
+         
           <div>
             <HandleLogout />
           </div>

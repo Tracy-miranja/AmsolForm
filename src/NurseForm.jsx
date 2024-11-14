@@ -87,7 +87,7 @@ const NurseForm = () => {
       setTimeout(() => {
         setShowPopup(false);
         navigate("/");
-      }, 3000);
+      }, 1000);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Error submitting form");
