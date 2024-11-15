@@ -1,26 +1,26 @@
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Cookies from "js-cookie"; // Ensure js-cookie is installed
-import { toast } from "react-hot-toast"; // For notifications
+import Cookies from "js-cookie"; 
+import { toast } from "react-hot-toast"; 
 
 const HandleLogout = () => {
   const navigate = useNavigate();
 
   const handleLogoutClick = async () => {
     try {
-      // Log current cookies for debugging
+
       console.log("Current cookies before logout:", Cookies.get());
 
-      // Call the logout API
+    
       await axios.post("https://amsol-api.onrender.com/logout", {}, { withCredentials: true });
 
       Cookies.remove("token");
       Cookies.remove("authToken");
       Cookies.remove("userId");
 
-      // Redirect to the login page or another specified page
-      navigate("/"); // Adjust this path as needed
-      toast.success("Logged out successfully!"); // Show success message
+      
+      navigate("/"); 
+      toast.success("Logged out successfully!"); 
 
     } catch (error) {
       console.error("Logout failed:", error);

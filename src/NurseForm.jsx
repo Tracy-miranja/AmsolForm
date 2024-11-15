@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "./Context/UserContext";
 
 const NurseForm = () => {
+
   const { token } = useUser(); 
   const navigate=useNavigate()
   const [activeSection, setActiveSection] = useState("personalDetails");
@@ -33,7 +34,8 @@ const NurseForm = () => {
   const [error, setError] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [cvSubmitted, setCvSubmitted] = useState(false);
-
+const [loading, setLoading] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
 
   const navigateToSection = (section) => {
@@ -42,15 +44,17 @@ const NurseForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLoading(true);
+  
     if (!fullName || !phoneNumber || !age || !email || !cv) {
       alert("Please fill out all required fields.");
+      setLoading(false); 
       return;
     }
   
     try {
       const formData = new FormData();
-      formData.append("fullName", fullName);     
+      formData.append("fullName", fullName);
       formData.append("email", email);
       formData.append("phoneNumber", phoneNumber);
       formData.append("age", age);
@@ -69,7 +73,7 @@ const NurseForm = () => {
       formData.append("cv", cv);
   
       const response = await axios.post(
-        "http://localhost:5000/api/nurse-applications",
+        "https://amsol-api.onrender.com/api/nurse-applications",
         formData,
         {
           headers: {
@@ -92,8 +96,11 @@ const NurseForm = () => {
       console.error(err);
       setError(err.response?.data?.message || "Error submitting form");
       setMessage("");
+    } finally {
+      setLoading(false); 
     }
   };
+  
 
   const validateForm = () => {
     return (
@@ -159,7 +166,7 @@ const NurseForm = () => {
               </div>
             </div>
           )}
-          {/* Row Links */}
+      
 
           <div className="w-[100%] h-fit shadow-lg rounded-lg flex flex:col md:flex-row">
             <div
@@ -471,12 +478,17 @@ const NurseForm = () => {
                     Submit Application
                   </button>
                 </div>
-
+              
                 {error && <p className="mt-4 text-red-500">{error}</p>}
                 {message && <p className="mt-4 text-green-500">{message}</p>}
               </form>
             </div>
           )}
+     {loading && (
+  <div className="spinner-overlay bg-black">
+    <div className="loading-circle"></div>
+  </div>
+)}
         </div>
       </div>
     </>

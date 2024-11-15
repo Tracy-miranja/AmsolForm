@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import vacancy from "./assets/Vector2tt.svg";
-import jobvacancy from "./assets/Group1.svg";
-import logo from "./assets/amsolJobVacancies.png";
+import jobvacancy from "./assets/Group 1 (1).png";
+import logo from "./assets/nawirilogo.png";
 import { FaHome } from "react-icons/fa";
 import arrow from "./assets/Vector1.svg";
 import jobsKenya from "./assets/Vector-6low.svg";
@@ -24,11 +24,11 @@ const RotationPandingPage = () => {
     <div
       className={`flex flex-col lg:h-[100vh] lg:overflow-hidden  ${
         isHovered
-          ? "bg-gradient-to-r from-[#25b2e6] to-[#0A599E] text-white"
+          ? "bg-gradient-to-r from-[#F48251] to-[#F41C1C] text-white"
           : "bg-white"
       } transition-colors duration-500 home`}
     >
-      <div className="w-[100%] flex  text-center md:h-[40px] bg-gradient-to-r from-[#25b2e6] to-[#0A599E] md:justify-center  p-2 lg:items-center lg:justify-center">
+      <div className="w-[100%] flex shadow-xl text-center md:h-[40px] bg-gradient-to-r from-[#F48251] to-[#F41C1C] md:justify-center  p-2 lg:items-center lg:justify-center">
         <h2 className="text-white font-bold lg:items-center">
         Empowering Your Next Career Move – Start Your Journey Today
         </h2>
@@ -38,7 +38,7 @@ const RotationPandingPage = () => {
           {/* Navbar Section */}
           <div className="w-full flex justify-around items-center p-3 pb-0">
             {/* Logo */}
-            <div className="pl-2">
+            <div className="pl-2 mt-4">
               <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
             </div>
 

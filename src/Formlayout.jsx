@@ -42,7 +42,7 @@ const FormLayout = () => {
   const [error, setError] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [cvSubmitted, setCvSubmitted] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
 
   const navigateToSection = (section) => {
@@ -51,9 +51,11 @@ const FormLayout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLoading(true);
+
     if (!firstName || !secondName || !lastName || !email || !cv) {
       alert("Please fill out all required fields.");
+      setLoading(false);
       return;
     }
   
@@ -108,6 +110,8 @@ const FormLayout = () => {
       console.error(err);
       setError(err.response?.data?.message || "Error submitting form");
       setMessage("");
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -502,7 +506,9 @@ const FormLayout = () => {
                 {message && <p className="mt-4 text-green-500">{message}</p>}
                 {error && <p className="mt-4 text-red-500">{error}</p>}
               </form>
+  
             </div>
+            
           )}
 
           {activeSection === "uploadApply" && (
@@ -532,7 +538,11 @@ const FormLayout = () => {
                     Submit Application
                   </button>
                 </div>
-
+                {loading && (
+  <div className="spinner-overlay bg-black">
+    <div className="loading-circle"></div>
+  </div>
+)}
                 {error && <p className="mt-4 text-red-500">{error}</p>}
                 {message && <p className="mt-4 text-green-500">{message}</p>}
               </form>

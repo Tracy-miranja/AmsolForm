@@ -35,13 +35,13 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
 
     try {
       const endpoint = isLogin
-        ? "http://localhost:5000/api/login"
-        : "http://localhost:5000/api/register";
+        ? "https://amsol-api.onrender.com/api/login"
+        : "https://amsol-api.onrender.com/api/register";
 
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username, role }), // Ensure role is passed on register
+        body: JSON.stringify({ email, password, username, role }), 
       });
 
       const data = await response.json();
@@ -70,7 +70,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
       if (typeof onError === "function") {
         onError();
       }
-      toast.error("Failed to connect to the server!");
+      // toast.error("Failed to connect to the server!");
     }
   };
 
