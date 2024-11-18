@@ -55,7 +55,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
         if (data.role === "nurse") {
           navigate("/NurseForm");
         } else {
-          navigate("/Formlayout");
+          navigate("/dashboard");
         }
         onSuccess();
       } else {

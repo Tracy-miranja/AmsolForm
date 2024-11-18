@@ -23,14 +23,14 @@ const ProfileDetailsPage = () => {
       setProfilePicture(data.profilePicture || 'default-profile.png'); // Update profile picture if available
     } catch (error) {
       console.error(error);
-      // Handle the error appropriately in your UI
+      
     }
   };
 
   // Fetch user data when the component mounts
   useEffect(() => {
     fetchUserData();
-  }, [userId]); // Dependency array includes userId to refetch data if it changes
+  }, [userId]); 
 
   // Handle profile picture change
   const handlePictureChange = (event) => {
@@ -53,7 +53,7 @@ const ProfileDetailsPage = () => {
   const handleSave = async () => {
     try {
       const response = await fetch(`/api/users/${userId}`, {
-        method: 'PUT', // or 'PATCH' depending on your API design
+        method: 'PUT', 
         headers: {
           'Content-Type': 'application/json',
         },
@@ -64,11 +64,11 @@ const ProfileDetailsPage = () => {
         throw new Error('Failed to save user data');
       }
       setIsEditing(false);
-      // Optionally, you can re-fetch the user data to get the latest state from the server
+      
       fetchUserData();
     } catch (error) {
       console.error(error);
-      // Handle the error appropriately in your UI
+      
     }
   };
 
@@ -83,9 +83,9 @@ const ProfileDetailsPage = () => {
     if (Array.isArray(value)) {
       return value.join(", ");
     } else if (typeof value === 'object' && value !== null) {
-      return JSON.stringify(value); // Display object as string (for debugging)
+      return JSON.stringify(value); 
     }
-    return value || 'N/A'; // Provide a fallback for undefined values
+    return value || 'N/A'; 
   };
 
   // Exclude fields that should not be displayed
@@ -128,7 +128,7 @@ const ProfileDetailsPage = () => {
                     className="border border-gray-300 rounded p-1"
                   />
                 ) : (
-                  <p>{renderField(key, value)}</p> // Use renderField to display values correctly
+                  <p>{renderField(key, value)}</p> 
                 )}
                 {isEditing ? (
                   <button onClick={handleSave} className="text-green-500 ml-4">

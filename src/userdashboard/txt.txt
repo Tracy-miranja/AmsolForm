@@ -1,0 +1,116 @@
+import React, { useState } from 'react';
+import { FaUserAlt, FaCamera, FaPhoneAlt, FaLinkedin, FaMapMarkerAlt, FaLink } from 'react-icons/fa';
+
+const Profile = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => {
+  const [profilePicture, setProfilePicture] = useState(user.profilePicture || '');
+  const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
+  const [linkedin, setLinkedin] = useState(user.linkedin || '');
+  const [location, setLocation] = useState(user.location || '');
+  const [website, setWebsite] = useState(user.website || '');
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(reader.result);
+        if (onUpdateProfilePicture) onUpdateProfilePicture(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePhoneNumberChange = (event) => setPhoneNumber(event.target.value);
+  const handleLinkedinChange = (event) => setLinkedin(event.target.value);
+  const handleLocationChange = (event) => setLocation(event.target.value);
+  const handleWebsiteChange = (event) => setWebsite(event.target.value);
+
+  return (
+    <div className="bg-gray-800 text-white min-h-screen shadow rounded-lg p-6 mb-6 relative">
+      <div className="flex flex-col items-center space-x-6 relative">
+        <div className="relative">
+          {profilePicture ? (
+            <img
+              className="w-24 h-24 rounded-full border-2 border-gray-300"
+              src={profilePicture}
+              alt="Profile"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
+              <FaUserAlt className="text-gray-500 text-4xl" />
+            </div>
+          )}
+
+          <label htmlFor="upload-input" className="absolute bottom-0 right-0 bg-gray-700 p-1 rounded-full cursor-pointer">
+            <FaCamera className="text-white text-lg" />
+          </label>
+          <input
+            id="upload-input"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageChange}
+          />
+        </div>
+        <div>
+          <h2 className="text-2xl font-semibold">{user.name || 'Unknown User'}</h2>
+          <p className="text-gray-600">{user.email || 'Unknown email'}</p>
+        </div>
+      </div>
+
+      <div>
+        <ul className="flex flex-col space-y-4">
+          {/* Phone Number Section */}
+          <li className="flex items-center space-x-2">
+            <FaPhoneAlt className="text-blue-500" />
+            <input
+              type="text"
+              placeholder="Phone Number"
+              value={phoneNumber}
+              onChange={handlePhoneNumberChange}
+              className="bg-gray-700 p-2 rounded-md text-white w-full"
+            />
+          </li>
+
+          {/* LinkedIn Section */}
+          <li className="flex items-center space-x-2">
+            <FaLinkedin className="text-blue-500" />
+            <input
+              type="text"
+              placeholder="LinkedIn Profile"
+              value={linkedin}
+              onChange={handleLinkedinChange}
+              className="bg-gray-700 p-2 rounded-md text-white w-full"
+            />
+          </li>
+
+          {/* Location Section */}
+          <li className="flex items-center space-x-2">
+            <FaMapMarkerAlt className="text-green-500" />
+            <input
+              type="text"
+              placeholder="Location"
+              value={location}
+              onChange={handleLocationChange}
+              className="bg-gray-700 p-2 rounded-md text-white w-full"
+            />
+          </li>
+
+          {/* Website Section */}
+          <li className="flex items-center space-x-2">
+            <FaLink className="text-red-500" />
+            <input
+              type="text"
+              placeholder="Website"
+              value={website}
+              onChange={handleWebsiteChange}
+              className="bg-gray-700 p-2 rounded-md text-white w-full"
+            />
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default Profile;

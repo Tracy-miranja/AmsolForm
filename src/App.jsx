@@ -7,7 +7,7 @@ import Home from "./Home";
 import RotationLandingPage from "./RotationLandingPage";
 import UpdateCV from "./cvupdate";
 import HandleLogout from "./logout";
-import ProfilePage from "./ProfilePage";
+import ProfilePage from "./ProfilePagex";
 import { UserProvider } from "./Context/UserContext";
 import ProfileDetailsPage from "./ProfileDetailsPage";
 import FormLayout from "./Formlayout";
@@ -17,6 +17,7 @@ import ForgetPrompt from "./forgetprompt";
 import Register from "./Register";
 import Profile from "./userProfile";
 import NurseForm from "./NurseForm";
+import Profilepage from "./userdashboard/ProfilePage"
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -65,6 +66,7 @@ const App = () => {
           <Route path="/forgetPassword" element={<ForgetPassword />} />
           <Route path="/forgetPrompt" element={<ForgetPrompt />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/dashboard" element={<Profilepage />} />
 
           {/* Private Routes */}
           <Route

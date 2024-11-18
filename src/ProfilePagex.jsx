@@ -9,7 +9,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const ProfilePage = () => {
+const ProfileXPage = () => {
   const { userId, token } = useUser(); // Get userId and token from context
   const [userData, setUserData] = useState({
     firstName: "",
@@ -428,4 +428,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ProfileXPage;
