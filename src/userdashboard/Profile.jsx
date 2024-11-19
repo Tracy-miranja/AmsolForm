@@ -24,7 +24,7 @@ const Profile = ({ userCV }) => {
   };
 
   return (
-    <div className="bg-gray-800 text-white w-64 h-auto p-2">
+    <div className="bg-gradient-to-r from-[#25b2e6] to-blue-500 text-white w-64 h-auto p-2">
       <h2 className="text-2xl font-bold mb-4">Update CV</h2>
       
       {/* File input for uploading a CV */}

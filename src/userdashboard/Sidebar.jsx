@@ -30,7 +30,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
   };
 
   return (
-    <div className="bg-gray-800 text-white min-h-screen shadow rounded-lg p-6 mb-6 relative">
+    <div className="bg-gradient-to-r from-[#25b2e6] to-blue-500 text-white min-h-screen shadow rounded-lg p-6 mb-6 relative">
       <div className="flex flex-col items-center space-x-6 relative">
         <div className="relative">
           {profilePicture ? (
@@ -58,7 +58,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
         </div>
         <div className="mt-4">
           <h2 className="text-2xl font-semibold">{user.name || 'Unknown User'}</h2>
-          <p className="text-gray-600">{user.email || 'Unknown email'}</p>
+          <p className="text-white-600">{user.email || 'Unknown email'}</p>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
                 className="bg-gray-700 p-2 rounded-md text-white w-full"
               />
             ) : (
-              <p className="bg-gray-700 p-2 rounded-md text-white w-full">{phoneNumber}</p>
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{phoneNumber}</p>
             )}
           </li>
 
@@ -105,7 +105,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
                 className="bg-gray-700 p-2 rounded-md text-white w-full"
               />
             ) : (
-              <p className="bg-gray-700 p-2 rounded-md text-white w-full">{linkedin}</p>
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{linkedin}</p>
             )}
           </li>
 
@@ -121,7 +121,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
                 className="bg-gray-700 p-2 rounded-md text-white w-full"
               />
             ) : (
-              <p className="bg-gray-700 p-2 rounded-md text-white w-full">{location}</p>
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{location}</p>
             )}
           </li>
 
@@ -137,7 +137,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
                 className="bg-gray-700 p-2 rounded-md text-white w-full"
               />
             ) : (
-              <p className="bg-gray-700 p-2 rounded-md text-white w-full">{website}</p>
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{website}</p>
             )}
           </li>
         </ul>

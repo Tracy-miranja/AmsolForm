@@ -29,7 +29,7 @@ const ProfilePage = () => {
     <div className="flex">
       <Sidebar />
       <div className="flex-1 p-8 bg-gray-100">
-        <div className='bg-gray-800 h-[10%] w-full'></div>
+        <div className='bg-gradient-to-r from-[#25b2e6] to-blue-500 h-[10%] w-full'></div>
         <div className='flex mt-10 gap-10 w-full'>    
         <div className='w-[80%]'>
         <WorkExperience experiences={userData.experiences} />
