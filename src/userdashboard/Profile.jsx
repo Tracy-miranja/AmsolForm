@@ -25,10 +25,11 @@ const Profile = ({ userCV }) => {
 
   return (
     <div className="bg-gradient-to-r from-[#25b2e6] to-blue-500 text-white w-64 h-auto p-2">
-      <h2 className="text-2xl font-bold mb-4">Update CV</h2>
+      <h2 className="text-2xl font-bold mb-4">My CV</h2>
       
       {/* File input for uploading a CV */}
       <div className="mb-4">
+        <h4>Update your CV</h4>
         <input
           type="file"
           accept=".pdf,.doc,.docx"
@@ -39,7 +40,7 @@ const Profile = ({ userCV }) => {
 
       {/* Conditional rendering for download section */}
       {cvFile ? (
-        <div className="mt-4">
+        <div className="mt-4 text-white">
           <h3 className="mb-2">Download CV</h3>
           <button
             onClick={handleDownloadCv}
@@ -49,7 +50,7 @@ const Profile = ({ userCV }) => {
           </button>
         </div>
       ) : (
-        <div className="mt-4 text-gray-400">No CV available for download</div>
+        <div className="mt-4 text-white">No CV available for download</div>
       )}
     </div>
   );

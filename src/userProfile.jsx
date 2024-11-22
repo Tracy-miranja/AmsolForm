@@ -35,7 +35,7 @@ const ProfilePage = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/users/${userId}`,
+          `https://amsol-api.onrender.com/api/users/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -57,7 +57,7 @@ const ProfilePage = () => {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/profile/resume/${userId}`,
+        `https://amsol-api.onrender.com/api/profile/resume/${userId}`,
         formData,
         {
           headers: {
@@ -84,7 +84,7 @@ const ProfilePage = () => {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/profile/picture/${userId}`,
+        `https://amsol-api.onrender.com/api/profile/picture/${userId}`,
         formData,
         {
           headers: {
@@ -131,7 +131,7 @@ const ProfilePage = () => {
       };
 
       await axios.put(
-        `http://localhost:5000/api/profile/${userId}`,
+        `https://amsol-api.onrender.com//api/profile/${userId}`,
         profileData,
         {
           headers: {

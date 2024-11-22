@@ -165,11 +165,11 @@ a:hover {
     opacity: 0;
   }
   50% {
-    transform: rotate(-180deg) scale(0.5);
+    transform: rotate(-360deg) scale(0.5);
     opacity: 1;
   }
   100% {
-    transform: rotate(180deg) scale(1.2);
+    transform: rotate(360deg) scale(1.2);
     opacity: 1;
   }
    
@@ -177,7 +177,7 @@ a:hover {
 
 @keyframes rotateOut {
   0% {
-    transform: rotate(180deg) scale(1.5);
+    transform: rotate(90deg) scale(1.0);
     opacity: 0;
   }
   100% {
@@ -187,7 +187,7 @@ a:hover {
 }
 
 .animate-rotateIn {
-  animation: rotateIn 5s forwards;
+  animation: rotateIn 10s forwards;
 }
 
 .animate-rotateOut {
@@ -285,6 +285,9 @@ input:-webkit-autofill:focus {
   .sectionA{
     height: fit-content;
   }
+  .section{
+    background-repeat: no-repeat;
+  }
 }
 body{
   background-color: #ffffff;
@@ -364,6 +367,11 @@ body{
 
 .animate-roll {
   animation: roll 2s linear infinite;
+}
+
+.shape {
+  background: radial-gradient(circle, #ff6f61, #6b5b95);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 

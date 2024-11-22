@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaBriefcase, FaGraduationCap, FaPlusCircle } from 'react-icons/fa';
+import { FaBriefcase, FaPlusCircle } from 'react-icons/fa';
 
 const Education = ({ education, setEducation }) => {
   const [isFormVisible, setIsFormVisible] = useState(false);

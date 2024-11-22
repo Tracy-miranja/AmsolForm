@@ -464,3 +464,14 @@ setMessage(response.data.message);
       setCv(null);
       setSpecialization("");
       setShowPopup(true); 
+
+      {/* <img
+      src={topimg}
+      className={`absolute h-[4vh] md:h-[7vh] top-4 right-4 md:top-10 md:right-10 ${isHovered ? "invisible" : "visible"} animate-bounce`}
+      alt="vacancy"
+    /> */}
+    {/* <img
+      src={vacancy}
+      className="absolute w-full h-screen"
+      alt="vacancy"
+    /> */}

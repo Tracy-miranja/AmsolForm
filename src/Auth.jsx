@@ -55,7 +55,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
         if (data.role === "nurse") {
           navigate("/NurseForm");
         } else {
-          navigate("/dashboard");
+          navigate("/Formlayout");
         }
         onSuccess();
       } else {
@@ -149,12 +149,16 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
           >
             {loading ? "Loading..." : isLogin ? "Login" : "Signup"}
           </button>
+          <Link to="/forgetPassword" className="flex text-blue-500 hover:underline justify-center">
+              ForgetPassword
+            </Link>
         </form>
         <p className="text-center mt-4">
           {isLogin ? (
             <Link to="/register" className="text-blue-500 hover:underline">
               Create an account
             </Link>
+            
           ) : (
             <Link to="/auth" className="text-blue-500 hover:underline">
               Already have an account? Login

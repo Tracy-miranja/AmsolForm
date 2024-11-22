@@ -9,8 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "./Context/UserContext";
 
 const FormLayout = () => {
-  const { token } = useUser(); 
-  const navigate=useNavigate()
+  const { token } = useUser();
+  const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState("personalDetails");
   const [firstName, setFirstName] = useState("");
   const [secondName, setSecondName] = useState("");
@@ -23,7 +23,7 @@ const FormLayout = () => {
   const [nationality, setNationality] = useState("");
   const [location, setLocation] = useState("");
   const [specialization, setSpecialization] = useState("");
-  const [positionapplied, setPositionapplied]=useState("")
+  const [positionapplied, setPositionapplied] = useState("")
   const [academicLevel, setAcademicLevel] = useState("");
   const [company1, setCompany1] = useState("");
   const [company2, setCompany2] = useState("");
@@ -58,7 +58,7 @@ const FormLayout = () => {
       setLoading(false);
       return;
     }
-  
+
     try {
       const formData = new FormData();
       formData.append("firstName", firstName);
@@ -85,23 +85,23 @@ const FormLayout = () => {
       formData.append("duration3", duration3);
       formData.append("salaryInfo", salaryInfo);
       formData.append("cv", cv);
-  
+
       const response = await axios.post(
         "https://amsol-api.onrender.com/api/applications",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
-          withCredentials: true, 
+          withCredentials: true,
         }
       );
-  
+
       setMessage("Form submitted successfully!");
       setError("");
       setShowPopup(true);
-  
+
       setTimeout(() => {
         setShowPopup(false);
         navigate("/");
@@ -111,7 +111,7 @@ const FormLayout = () => {
       setError(err.response?.data?.message || "Error submitting form");
       setMessage("");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -133,9 +133,9 @@ const FormLayout = () => {
   const handleNextButtonClick = () => {
     if (validateForm()) {
       setIsFormValid(true);
-      setActiveSection("institutionDetails"); 
+      setActiveSection("institutionDetails");
       setIsFormValid(false);
-      setError("Please fill out all required fields before proceeding."); 
+      setError("Please fill out all required fields before proceeding.");
     }
   };
 
@@ -156,8 +156,8 @@ const FormLayout = () => {
               Home
             </Link>
           </div>
-         
-          <div>
+          <div className="flex gap-5">
+            <Link to="/dashboard" className="mt-1 text-white">Profile Dashbaord</Link>
             <HandleLogout />
           </div>
         </div>
@@ -171,7 +171,7 @@ const FormLayout = () => {
                   {cvSubmitted
                     ? "Form succesfully submitted!"
                     : "Successfully Registered!"}
-                    
+
                 </h3>
                 <p className="text-gray-700 mt-2">
                   {cvSubmitted
@@ -182,13 +182,12 @@ const FormLayout = () => {
             </div>
           )}
           {/* Row Links */}
-
           <div className="w-[100%] h-fit shadow-lg rounded-lg flex flex:col md:flex-row">
             <div
               onClick={() => navigateToSection("personalDetails")}
               className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[30%] ${activeSection === "personalDetails"
-                  ? "bg-blue-500 text-white"
-                  : ""
+                ? "bg-blue-500 text-white"
+                : ""
                 } hover:bg-blue-500 hover:text-white`}
             >
               <h2 className="font-bold">1. Personal Details</h2>
@@ -196,8 +195,8 @@ const FormLayout = () => {
             <div
               onClick={handleNextButtonClick}
               className={`cursor-pointer p-1 border-b-2 sm:w-[40%] w-[100%] w-[30%] ${activeSection === "institutionDetails"
-                  ? "bg-blue-500 text-white"
-                  : ""
+                ? "bg-blue-500 text-white"
+                : ""
                 } hover:bg-blue-500 hover:text-white`}
             >
               <h2 className="font-bold">2. Qualifications Details</h2>
@@ -366,7 +365,7 @@ const FormLayout = () => {
                 </div>
                 <div className="mb-4 flex  flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
-                   Position Applied:<span className="text-red-500">*</span>:
+                    Position Applied:<span className="text-red-500">*</span>:
                   </label>
                   <input
                     type="text"
@@ -506,9 +505,9 @@ const FormLayout = () => {
                 {message && <p className="mt-4 text-green-500">{message}</p>}
                 {error && <p className="mt-4 text-red-500">{error}</p>}
               </form>
-  
+
             </div>
-            
+
           )}
 
           {activeSection === "uploadApply" && (
@@ -539,10 +538,10 @@ const FormLayout = () => {
                   </button>
                 </div>
                 {loading && (
-  <div className="spinner-overlay bg-black">
-    <div className="loading-circle"></div>
-  </div>
-)}
+                  <div className="spinner-overlay bg-black">
+                    <div className="loading-circle"></div>
+                  </div>
+                )}
                 {error && <p className="mt-4 text-red-500">{error}</p>}
                 {message && <p className="mt-4 text-green-500">{message}</p>}
               </form>
