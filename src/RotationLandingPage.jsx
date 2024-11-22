@@ -37,8 +37,8 @@ const RotationPandingPage = () => {
           {/* Navbar Section */}
           <div className="w-full flex justify-around items-center p-3 pb-0">
             {/* Logo */}
-            <div className="pl-[7%] mt-4">
-              <img src={logo} alt="hrOutsourcing" className="w-[110px]" />
+            <div className="pl-[10%] lg:mt-4 pb-2">
+              <img src={logo} alt="hrOutsourcing" className="w-[110px] " />
             </div>
 
             {/* Toggle Button for Small Screens */}
@@ -51,27 +51,27 @@ const RotationPandingPage = () => {
 
             {/* Desktop Menu */}
             <div
-              className={`hidden md:flex flex-row items-center gap-5 ${hoveredSection ? "text-white" : "text-[#0A599E]"}`}
+              className={`hidden md:flex flex-row items-center gap-5 ${hoveredSection ? "text-white" : "text-[#087EE3]"}`}
             >
               <Link to="/" className="hover:text-white flex items-center gap-2">
                 <FaHome /> Home
               </Link>
               <Link
                 to="https://www.amsol.africa/about-amsol"
-                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#0A599E]"} hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-white p-2 hover:bg-gray-400 font-semibold`}
               >
                 About
               </Link>
               <Link
                 to="https://www.amsol.africa/job-vacancies"
 
-                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#0A599E]"} hover:text-white p-2 hover:bg-gray-400 font-semibold`}
+                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-white p-2 hover:bg-gray-400 font-semibold`}
               >
                 Jobs
               </Link>
               <Link
                 to="/cv-update"
-                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#0A599E]"} hover:text-blue  border border-blue-900 p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
+                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-blue  border border-blue-900 p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
               >
                 cv-update
               </Link>
@@ -94,24 +94,24 @@ const RotationPandingPage = () => {
               </button>
             </div>
             <div className="p-4 space-y-4">
-              <Link to="/" className="flex items-center gap-2 text-[#0A599E]">
+              <Link to="/" className="flex items-center gap-2 text-[#087EE3]">
                 <FaHome /> Home
               </Link>
               <Link
                 to="https://www.amsol.africa/about-amsol"
-                className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+                className="block text-[#087EE3] hover:bg-gray-200 p-2 rounded"
               >
                 About
               </Link>
               <Link
                 to="https://www.amsol.africa/job-vacancies/"
-                className="block text-[#0A599E] hover:bg-gray-200 p-2 rounded"
+                className="block text-[#087EE3] hover:bg-gray-200 p-2 rounded"
               >
                 Jobs
               </Link>
               <Link
                 to="/cv-update"
-                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#0A599E]"} hover:text-blue  border border-blue-900 p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
+                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-blue  border border-blue-900 p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
               >
                 cv-update
               </Link>
@@ -121,19 +121,19 @@ const RotationPandingPage = () => {
         <div className="flex flex-col h-screen  w-full  md:flex-row p-0">
   {/* First Section */}
   <div
-  className="flex w-full h-[60vh] md:w-[60%] md:h-screen lg:w-[60%] relative items-center  text-center " 
+  className=" flex w-full h-[60vh] md:w-[60%] md:h-screen lg:w-[60%] 
+    relative items-center text-center 
+    ml-[-2%] md:mt-[-3.5%]"
   style={{
     backgroundImage: `url(${vacancy})`,
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'contain',
-    marginLeft: '-2%',  
-    marginTop: '-3.5%',  
-   
   }}
 >
+
 <h1 className="absolute inset-0 flex flex-col items-center justify-center text-4xl font-bold text-gray-100 md:text-3xl lg:text-4xl" style={{
     top: '50%',  
-    left: '30%', 
+    left: '35%', 
     transform: 'translate(-50%, -50%)', 
   }}>
     We’re AMSOL
