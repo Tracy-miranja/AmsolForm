@@ -18,6 +18,7 @@ import Register from "./Register";
 import Profile from "./userProfile";
 import NurseForm from "./NurseForm";
 import Profilepage from "./userdashboard/ProfilePage"
+import JobPage from "./job";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -67,6 +68,7 @@ const App = () => {
           <Route path="/forgetPrompt" element={<ForgetPrompt />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/dashboard" element={<Profilepage />} />
+          <Route path="/Jobs" element={<JobPage />} />
 
           {/* Private Routes */}
           <Route

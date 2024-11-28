@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import axios from 'axios';
+import { useUser } from "../Context/UserContext"
+import toast from 'react-hot-toast';
 import { FaUserAlt, FaCamera, FaPhoneAlt, FaLinkedin, FaMapMarkerAlt, FaLink, FaEdit, FaSave } from 'react-icons/fa';
 
 const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => {
@@ -8,27 +12,82 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
   const [location, setLocation] = useState(user.location || 'New York, USA');
   const [website, setWebsite] = useState(user.website || 'https://johndoe.com');
   const [isEditing, setIsEditing] = useState(false);
+  const [userData, setUserData]=useState({})
+  
+  const { userId, token } = useUser();
 
-  const handleImageChange = (event) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserData(response.data);
+      } catch (error) {
+        toast.error
+      }
+    };
+    fetchData();
+  }, [userId, token]);
+  
+  const handleImageChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePicture(reader.result);
-        if (onUpdateProfilePicture) onUpdateProfilePicture(reader.result);
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append('file', file);
+  
+      try {
+        const response = await axios.put(
+          `http://localhost:5000/api/profile/${userId}`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        // Update the profile picture state with the returned fileId
+        const fileId = response.data.fileId;
+        setProfilePicture(`/api/profile/picture/${fileId}`);
+        toast.success('Profile picture updated successfully!');
+      } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        toast.error('Failed to upload profile picture.');
+      }
     }
   };
-
-  const handleSave = () => {
+  
+  const handleSave = async () => {
     setIsEditing(false);
-    // Send updated data to the backend here
-    if (onUpdateProfileInfo) {
-      onUpdateProfileInfo({ phoneNumber, linkedin, location, website });
+    try {
+      const updatedData = {
+        phoneNumber,
+        linkedin,
+        location,
+        website,
+        profilePicture, // Send the fileId directly
+      };
+  
+      const response = await axios.put(
+        `http://localhost:5000/api/profile/${userId}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      toast.success('Profile updated successfully!');
+      if (onUpdateProfileInfo) onUpdateProfileInfo(response.data.user);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile.');
     }
   };
-
+  
   return (
     <div className="bg-gradient-to-r from-[#25b2e6] to-blue-500 text-white min-h-screen shadow rounded-lg p-6 mb-6 relative">
       <div className="flex flex-col items-center space-x-6 relative">
@@ -38,7 +97,10 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
               className="w-24 h-24 rounded-full border-2 border-gray-300"
               src={profilePicture}
               alt="Profile"
+              onError={(e) => { e.target.src = '/default-profile.png'; }}
             />
+           
+
           ) : (
             <div className="w-24 h-24 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
               <FaUserAlt className="text-gray-500 text-4xl" />
@@ -57,8 +119,8 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
           />
         </div>
         <div className="mt-4">
-          <h2 className="text-2xl font-semibold">{user.name || 'Unknown User'}</h2>
-          <p className="text-white-600">{user.email || 'Unknown email'}</p>
+          <h2 className="text-2xl font-semibold">{userData.username || 'Unknown User'}</h2>
+          <p className="text-white-600">{userData.email || 'Unknown email'}</p>
         </div>
       </div>
 

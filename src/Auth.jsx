@@ -35,8 +35,8 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
 
     try {
       const endpoint = isLogin
-        ? "https://amsol-api.onrender.com/api/login"
-        : "https://amsol-api.onrender.com/api/register";
+        ? "http://localhost:5000/api/login"
+        : "http://localhost:5000/api/register";
 
       const response = await fetch(endpoint, {
         method: "POST",

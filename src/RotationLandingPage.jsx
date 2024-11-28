@@ -63,7 +63,7 @@ const RotationPandingPage = () => {
                 About
               </Link>
               <Link
-                to="https://www.amsol.africa/job-vacancies"
+                to="/Jobs"
 
                 className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-white p-2 hover:bg-gray-400 font-semibold`}
               >
@@ -104,7 +104,7 @@ const RotationPandingPage = () => {
                 About
               </Link>
               <Link
-                to="https://www.amsol.africa/job-vacancies/"
+                to="/Jobs"
                 className="block text-[#087EE3] hover:bg-gray-200 p-2 rounded"
               >
                 Jobs
@@ -187,12 +187,12 @@ const RotationPandingPage = () => {
     onMouseEnter={() => {
       setHoveredSection("signup");
       setIsHovered(true);
-      document.body.classList.add("bg-blue-500"); // Change the background color of the entire page
+      document.body.classList.add("bg-blue-500"); 
     }}
     onMouseLeave={() => {
       setHoveredSection(null);
       setIsHovered(false);
-      document.body.classList.remove("bg-blue-500"); // Reset the background color
+      document.body.classList.remove("bg-blue-500"); 
     }}
   >
     <h1 className={`text-3xl font-extrabold ${isHovered ? "text-white" : "text-[#087EE3]"}`}>

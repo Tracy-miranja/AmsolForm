@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaBriefcase, FaPlusCircle } from 'react-icons/fa';
 
-const Education = ({ education, setEducation }) => {
+const Education = ({ applicationId }) => {
+  const [education, setEducation] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [newEducation, setNewEducation] = useState({
-    institution: '',
-    degree: '',
-    year: '',
+    company: '',
+    position: '',
+    duration: '',
   });
+
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchEducationData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/applications/${applicationId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setEducation(data.workExperience || []); // Set work experience to state
+        } else {
+          console.error('Failed to fetch education data');
+        }
+      } catch (error) {
+        console.error('Error fetching education data:', error);
+      }
+    };
+
+    fetchEducationData();
+  }, [applicationId]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -20,27 +40,27 @@ const Education = ({ education, setEducation }) => {
 
   // Handle form submission
   const handleAddEducation = async () => {
-    if (newEducation.institution && newEducation.degree && newEducation.year) {
+    if (newEducation.company && newEducation.position && newEducation.duration) {
+      const updatedEducation = [...education, newEducation]; // Add new entry to current state
       try {
-        const response = await fetch('/api/education', {
-          method: 'POST',
+        const response = await fetch(`http://localhost:5000/api/applications/${applicationId}`, {
+          method: 'PATCH', // Use PATCH for updating data
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(newEducation),
+          body: JSON.stringify({ workExperience: updatedEducation }),
         });
 
         if (response.ok) {
-          const addedEducation = await response.json();
-          setEducation((prev) => [...prev, addedEducation]); // Update state with new entry
-          setNewEducation({ institution: '', degree: '', year: '' }); // Reset form fields
-          setIsFormVisible(false); // Hide form after submission
+          setEducation(updatedEducation); // Update state on successful API response
+          setNewEducation({ company: '', position: '', duration: '' }); // Reset form
+          setIsFormVisible(false); // Hide form
         } else {
           alert('Failed to add education. Please try again.');
         }
       } catch (error) {
-        console.error('Error adding education:', error);
-        alert('Error adding education');
+        console.error('Error updating education:', error);
+        alert('Error updating education');
       }
     }
   };
@@ -49,7 +69,7 @@ const Education = ({ education, setEducation }) => {
     <div className="bg-white shadow rounded-lg p-6">
       <div className="flex flex-row items-center mb-4">
         <FaBriefcase className="text-blue-400 mr-2" />
-        <h3 className="text-lg">Education</h3>
+        <h3 className="text-lg">Work Experience</h3>
         <FaPlusCircle
           className="text-blue-500 ml-auto cursor-pointer"
           onClick={() => setIsFormVisible(true)}
@@ -62,28 +82,28 @@ const Education = ({ education, setEducation }) => {
       {isFormVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-lg mb-4">Add New Education</h2>
+            <h2 className="text-lg mb-4">Add Work Experience</h2>
             <input
               type="text"
-              name="institution"
-              placeholder="Institution Name"
-              value={newEducation.institution}
+              name="company"
+              placeholder="Company Name"
+              value={newEducation.company}
               onChange={handleInputChange}
               className="bg-gray-200 p-2 rounded-md w-full mb-2"
             />
             <input
               type="text"
-              name="degree"
-              placeholder="Degree"
-              value={newEducation.degree}
+              name="position"
+              placeholder="Position"
+              value={newEducation.position}
               onChange={handleInputChange}
               className="bg-gray-200 p-2 rounded-md w-full mb-2"
             />
             <input
               type="text"
-              name="year"
-              placeholder="Year (e.g., 2021)"
-              value={newEducation.year}
+              name="duration"
+              placeholder="Duration (e.g., 3 years)"
+              value={newEducation.duration}
               onChange={handleInputChange}
               className="bg-gray-200 p-2 rounded-md w-full mb-2"
             />
@@ -108,8 +128,10 @@ const Education = ({ education, setEducation }) => {
       {/* Display education entries */}
       {education.map((edu, index) => (
         <div key={index} className="mb-4">
-          <h3 className="text-lg font-medium">{edu.institution}</h3>
-          <p className="text-gray-600">{edu.degree} - {edu.year}</p>
+          <h3 className="text-lg font-medium">{edu.company}</h3>
+          <p className="text-gray-600">
+            {edu.position} - {edu.duration}
+          </p>
         </div>
       ))}
     </div>
