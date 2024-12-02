@@ -475,3 +475,71 @@ setMessage(response.data.message);
       className="absolute w-full h-screen"
       alt="vacancy"
     /> */}
+
+
+    <div className="mt-4">
+        <ul className="flex flex-col space-y-4">
+          {/* Phone Number Section */}
+          <li className="flex items-center space-x-2">
+            <FaPhoneAlt className="text-blue-500" />
+            {isEditing ? (
+              <input
+                type="text"
+                placeholder="Phone Number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="bg-gray-700 p-2 rounded-md text-white w-full"
+              />
+            ) : (
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{phoneNumber}</p>
+            )}
+          </li>
+          {/* LinkedIn Section */}
+          <li className="flex items-center space-x-2">
+            <FaLinkedin className="text-blue-500" />
+            {isEditing ? (
+              <input
+                type="text"
+                placeholder="LinkedIn Profile"
+                value={linkedin}
+                onChange={(e) => setLinkedin(e.target.value)}
+                className="bg-gray-700 p-2 rounded-md text-white w-full"
+              />
+            ) : (
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{linkedin}</p>
+            )}
+          </li>
+
+          {/* Location Section */}
+          <li className="flex items-center space-x-2">
+            <FaMapMarkerAlt className="text-green-500" />
+            {isEditing ? (
+              <input
+                type="text"
+                placeholder="Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="bg-gray-700 p-2 rounded-md text-white w-full"
+              />
+            ) : (
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{location}</p>
+            )}
+          </li>
+
+          {/* Website Section */}
+          <li className="flex items-center space-x-2">
+            <FaLink className="text-red-500" />
+            {isEditing ? (
+              <input
+                type="text"
+                placeholder="Website"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="bg-gray-700 p-2 rounded-md text-white w-full"
+              />
+            ) : (
+              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{website}</p>
+            )}
+          </li>
+        </ul>
+      </div>

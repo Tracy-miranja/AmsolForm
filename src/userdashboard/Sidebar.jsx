@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from "../Context/UserContext"
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
+import { FaUser, FaBriefcase, FaClipboardList, FaFileAlt} from "react-icons/fa";
 import { FaUserAlt, FaCamera, FaPhoneAlt, FaLinkedin, FaMapMarkerAlt, FaLink, FaEdit, FaSave } from 'react-icons/fa';
 
 const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => {
@@ -34,8 +36,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
     const file = event.target.files[0];
     if (file) {
       const formData = new FormData();
-      formData.append('file', file);
-  
+      formData.append('file', file); 
       try {
         const response = await axios.put(
           `http://localhost:5000/api/profile/${userId}`,
@@ -47,7 +48,6 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
             },
           }
         );
-  
         // Update the profile picture state with the returned fileId
         const fileId = response.data.fileId;
         setProfilePicture(`/api/profile/picture/${fileId}`);
@@ -67,7 +67,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
         linkedin,
         location,
         website,
-        profilePicture, // Send the fileId directly
+        profilePicture, 
       };
   
       const response = await axios.put(
@@ -99,8 +99,6 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
               alt="Profile"
               onError={(e) => { e.target.src = '/default-profile.png'; }}
             />
-           
-
           ) : (
             <div className="w-24 h-24 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
               <FaUserAlt className="text-gray-500 text-4xl" />
@@ -125,7 +123,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
       </div>
 
       {/* Edit Icon */}
-      <div className="flex justify-end mt-4">
+      {/* <div className="flex justify-end mt-4">
         {!isEditing ? (
           <button onClick={() => setIsEditing(true)} className="text-white hover:text-gray-300">
             <FaEdit className="text-xl" />
@@ -135,75 +133,26 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
             <FaSave className="text-xl" />
           </button>
         )}
-      </div>
+      </div> */}
+      
+      <div className="flex flex-col justify-center pl-6  gap-4 mt-5">
+      
+      <Link to="/dashboard" className="flex items-center space-x-4">
+        <FaUser className="text-black text-2xl" />
+        <span className="mt-2 text-white font-bold">Profile</span>
+      </Link>
+      
+     
+      <Link to="/applications" className="flex items-center space-x-4">
+        <FaBriefcase className="text-black text-2xl" />
+        <span className="mt-2 text-white text-sm font-bold">Application</span>
+      </Link>
 
-      <div className="mt-4">
-        <ul className="flex flex-col space-y-4">
-          {/* Phone Number Section */}
-          <li className="flex items-center space-x-2">
-            <FaPhoneAlt className="text-blue-500" />
-            {isEditing ? (
-              <input
-                type="text"
-                placeholder="Phone Number"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="bg-gray-700 p-2 rounded-md text-white w-full"
-              />
-            ) : (
-              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{phoneNumber}</p>
-            )}
-          </li>
-
-          {/* LinkedIn Section */}
-          <li className="flex items-center space-x-2">
-            <FaLinkedin className="text-blue-500" />
-            {isEditing ? (
-              <input
-                type="text"
-                placeholder="LinkedIn Profile"
-                value={linkedin}
-                onChange={(e) => setLinkedin(e.target.value)}
-                className="bg-gray-700 p-2 rounded-md text-white w-full"
-              />
-            ) : (
-              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{linkedin}</p>
-            )}
-          </li>
-
-          {/* Location Section */}
-          <li className="flex items-center space-x-2">
-            <FaMapMarkerAlt className="text-green-500" />
-            {isEditing ? (
-              <input
-                type="text"
-                placeholder="Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="bg-gray-700 p-2 rounded-md text-white w-full"
-              />
-            ) : (
-              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{location}</p>
-            )}
-          </li>
-
-          {/* Website Section */}
-          <li className="flex items-center space-x-2">
-            <FaLink className="text-red-500" />
-            {isEditing ? (
-              <input
-                type="text"
-                placeholder="Website"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                className="bg-gray-700 p-2 rounded-md text-white w-full"
-              />
-            ) : (
-              <p className="bg-gradient-to-r from-[#25b2e6] to-blue-500 p-2 rounded-md text-white w-full">{website}</p>
-            )}
-          </li>
-        </ul>
-      </div>
+      <Link to="/Profilepage" className="flex items-center space-x-4">
+        <FaFileAlt className="text-black text-2xl" />
+        <span className="mt-2 text-white text-sm font-bold">Career</span>
+      </Link>
+    </div>
     </div>
   );
 };

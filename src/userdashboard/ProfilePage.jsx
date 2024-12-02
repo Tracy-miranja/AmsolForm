@@ -31,10 +31,9 @@ const ProfilePage = () => {
           return;
         }
 
-        // Fetch user profile using the userId and token for authentication
         const response = await fetch(`http://localhost:5000/api/profile/${userId}`, {
           headers: {
-            'Authorization': `Bearer ${token}`, // Pass the token for secure access
+            'Authorization': `Bearer ${token}`, 
           },
         });
 

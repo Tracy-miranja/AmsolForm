@@ -56,18 +56,19 @@ const RotationPandingPage = () => {
               <Link to="/" className="hover:text-white flex items-center gap-2">
                 <FaHome /> Home
               </Link>
-              <Link
-                to="https://www.amsol.africa/about-amsol"
-                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-white p-2 hover:bg-gray-400 font-semibold`}
-              >
-                About
-              </Link>
+              
               <Link
                 to="/Jobs"
 
                 className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-white p-2 hover:bg-gray-400 font-semibold`}
               >
                 Jobs
+              </Link>
+              <Link
+                to="/dashboard"
+                className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-blue   p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
+              >
+                Dashboard
               </Link>
               <Link
                 to="/cv-update"

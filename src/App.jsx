@@ -19,6 +19,8 @@ import Profile from "./userProfile";
 import NurseForm from "./NurseForm";
 import Profilepage from "./userdashboard/ProfilePage"
 import JobPage from "./job";
+import UserDashbaord from "./userdashboard/userDashboard";
+import Application from "./userdashboard/Application";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -63,11 +65,13 @@ const App = () => {
               />
             }
           />
+          <Route path="/applications" element={<Application/>}/>
+          <Route path="/dashboard" element={<UserDashbaord />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgetPassword" element={<ForgetPassword />} />
           <Route path="/forgetPrompt" element={<ForgetPrompt />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/dashboard" element={<Profilepage />} />
+          <Route path="/Profilepage" element={<Profilepage />} />
           <Route path="/Jobs" element={<JobPage />} />
 
           {/* Private Routes */}
