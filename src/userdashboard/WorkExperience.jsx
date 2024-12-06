@@ -18,7 +18,7 @@ const WorkExperience = ({ userId, setExperiences }) => {
     const fetchExperiences = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/profile/${userId}`);
+        const response = await fetch(`https://amsol-api-2.onrender.com/api/profile/${userId}`);
         if (response.ok) {
           const data = await response.json();
           if (data && data.work_experience) {
@@ -58,7 +58,7 @@ const WorkExperience = ({ userId, setExperiences }) => {
       try {
         if (editingIndex !== null) {
           // Update existing experience
-          const response = await fetch(`http://localhost:5000/api/profile/${userId}/experiences/${experiences[editingIndex]._id}`, {
+          const response = await fetch(`https://amsol-api-2.onrender.com/api/profile/${userId}/experiences/${experiences[editingIndex]._id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const WorkExperience = ({ userId, setExperiences }) => {
           }
         } else {
           // Add new experience
-          const response = await fetch(`http://localhost:5000/api/users/${userId}/profile`, {
+          const response = await fetch(`https://amsol-api-2.onrender.com/api/users/${userId}/profile`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -92,7 +92,7 @@ const FormLayout = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
+            
           },
           withCredentials: true,
         }
@@ -410,7 +410,7 @@ const FormLayout = () => {
 
                   <div>
                     <div className=" ">
-
+                     <p className="pb-2">Please fill in the details of the last three companies you have worked for, starting with the most recent (current employer) and moving backward to the previous two.</p>
                       <input
                         type="text"
                         placeholder="Company 1"

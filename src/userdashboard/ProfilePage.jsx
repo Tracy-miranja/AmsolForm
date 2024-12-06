@@ -31,7 +31,7 @@ const ProfilePage = () => {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+        const response = await fetch(`https://amsol-api-2.onrender.com/api/profile/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`, 
           },

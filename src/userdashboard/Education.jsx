@@ -14,7 +14,7 @@ const Education = ({ applicationId }) => {
   useEffect(() => {
     const fetchEducationData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/applications/${applicationId}`);
+        const response = await fetch(`https://amsol-api-2.onrender.com/api/applications/${applicationId}`);
         if (response.ok) {
           const data = await response.json();
           setEducation(data.workExperience || []); // Set work experience to state
@@ -43,7 +43,7 @@ const Education = ({ applicationId }) => {
     if (newEducation.company && newEducation.position && newEducation.duration) {
       const updatedEducation = [...education, newEducation]; // Add new entry to current state
       try {
-        const response = await fetch(`http://localhost:5000/api/applications/${applicationId}`, {
+        const response = await fetch(`https://amsol-api-2.onrender.com/api/applications/${applicationId}`, {
           method: 'PATCH', // Use PATCH for updating data
           headers: {
             'Content-Type': 'application/json',
