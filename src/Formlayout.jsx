@@ -402,7 +402,6 @@ const FormLayout = () => {
                   </select>
                 </div>
                 {/* //workexperience part */}
-
                 <div className="mb-4 flex  flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     WorkExperience<span className="text-red-500">*</span>:
