@@ -10,7 +10,7 @@ function classNames(...classes) {
 }
 
 const ProfileXPage = () => {
-  const { userId, token } = useUser(); // Get userId and token from context
+  const { userId, token } = useUser(); 
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",

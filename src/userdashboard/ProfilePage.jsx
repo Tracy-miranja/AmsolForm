@@ -22,7 +22,6 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        // Retrieve the userId from cookies
         const userId = Cookies.get('userId');
         const token = Cookies.get('token');
 
