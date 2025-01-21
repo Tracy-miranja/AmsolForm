@@ -13,7 +13,7 @@ const HandleLogout = () => {
       console.log("Current cookies before logout:", Cookies.get());
 
     
-      await axios.post("https://amsol-api-2.onrender.com/logout", {}, { withCredentials: true });
+      await axios.post("https://amsol-api-3.onrender.com/logout", {}, { withCredentials: true });
 
       Cookies.remove("token");
       Cookies.remove("authToken");

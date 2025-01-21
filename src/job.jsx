@@ -27,7 +27,7 @@ const JobPage = () => {
   const [location, setLocation] = useState("");
 
   const fetchJobs = () => {
-    const apiUrl = "https://amsol-api-2.onrender.com/api/jobs";
+    const apiUrl = "https://amsol-api-3.onrender.com/api/jobs";
   
     fetch(apiUrl)
       .then((response) => {

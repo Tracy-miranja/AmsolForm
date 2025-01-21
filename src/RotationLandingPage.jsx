@@ -64,12 +64,12 @@ const RotationPandingPage = () => {
               >
                 Jobs
               </Link>
-              <Link
+              {/* <Link
                 to="/dashboard"
                 className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-blue   p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}
               >
                 Dashboard
-              </Link>
+              </Link> */}
               <Link
                 to="/cv-update"
                 className={`rounded-full ${hoveredSection ? "text-white" : "text-[#087EE3]"} hover:text-blue  border border-blue-900 p-1 pl-4 pr-4 hover:bg-gray-400 font-semibold`}

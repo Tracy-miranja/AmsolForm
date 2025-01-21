@@ -35,9 +35,10 @@ const FormLayout = () => {
   const [duration2, setDuration2] = useState("");
   const [position3, setPosition3] = useState("");
   const [duration3, setDuration3] = useState("");
-
+  const [hasDrivingLicence, setHasDrivingLicence] = useState("")
   const [salaryInfo, setSalaryInfo] = useState("");
   const [cv, setCv] = useState(null);
+  const [PassportNo, setPassportNo] = useState("")
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [showPopup, setShowPopup] = useState(false);
@@ -84,15 +85,17 @@ const FormLayout = () => {
       formData.append("position3", position3);
       formData.append("duration3", duration3);
       formData.append("salaryInfo", salaryInfo);
+      formData.append("hasDrivingLicence", hasDrivingLicence)
+      formData.append("PassportNo", PassportNo)
       formData.append("cv", cv);
 
       const response = await axios.post(
-        "http://localhost:5000/api/applications",
+        "https://amsol-api-3.onrender.com/api/applications",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            
+            Authorization: `Bearer ${token}`
           },
           withCredentials: true,
         }
@@ -289,6 +292,34 @@ const FormLayout = () => {
                 </div>
                 <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
+                    Passport No.<span className="text-red-500">*</span>:
+                  </label>
+                  <input
+                    type="tel"
+                    value={PassportNo}
+                    onChange={(e) => setPassportNo(e.target.value)}
+                    required
+                    className="w-full p-2 border rounded text-black bg-gray-100"
+                  />
+                </div>
+                <div className="mb-4 flex flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
+                    Availability of driving licence<span className="text-red-500">*</span>:
+                  </label>
+                  <select
+                    value={hasDrivingLicence}
+                    onChange={(e) => setHasDrivingLicence(e.target.value)}
+                    required
+                    className="w-full p-2 border rounded text-black bg-gray-100"
+                  >
+                    <option value="" disabled>Select an option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+
+                <div className="mb-4 flex flex-row">
+                  <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
                     Email<span className="text-red-500">*</span>:
                   </label>
                   <input
@@ -409,7 +440,7 @@ const FormLayout = () => {
 
                   <div>
                     <div className=" ">
-                     <p className="pb-2">Please fill in the details of the last three companies you have worked for, starting with the most recent (current employer) and moving backward to the previous two.</p>
+                      <p className="pb-2">Please fill in the details of the last three companies you have worked for, starting with the most recent (current employer) and moving backward to the previous two.</p>
                       <input
                         type="text"
                         placeholder="Company 1"
@@ -513,10 +544,12 @@ const FormLayout = () => {
             <div className="w-full bg-white p-6 shadow-lg rounded-lg">
               <form onSubmit={handleSubmit}>
                 {/* CV Upload Field */}
+                <p className="mb-2 text-lg">Please upload the required documents, such as your resume or any other relevant materials, consolidated into a single PDF file.</p>
                 <div className="mb-4 flex flex-row">
                   <label className="block text-black sm:w-[100%] md:w-[15%] font-semibold">
-                    Upload CV<span className="text-red-500">*</span>:
+                    Upload documents<span className="text-red-500">*</span>:
                   </label>
+
                   <input
                     type="file"
                     accept=".pdf,.doc,.docx"

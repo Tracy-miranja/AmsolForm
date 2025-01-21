@@ -49,10 +49,10 @@ const Certificates = ({ certificates = [], setCertificates }) => {
         });
 
         if (response.ok) {
-          const addedCertificate = await response.json(); // Assuming the backend returns the added certificate
-          setCertificates((prev) => [...prev, addedCertificate]); // Update frontend with the new certificate
-          setNewCertificate({ name: '', organization: '', date: '', file: null }); // Reset form fields
-          setIsFormVisible(false); // Hide the form after saving
+          const addedCertificate = await response.json(); 
+          setCertificates((prev) => [...prev, addedCertificate]); 
+          setNewCertificate({ name: '', organization: '', date: '', file: null }); 
+          setIsFormVisible(false); 
         } else {
           alert('Failed to save the certificate. Please try again.');
         }

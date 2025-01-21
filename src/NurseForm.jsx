@@ -73,7 +73,7 @@ const [loading, setLoading] = useState(false);
       formData.append("cv", cv);
   
       const response = await axios.post(
-        "https://amsol-api-2.onrender.com/api/nurse-applications",
+        "https://amsol-api-3.onrender.com/api/nurse-applications",
         formData,
         {
           headers: {
