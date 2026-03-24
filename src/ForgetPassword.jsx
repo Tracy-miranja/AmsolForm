@@ -10,7 +10,7 @@ const ForgetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("https://amsol-api-3.onrender.com/forgot-password", {
+      await axios.post("https://amsol-api-production.up.railway.app/forgot-password", {
         email,
       });
       toast.success("Reset link sent to your email!");

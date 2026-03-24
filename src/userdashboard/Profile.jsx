@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useUser } from "../Context/UserContext";
 
 const Profile = ({ userCV = null }) => {
-  const [cvFileId, setCvFileId] = useState(userCV); // Initialize with existing CV ID
+  const [cvFileId, setCvFileId] = useState(userCV);
   const [newCvFile, setNewCvFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -21,7 +21,7 @@ const Profile = ({ userCV = null }) => {
 
     try {
       setIsUploading(true);
-      const response = await fetch(`https://amsol-api-2.onrender.com/api/applications/cv/${userId}`, {
+      const response = await fetch(`https://amsol-api-production.up.railway.app/api/applications/cv/${userId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -31,7 +31,7 @@ const Profile = ({ userCV = null }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setCvFileId(data.cvId); // Update CV ID after upload
+        setCvFileId(data.cvId); 
         alert("CV uploaded successfully!");
       } else {
         const error = await response.json();
@@ -53,7 +53,7 @@ const Profile = ({ userCV = null }) => {
     }
 
     try {
-      const response = await fetch(`https://amsol-api-2.onrender.com/api/user/${userId}/cv`, {
+      const response = await fetch(`https://amsol-api-production.up.railway.app/api/user/${userId}/cv`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

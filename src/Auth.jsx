@@ -35,8 +35,8 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
 
     try {
       const endpoint = isLogin
-        ? "https://amsol-api-3.onrender.com/api/login"
-        : "https://amsol-api-3.onrender.com/api/register";
+        ? "https://amsol-api-production.up.railway.app/api/login"
+        : "https://amsol-api-production.up.railway.app/api/register";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -83,21 +83,22 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700">Full Name</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
+                placeholder="Enter Full Names i.e John Doe"
                 required
-                className="w-full px-4 py-2 border rounded-md focus:outline-none"
+                className="w-full px-4 py-2 border rounded-md focus:outline-none bg-gray-50 text-gray-700"
               />
-              
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">Select Role</label>
               <select
                 id="role"
                 name="role" 
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none"
+                className="w-full px-4 py-2 border rounded-md focus:outline-none bg-gray-50 text-gray-700"
                 required
               >
               <option value="nurse">Nurse</option>
@@ -106,14 +107,16 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
               </select>
             </>
           )}
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700"
           />
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -121,7 +124,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700"
             />
             <button
               type="button"
@@ -131,14 +134,16 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
               {showPassword ? <FiEyeOff /> : <FiEye />}
             </button>
           </div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
           {!isLogin && (
+            
             <input
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm Password"
               required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700"
             />
           )}
           <button

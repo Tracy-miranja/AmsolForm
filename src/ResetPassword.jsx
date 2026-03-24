@@ -12,7 +12,7 @@ const ResetPassword = () => {
   const handleReset = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://amsol-api-3.onrender.com/reset-password', { token, password });
+      await axios.post('https://amsol-api-production.up.railway.app/reset-password', { token, password });
       toast.success("Password reset successfully!");
       navigate('/auth');
     } catch (error) {

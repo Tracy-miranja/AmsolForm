@@ -30,7 +30,7 @@ const ProfilePage = () => {
           return;
         }
 
-        const response = await fetch(`https://amsol-api-2.onrender.com/api/profile/${userId}`, {
+        const response = await fetch(`https://amsol-api-production.up.railway.app/api/profile/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`, 
           },

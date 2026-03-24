@@ -21,7 +21,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://amsol-api-2.onrender.com/api/users/${userId}`, {
+        const response = await axios.get(`https://amsol-api-production.up.railway.app/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserData(response.data);
@@ -39,7 +39,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
       formData.append('file', file); 
       try {
         const response = await axios.put(
-          `https://amsol-api-2.onrender.com/api/profile/${userId}`,
+          `https://amsol-api-production.up.railway.app/api/profile/${userId}`,
           formData,
           {
             headers: {
@@ -71,7 +71,7 @@ const Sidebar = ({ user = {}, onUpdateProfilePicture, onUpdateProfileInfo }) => 
       };
   
       const response = await axios.put(
-        `https://amsol-api-2.onrender.com/api/profile/${userId}`,
+        `https://amsol-api-production.up.railway.app/api/profile/${userId}`,
         updatedData,
         {
           headers: {

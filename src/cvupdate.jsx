@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
@@ -14,7 +14,7 @@ const UpdateCV = () => {
   // Fetch user ID from cookie-stored session
 const fetchUserId = async () => {
   try {
-    const response = await axios.get("https://amsol-api-3.onrender.com/api/users/me", {
+    const response = await axios.get("https://amsol-api-production.up.railway.app/api/users/me", {
       withCredentials: true, // Ensure cookies are sent with the request
     });
 
@@ -49,7 +49,7 @@ const fetchUserId = async () => {
 
     try {
       const response = await axios.put(
-        `https://amsol-api-3.onrender.com/api/users/${userId}/cv`,
+        `https://amsol-api-production.up.railway.app/api/users/${userId}/cv`,
         formData,
         {
           headers: {
@@ -70,7 +70,7 @@ const fetchUserId = async () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("https://amsol-api-3.onrender.com/api/login", {
+      const response = await axios.post("https://amsol-api-production.up.railway.app/api/login", {
         email,
         password,
       }, { withCredentials: true });

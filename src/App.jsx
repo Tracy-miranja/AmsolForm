@@ -21,6 +21,7 @@ import Profilepage from "./userdashboard/ProfilePage"
 import JobPage from "./job";
 import UserDashbaord from "./userdashboard/userDashboard";
 import Application from "./userdashboard/Application";
+import UserProfileDashboard from "./Userprofiledashboard";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -66,6 +67,7 @@ const App = () => {
             }
           />
           <Route path="/applications" element={<Application/>}/>
+          <Route path="/profile" element={<UserProfileDashboard />} />
           <Route path="/dashboard" element={<UserDashbaord />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgetPassword" element={<ForgetPassword />} />

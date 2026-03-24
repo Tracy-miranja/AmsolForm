@@ -67,14 +67,15 @@ const Navbar = () => {
           >
             Jobs
           </Link>
-          <Link
+          <Link to="/profile">My Profile</Link>
+          {/* <Link
             to="/signupform"
             className={`rounded-full ${
               hoveredSection ? "text-white" : "text-[#0A599E]"
             } hover:text-white hover:-mt-2 p-1 pl-2 pr-2 hover:bg-gray-400 font-semibold`}
           >
             Career
-          </Link>
+          </Link> */}
         </div>
       </div>
 
@@ -99,19 +100,20 @@ const Navbar = () => {
           >
             Jobs
           </Link>
-          <Link
+          <Link to="/profile">My Profile</Link>
+          {/* <Link
             to="/signupform"
             className="text-[#0A599E] hover:text-white hover:bg-gray-400 p-2 rounded-md w-full"
           >
             Career
-          </Link>
-          <Link
+          </Link> */}
+          {/* <Link
             to="/cvupdate"
             className="flex gap-2 items-center justify-start bg-white rounded-full border border-blue-900 text-[#0A599E] p-1 pl-2 pr-2 hover:bg-gray-400 hover:text-white font-bold w-full"
           >
             <span>Update CV</span>
             <img src={arrow} className="w-5 h-5" alt="Arrow" />
-          </Link>
+          </Link> */}
         </div>
       )}
     </div>
