@@ -22,6 +22,7 @@ import JobPage from "./job";
 import UserDashbaord from "./userdashboard/userDashboard";
 import Application from "./userdashboard/Application";
 import UserProfileDashboard from "./Userprofiledashboard";
+import { JobProvider } from "./JobContext";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -51,6 +52,7 @@ const App = () => {
 
   return (
     <UserProvider>
+      <JobProvider>
       <Toaster position="top-right" reverseOrder={false} />
       <Router>
         <Routes>
@@ -134,6 +136,7 @@ const App = () => {
           />
         </Routes>
       </Router>
+      </JobProvider>
     </UserProvider>
   );
 };
