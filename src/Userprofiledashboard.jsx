@@ -1,12 +1,13 @@
-// UserProfileDashboard.jsx
-// Mount at /profile route.
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "./Context/UserContext";
-import HandleLogout from "./logout";
 import Dashboard from "./Dashboard";
+import { useSavedJobs } from "../hooks/useSavedJobs";
+import {SavedJobsPanel} from "./components/SavedJobsPanel";
+import { SaveJobButton } from "./savedjobs/SaveJobButton";
+import ApplicationsPage from "./components/ApplicationsPage";
+import JobSettingsPage from "./components/JobSettingsPage";
 
 const API = "https://amsol-api-production.up.railway.app/api";
 
@@ -135,6 +136,270 @@ const NavItem = ({ icon, label, active, badge, onClick }) => (
   </button>
 );
 
+// ─── Country data hook ────────────────────────────────────────────────────────
+function useCountries() {
+  const [countries, setCountries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://restcountries.com/v3.1/all?fields=name,idd,flags,capital,region,subregion,cca2")
+      .then((r) => r.json())
+      .then((data) => {
+        const list = data
+          .map((c) => {
+            const root = c.idd?.root || "";
+            const suffix = c.idd?.suffixes?.[0] || "";
+            const dialCode = root && suffix ? `${root}${suffix}` : root || "";
+            return {
+              name: c.name.common,
+              cca2: c.cca2,
+              flag: c.flags?.emoji || "",
+              dialCode,
+              capital: c.capital?.[0] || "",
+              region: c.region || "",
+            };
+          })
+          .filter((c) => c.dialCode)
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setCountries(list);
+      })
+      .catch(() => {
+        // Fallback list if API is unreachable
+        setCountries([
+          { name: "Kenya", cca2: "KE", flag: "🇰🇪", dialCode: "+254", capital: "Nairobi", region: "Africa" },
+          { name: "Uganda", cca2: "UG", flag: "🇺🇬", dialCode: "+256", capital: "Kampala", region: "Africa" },
+          { name: "Tanzania", cca2: "TZ", flag: "🇹🇿", dialCode: "+255", capital: "Dodoma", region: "Africa" },
+          { name: "United States", cca2: "US", flag: "🇺🇸", dialCode: "+1", capital: "Washington D.C.", region: "Americas" },
+          { name: "United Kingdom", cca2: "GB", flag: "🇬🇧", dialCode: "+44", capital: "London", region: "Europe" },
+          { name: "South Africa", cca2: "ZA", flag: "🇿🇦", dialCode: "+27", capital: "Pretoria", region: "Africa" },
+          { name: "Nigeria", cca2: "NG", flag: "🇳🇬", dialCode: "+234", capital: "Abuja", region: "Africa" },
+          { name: "India", cca2: "IN", flag: "🇮🇳", dialCode: "+91", capital: "New Delhi", region: "Asia" },
+          { name: "Canada", cca2: "CA", flag: "🇨🇦", dialCode: "+1", capital: "Ottawa", region: "Americas" },
+          { name: "Australia", cca2: "AU", flag: "🇦🇺", dialCode: "+61", capital: "Canberra", region: "Oceania" },
+        ]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { countries, loading };
+}
+
+// ─── Nationality searchable dropdown ─────────────────────────────────────────
+const NationalitySelect = ({ value, onChange, countries, loading }) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef();
+  const searchRef = useRef();
+
+  const selected = countries.find((c) => c.name === value);
+  const filtered = search.trim()
+    ? countries.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+    : countries;
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const select = (country) => { onChange(country); setSearch(""); setOpen(false); };
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => { setOpen((o) => !o); setTimeout(() => searchRef.current?.focus(), 50); }}
+        className={inputCls + " flex items-center gap-2 text-left cursor-pointer"}
+        style={{ justifyContent: "space-between" }}
+      >
+        {loading ? (
+          <span style={{ color: "#9090a8" }}>Loading countries…</span>
+        ) : selected ? (
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 16 }}>{selected.flag}</span>
+            <span>{selected.name}</span>
+          </span>
+        ) : (
+          <span style={{ color: "#9090a8" }}>Select nationality…</span>
+        )}
+        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"
+          style={{ color: "#9090a8", flexShrink: 0, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 200,
+          background: "#fff", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12)", overflow: "hidden",
+        }}>
+          <div style={{ padding: "8px 10px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Search country…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: "100%", padding: "6px 10px", borderRadius: 8,
+                border: "1px solid rgba(0,0,0,0.1)", background: "#f8f9fc",
+                fontSize: 13, outline: "none", color: "#1a1a2e",
+              }}
+            />
+          </div>
+          <div style={{ maxHeight: 220, overflowY: "auto" }}>
+            {filtered.length === 0 ? (
+              <div style={{ padding: "12px 14px", fontSize: 13, color: "#9090a8" }}>No results</div>
+            ) : filtered.map((c) => (
+              <button
+                key={c.cca2}
+                type="button"
+                onClick={() => select(c)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  width: "100%", padding: "8px 14px", textAlign: "left",
+                  background: selected?.cca2 === c.cca2 ? "#e8f1fd" : "transparent",
+                  border: "none", cursor: "pointer", fontSize: 13.5, color: "#1a1a2e",
+                  transition: "background 0.1s",
+                }}
+                onMouseEnter={(e) => { if (selected?.cca2 !== c.cca2) e.currentTarget.style.background = "#f4f6fb"; }}
+                onMouseLeave={(e) => { if (selected?.cca2 !== c.cca2) e.currentTarget.style.background = "transparent"; }}
+              >
+                <span style={{ fontSize: 16, flexShrink: 0 }}>{c.flag}</span>
+                <span style={{ flex: 1 }}>{c.name}</span>
+                <span style={{ fontSize: 12, color: "#9090a8", flexShrink: 0 }}>{c.dialCode}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Phone input with country code picker ─────────────────────────────────────
+const PhoneInput = ({ value, onChange, countries, selectedDialCode, onDialCodeChange, placeholder }) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef();
+  const searchRef = useRef();
+
+  // Extract just the number portion (strip leading dial code)
+  const numberOnly = (() => {
+    if (!value) return "";
+    if (selectedDialCode && value.startsWith(selectedDialCode)) {
+      return value.slice(selectedDialCode.length).trimStart();
+    }
+    return value.replace(/^\+\d{1,4}\s?/, "");
+  })();
+
+  const selectedCountry = countries.find((c) => c.dialCode === selectedDialCode && c.flag);
+  const filtered = search.trim()
+    ? countries.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.dialCode.includes(search))
+    : countries;
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) { setOpen(false); setSearch(""); } };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selectCode = (country) => {
+    onDialCodeChange(country.dialCode);
+    onChange(`${country.dialCode} ${numberOnly}`);
+    setOpen(false);
+    setSearch("");
+  };
+
+  const handleNumberChange = (e) => {
+    const num = e.target.value.replace(/[^\d\s\-()+]/g, "");
+    onChange(selectedDialCode ? `${selectedDialCode} ${num}` : num);
+  };
+
+  return (
+    <div ref={ref} style={{ display: "flex", gap: 6 }}>
+      {/* Dial code button */}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <button
+          type="button"
+          onClick={() => { setOpen((o) => !o); setTimeout(() => searchRef.current?.focus(), 50); }}
+          style={{
+            display: "flex", alignItems: "center", gap: 5, padding: "8px 10px",
+            borderRadius: 9, border: "1px solid rgba(0,0,0,0.1)", background: "#f8f9fc",
+            fontSize: 13, cursor: "pointer", color: "#1a1a2e", whiteSpace: "nowrap",
+            height: "100%",
+          }}
+        >
+          <span style={{ fontSize: 15 }}>{selectedCountry?.flag || "🌍"}</span>
+          <span style={{ fontWeight: 500 }}>{selectedDialCode || "+?"}</span>
+          <svg viewBox="0 0 20 20" fill="currentColor" width="11" height="11"
+            style={{ color: "#9090a8", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+
+        {open && (
+          <div style={{
+            position: "absolute", top: "calc(100% + 4px)", left: 0, zIndex: 200, width: 250,
+            background: "#fff", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.12)", overflow: "hidden",
+          }}>
+            <div style={{ padding: "8px 10px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+              <input
+                ref={searchRef}
+                type="text"
+                placeholder="Search country…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{
+                  width: "100%", padding: "6px 10px", borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.1)", background: "#f8f9fc",
+                  fontSize: 13, outline: "none", color: "#1a1a2e",
+                }}
+              />
+            </div>
+            <div style={{ maxHeight: 200, overflowY: "auto" }}>
+              {filtered.map((c) => (
+                <button
+                  key={c.cca2}
+                  type="button"
+                  onClick={() => selectCode(c)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    width: "100%", padding: "7px 12px", textAlign: "left",
+                    background: selectedDialCode === c.dialCode && selectedCountry?.cca2 === c.cca2 ? "#e8f1fd" : "transparent",
+                    border: "none", cursor: "pointer", fontSize: 13, color: "#1a1a2e",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f4f6fb"; }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background =
+                      selectedDialCode === c.dialCode && selectedCountry?.cca2 === c.cca2 ? "#e8f1fd" : "transparent";
+                  }}
+                >
+                  <span style={{ fontSize: 15 }}>{c.flag}</span>
+                  <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
+                  <span style={{ color: "#1a6edb", fontWeight: 500, flexShrink: 0 }}>{c.dialCode}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Number field */}
+      <input
+        type="tel"
+        placeholder={placeholder || "Phone number"}
+        value={numberOnly}
+        onChange={handleNumberChange}
+        className={inputCls}
+        style={{ flex: 1 }}
+      />
+    </div>
+  );
+};
+
 // ─── Quick Apply Modal ────────────────────────────────────────────────────────
 const QuickApplyModal = ({ onClose, savedCvName, token }) => {
   const [position, setPosition] = useState("");
@@ -228,32 +493,195 @@ const QuickApplyModal = ({ onClose, savedCvName, token }) => {
   );
 };
 
-// ─── Personal Info Modal ──────────────────────────────────────────────────────
-const PersonalModal = ({ form, onChange, onClose, onSave, saving, saveMsg }) => (
-  <Modal title="Edit Personal Details" subtitle="Update your personal information" onClose={onClose} onSave={onSave} saving={saving}>
-    {saveMsg && (
-      <p className={`text-sm font-medium ${saveMsg.includes("success") ? "text-green-600" : "text-red-500"}`}>{saveMsg}</p>
-    )}
-    <MF label="First Name *"><Inp type="text" placeholder="Enter first name" value={form.firstName || ""} onChange={e => onChange("firstName", e.target.value)} /></MF>
-    <MF label="Second Name *"><Inp type="text" placeholder="Enter second name" value={form.secondName || ""} onChange={e => onChange("secondName", e.target.value)} /></MF>
-    <MF label="Last Name *"><Inp type="text" placeholder="Enter last name" value={form.lastName || ""} onChange={e => onChange("lastName", e.target.value)} /></MF>
-    <MF label="ID Number *"><Inp type="text" placeholder="Enter ID number" value={form.idNumber || ""} onChange={e => onChange("idNumber", e.target.value)} /></MF>
-    <MF label="WhatsApp No. *"><Inp type="tel" placeholder="Enter WhatsApp number" value={form.whatsAppNo || ""} onChange={e => onChange("whatsAppNo", e.target.value)} /></MF>
-    <MF label="Phone Number *"><Inp type="tel" placeholder="Enter phone number" value={form.phoneNumber || ""} onChange={e => onChange("phoneNumber", e.target.value)} /></MF>
-    <MF label="Passport No. *"><Inp type="text" placeholder="Enter passport number" value={form.PassportNo || ""} onChange={e => onChange("PassportNo", e.target.value)} /></MF>
-    <MF label="Availability of Driving Licence *">
-      <Sel value={form.hasDrivingLicence || ""} onChange={e => onChange("hasDrivingLicence", e.target.value)}>
-        <option value="">Select an option</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </Sel>
-    </MF>
-    <MF label="Email *"><Inp type="email" placeholder="Enter email" value={form.email || ""} onChange={e => onChange("email", e.target.value)} /></MF>
-    <MF label="Age *"><Inp type="number" placeholder="Enter age" value={form.age || ""} onChange={e => onChange("age", e.target.value)} /></MF>
-    <MF label="Nationality *"><Inp type="text" placeholder="Enter nationality" value={form.nationality || ""} onChange={e => onChange("nationality", e.target.value)} /></MF>
-    <MF label="Location *"><Inp type="text" placeholder="Enter location" value={form.location || ""} onChange={e => onChange("location", e.target.value)} /></MF>
-  </Modal>
-);
+// ─── Personal Info Modal (with nationality dropdown, location auto-fill, phone codes) ──
+const PersonalModal = ({ form, onChange, onClose, onSave, saving, saveMsg }) => {
+  const { countries, loading } = useCountries();
+
+  // Helper: extract dial code from a stored phone string
+  const extractDialCode = useCallback((phone, countryList) => {
+    if (!phone || !countryList.length) return "";
+    // Sort longest first so "+254" matches before "+"
+    const sorted = [...countryList].sort((a, b) => b.dialCode.length - a.dialCode.length);
+    for (const c of sorted) {
+      if (phone.startsWith(c.dialCode)) return c.dialCode;
+    }
+    return "";
+  }, []);
+
+  const [phoneDialCode, setPhoneDialCode] = useState("");
+  const [waDialCode, setWaDialCode] = useState("");
+
+  // Once countries load, try to detect dial codes from existing saved values
+  useEffect(() => {
+    if (!countries.length) return;
+    if (!phoneDialCode) setPhoneDialCode(extractDialCode(form.phoneNumber || "", countries));
+    if (!waDialCode) setWaDialCode(extractDialCode(form.whatsAppNo || "", countries));
+    // If nationality already set and no dial code detected yet, seed from nationality
+    if (!phoneDialCode && form.nationality) {
+      const match = countries.find((c) => c.name === form.nationality);
+      if (match) { setPhoneDialCode(match.dialCode); setWaDialCode(match.dialCode); }
+    }
+  }, [countries]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When user picks a nationality from the dropdown
+  const handleNationalityChange = useCallback((country) => {
+    onChange("nationality", country.name);
+    // Auto-fill location with capital if location is empty
+    if (!form.location) {
+      onChange("location", country.capital ? `${country.capital}, ${country.name}` : country.name);
+    } else {
+      // Offer the auto-fill by replacing only if it looks like a previous auto-fill
+      const prevCountry = countries.find((c) => c.name !== country.name &&
+        form.location.endsWith(c.name));
+      if (prevCountry) {
+        onChange("location", country.capital ? `${country.capital}, ${country.name}` : country.name);
+      }
+    }
+    // Update dial codes
+    setPhoneDialCode(country.dialCode);
+    setWaDialCode(country.dialCode);
+    // Preserve existing number portion
+    const rawPhone = (form.phoneNumber || "").replace(/^\+\d{1,4}\s?/, "").trim();
+    const rawWa = (form.whatsAppNo || "").replace(/^\+\d{1,4}\s?/, "").trim();
+    if (rawPhone) onChange("phoneNumber", `${country.dialCode} ${rawPhone}`);
+    if (rawWa) onChange("whatsAppNo", `${country.dialCode} ${rawWa}`);
+  }, [form.location, form.phoneNumber, form.whatsAppNo, countries, onChange]);
+
+  // Sync same-as-phone checkbox
+  const syncWhatsApp = (e) => {
+    if (e.target.checked) {
+      onChange("whatsAppNo", form.phoneNumber || "");
+      setWaDialCode(phoneDialCode);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(0,0,0,0.08)] flex-shrink-0">
+          <div>
+            <h2 className="font-semibold text-[#1a1a2e] text-[15px]">Edit Personal Details</h2>
+            <p className="text-[#9090a8] text-xs mt-0.5">Update your personal information</p>
+          </div>
+          <button onClick={onClose} className="text-[#9090a8] hover:text-[#1a1a2e] transition p-1 rounded-lg hover:bg-[#f4f6fb]">
+            {Icon.x}
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="p-6 overflow-y-auto flex-1 space-y-3">
+          {saveMsg && (
+            <p className={`text-sm font-medium ${saveMsg.includes("success") ? "text-green-600" : "text-red-500"}`}>{saveMsg}</p>
+          )}
+
+          <MF label="First Name *">
+            <Inp type="text" placeholder="Enter first name" value={form.firstName || ""} onChange={e => onChange("firstName", e.target.value)} />
+          </MF>
+          <MF label="Second Name">
+            <Inp type="text" placeholder="Enter second name" value={form.secondName || ""} onChange={e => onChange("secondName", e.target.value)} />
+          </MF>
+          <MF label="Last Name *">
+            <Inp type="text" placeholder="Enter last name" value={form.lastName || ""} onChange={e => onChange("lastName", e.target.value)} />
+          </MF>
+          <MF label="ID Number">
+            <Inp type="text" placeholder="Enter ID number" value={form.idNumber || ""} onChange={e => onChange("idNumber", e.target.value)} />
+          </MF>
+
+          {/* ── Nationality — searchable dropdown from API ── */}
+          <MF label="Nationality *">
+            {loading ? (
+              <div className={inputCls + " flex items-center gap-2 text-[#9090a8]"}>
+                {Icon.spin} Loading countries…
+              </div>
+            ) : (
+              <NationalitySelect
+                value={form.nationality || ""}
+                onChange={handleNationalityChange}
+                countries={countries}
+                loading={loading}
+              />
+            )}
+            {form.nationality && (
+              <p style={{ fontSize: 11, color: "#9090a8", marginTop: 2 }}>
+                Location and dial codes update automatically when you change nationality.
+              </p>
+            )}
+          </MF>
+
+          {/* ── Location — auto-filled but freely editable ── */}
+          <MF label="Location *">
+            <Inp
+              type="text"
+              placeholder="e.g. Nairobi, Kenya"
+              value={form.location || ""}
+              onChange={e => onChange("location", e.target.value)}
+            />
+            <p style={{ fontSize: 11, color: "#9090a8", marginTop: 2 }}>
+              Auto-suggested from nationality — you can edit this freely.
+            </p>
+          </MF>
+
+          {/* ── Phone with country code ── */}
+          <MF label="Phone Number *">
+            <PhoneInput
+              value={form.phoneNumber || ""}
+              onChange={(v) => onChange("phoneNumber", v)}
+              countries={countries}
+              selectedDialCode={phoneDialCode || countries.find(c => c.name === form.nationality)?.dialCode || ""}
+              onDialCodeChange={setPhoneDialCode}
+              placeholder="e.g. 712 345 678"
+            />
+          </MF>
+
+          {/* ── WhatsApp with country code ── */}
+          <MF label="WhatsApp No. *">
+            <PhoneInput
+              value={form.whatsAppNo || ""}
+              onChange={(v) => onChange("whatsAppNo", v)}
+              countries={countries}
+              selectedDialCode={waDialCode || countries.find(c => c.name === form.nationality)?.dialCode || ""}
+              onDialCodeChange={setWaDialCode}
+              placeholder="e.g. 712 345 678"
+            />
+            <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, cursor: "pointer" }}>
+              <input type="checkbox" style={{ width: 13, height: 13 }} onChange={syncWhatsApp} />
+              <span style={{ fontSize: 11, color: "#9090a8" }}>Same as phone number</span>
+            </label>
+          </MF>
+
+          <MF label="Passport No.">
+            <Inp type="text" placeholder="Enter passport number" value={form.PassportNo || ""} onChange={e => onChange("PassportNo", e.target.value)} />
+          </MF>
+
+          <MF label="Availability of Driving Licence">
+            <Sel value={form.hasDrivingLicence || ""} onChange={e => onChange("hasDrivingLicence", e.target.value)}>
+              <option value="">Select an option</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </Sel>
+          </MF>
+
+          <MF label="Email *">
+            <Inp type="email" placeholder="Enter email" value={form.email || ""} onChange={e => onChange("email", e.target.value)} />
+          </MF>
+          <MF label="Age">
+            <Inp type="number" placeholder="Enter age" value={form.age || ""} onChange={e => onChange("age", e.target.value)} />
+          </MF>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-[rgba(0,0,0,0.06)] flex justify-end gap-3 flex-shrink-0">
+          <GhostBtn onClick={onClose}>{Icon.x} Cancel</GhostBtn>
+          <PrimaryBtn onClick={onSave} disabled={saving}>
+            {saving ? Icon.spin : Icon.save}
+            {saving ? "Saving…" : "Save Changes"}
+          </PrimaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ─── Professional Summary Modal ───────────────────────────────────────────────
 const SummaryModal = ({ form, onClose, onSave, saving }) => {
@@ -424,7 +852,6 @@ const AvatarModal = ({ currentUrl, onClose, onSave, saving }) => {
           <button onClick={onClose} className="text-[#9090a8] hover:text-[#1a1a2e] transition p-1 rounded-lg hover:bg-[#f4f6fb]">{Icon.x}</button>
         </div>
         <div className="p-6 flex flex-col items-center gap-4">
-          {/* Preview */}
           <div
             onClick={() => fileRef.current?.click()}
             className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#e8f1fd] cursor-pointer relative group"
@@ -464,48 +891,100 @@ const AvatarModal = ({ currentUrl, onClose, onSave, saving }) => {
   );
 };
 
-// ─── CV Preview Modal ─────────────────────────────────────────────────────────
-const CvPreviewModal = ({ cvUrl, cvName, onClose }) => (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(0,0,0,0.08)] flex-shrink-0">
-        <div>
-          <h2 className="font-semibold text-[#1a1a2e] text-[15px]">CV Preview</h2>
-          {cvName && <p className="text-[#9090a8] text-xs mt-0.5">{cvName}</p>}
-        </div>
-        <div className="flex items-center gap-2">
-          <a
-            href={cvUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-[#f4f6fb] transition"
-          >
-            {Icon.externalLink} Open in new tab
-          </a>
-          <button onClick={onClose} className="text-[#9090a8] hover:text-[#1a1a2e] transition p-1 rounded-lg hover:bg-[#f4f6fb]">{Icon.x}</button>
-        </div>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        {cvUrl ? (
-          <iframe
-            src={cvUrl}
-            title="CV Preview"
-            className="w-full h-full border-0"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-[#9090a8]">
-            <div className="text-center">
-              <div className="text-5xl mb-3">📄</div>
-              <p className="text-sm">No CV available to preview.</p>
-            </div>
+const CvPreviewModal = ({ cvUrl, cvName, onClose }) => {
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [loadState, setLoadState] = useState("loading"); // "loading" | "ready" | "error"
+
+  useEffect(() => {
+    if (!cvUrl) { setLoadState("error"); return; }
+    setLoadState("loading");
+
+    fetch(cvUrl, { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch CV");
+        return res.blob();
+      })
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        setBlobUrl(url);
+        setLoadState("ready");
+      })
+      .catch(() => setLoadState("error"));
+
+    // Cleanup blob URL on unmount
+    return () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
+  }, [cvUrl]);
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(0,0,0,0.08)] flex-shrink-0">
+          <div>
+            <h2 className="font-semibold text-[#1a1a2e] text-[15px]">CV Preview</h2>
+            {cvName && <p className="text-[#9090a8] text-xs mt-0.5">{cvName}</p>}
           </div>
-        )}
+          <div className="flex items-center gap-2">
+            {blobUrl && (
+              <a href={blobUrl} download={cvName}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a6edb] text-white text-[12.5px] hover:bg-[#0d4fa3] transition">
+                {Icon.download} Download
+              </a>
+            )}
+            <a href={cvUrl} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-[#f4f6fb] transition">
+              {Icon.externalLink} Open in new tab
+            </a>
+            <button onClick={onClose} className="text-[#9090a8] hover:text-[#1a1a2e] transition p-1 rounded-lg hover:bg-[#f4f6fb]">{Icon.x}</button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-hidden relative bg-[#f4f6fb]">
+          {loadState === "loading" && (
+            <div className="flex flex-col items-center justify-center h-full gap-3">
+              <div style={{ width: 36, height: 36, border: "3px solid #e8edf5", borderTop: "3px solid #1a6edb", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+              <p className="text-[#9090a8] text-sm">Loading your CV…</p>
+            </div>
+          )}
+
+          {loadState === "error" && (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-8">
+              <div className="text-4xl">📄</div>
+              <p className="text-[#1a1a2e] font-medium text-sm">Could not load preview</p>
+              <p className="text-[#9090a8] text-xs">Try opening in a new tab or downloading directly.</p>
+              <a href={cvUrl} target="_blank" rel="noopener noreferrer"
+                className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1a6edb] text-white text-sm hover:bg-[#0d4fa3] transition">
+                {Icon.externalLink} Open in new tab
+              </a>
+            </div>
+          )}
+
+          {loadState === "ready" && blobUrl && (
+            <object
+              data={blobUrl}
+              type="application/pdf"
+              className="w-full h-full"
+              style={{ display: "block" }}
+            >
+              {/* Fallback for browsers that can't render PDF in object tag */}
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-8">
+                <div className="text-4xl">📄</div>
+                <p className="text-[#1a1a2e] font-medium text-sm">Your browser can't display PDFs inline.</p>
+                <a href={blobUrl} download={cvName}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1a6edb] text-white text-sm hover:bg-[#0d4fa3] transition">
+                  {Icon.download} Download to view
+                </a>
+              </div>
+            </object>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-// ─── Placeholder pages for other nav sections ─────────────────────────────────
+// ─── Placeholder pages ────────────────────────────────────────────────────────
 const PlaceholderPage = ({ title, icon, description }) => (
   <div className="flex flex-col items-center justify-center h-[60vh] gap-4 text-center px-8">
     <div className="w-16 h-16 rounded-2xl bg-[#f4f6fb] flex items-center justify-center text-[#9090a8] scale-150">
@@ -520,15 +999,13 @@ const PlaceholderPage = ({ title, icon, description }) => (
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const UserProfileDashboard = () => {
-  const { token } = useUser();
+  const { token, userId, logout } = useUser();
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("profile");
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Modal states: null | "personal" | "summary" | "skills" | "education" | "avatar" | "cvpreview"
-  // For work experience: "workexp" with workExpModalData
   const [modal, setModal] = useState(null);
   const [workExpModalData, setWorkExpModalData] = useState({ entry: {}, index: -1, isNew: true });
   const [saving, setSaving] = useState(false);
@@ -540,6 +1017,8 @@ const UserProfileDashboard = () => {
   const [workExperience, setWorkExperience] = useState([]);
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const { savedJobIds, savedJobs, loadingSaved, toggleSave } = useSavedJobs(userId, token);
+  const [applicationsCount, setApplicationsCount] = useState(0);
 
   const [cvFile, setCvFile] = useState(null);
   const [cvUploading, setCvUploading] = useState(false);
@@ -569,10 +1048,51 @@ const UserProfileDashboard = () => {
       .finally(() => setLoading(false));
   }, [token]);
 
+  useEffect(() => {
+    if (!token) {
+      setApplicationsCount(0);
+      return;
+    }
+
+    let cancelled = false;
+
+    axios
+      .get(`${API}/my-applications`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      })
+      .then(({ data }) => {
+        if (!cancelled) {
+          setApplicationsCount((data.applications || []).length);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setApplicationsCount(0);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const handleLogoutClick = async () => {
+    try {
+      await axios.post("https://amsol-api-production.up.railway.app/logout", {}, { withCredentials: true });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      logout();
+      navigate("/");
+    }
+  };
+
   const changeForm = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const flashMsg = (msg) => { setSaveMsg(msg); setTimeout(() => setSaveMsg(""), 3500); };
 
-  // ── Save personal ─────────────────────────────────────────────────────────
   const savePersonal = async () => {
     setSaving(true);
     try {
@@ -588,7 +1108,6 @@ const UserProfileDashboard = () => {
     } finally { setSaving(false); }
   };
 
-  // ── Save summary ──────────────────────────────────────────────────────────
   const saveSummary = async (localData) => {
     setSaving(true);
     try {
@@ -605,7 +1124,6 @@ const UserProfileDashboard = () => {
     } finally { setSaving(false); }
   };
 
-  // ── Save single work experience entry ─────────────────────────────────────
   const saveWorkExp = async (entry) => {
     setSaving(true);
     try {
@@ -629,7 +1147,6 @@ const UserProfileDashboard = () => {
     } finally { setSaving(false); }
   };
 
-  // ── Delete single work experience entry ───────────────────────────────────
   const deleteWorkExp = async (index) => {
     setSaving(true);
     try {
@@ -648,7 +1165,6 @@ const UserProfileDashboard = () => {
     } finally { setSaving(false); }
   };
 
-  // ── Save skills ───────────────────────────────────────────────────────────
   const saveSkills = async (newSkills) => {
     setSaving(true);
     try {
@@ -666,7 +1182,6 @@ const UserProfileDashboard = () => {
     } finally { setSaving(false); }
   };
 
-  // ── Save education ────────────────────────────────────────────────────────
   const saveEducation = async (newEdu) => {
     setSaving(true);
     try {
@@ -684,7 +1199,6 @@ const UserProfileDashboard = () => {
     } finally { setSaving(false); }
   };
 
-  // ── Upload profile photo ──────────────────────────────────────────────────
   const saveAvatar = async (file) => {
     if (!file) return;
     setSaving(true);
@@ -705,7 +1219,6 @@ const UserProfileDashboard = () => {
     } finally { setSaving(false); }
   };
 
-  // ── Upload CV ─────────────────────────────────────────────────────────────
   const uploadCv = async () => {
     if (!cvFile) return;
     setCvUploading(true); setCvMsg("");
@@ -723,7 +1236,6 @@ const UserProfileDashboard = () => {
     } finally { setCvUploading(false); }
   };
 
-  // ── Preview CV ────────────────────────────────────────────────────────────
   const handlePreviewCv = () => {
     if (!profile?.savedCvUrl && !profile?.savedCvFileId) {
       flashMsg("No CV uploaded yet. Please upload a CV first.");
@@ -732,15 +1244,7 @@ const UserProfileDashboard = () => {
     setModal("cvpreview");
   };
 
-  // Build CV URL — use savedCvUrl if API provides it, otherwise construct from fileId
-  const cvPreviewUrl = profile?.savedCvUrl || (profile?.savedCvFileId ? `${API}/cv/${profile.savedCvFileId}` : null);
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f4f6fb]">
-      <div style={{ animation: "spin 1s linear infinite" }} className="w-8 h-8 border-4 border-[#1a6edb] border-t-transparent rounded-full" />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </div>
-  );
+const cvPreviewUrl = profile?.savedCvUrl || (profile?.savedCvFileId ? `${API}/applications/cv/${profile.savedCvFileId}` : null);
 
   const pct = calcCompletion(profile);
   const barColor = pct < 50 ? "#ef4444" : pct < 80 ? "#f59e0b" : "#1a6edb";
@@ -748,6 +1252,87 @@ const UserProfileDashboard = () => {
   const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ") || "—";
   const initials = [profile?.firstName?.[0], profile?.lastName?.[0]].filter(Boolean).join("") || "?";
   const displayAvatar = avatarUrl || profile?.profilePhotoUrl;
+
+  const renderLoadingPage = () => (
+    <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", gap: 18 }}>
+      <div style={{ height: 132, borderRadius: 20, background: "linear-gradient(135deg,#eef4ff,#f8fbff)", border: "1px solid rgba(59,130,246,0.12)", animation: "pulse 1.5s ease-in-out infinite" }} />
+      <div style={{ display: "grid", gridTemplateColumns: "1.05fr 1fr", gap: 18 }}>
+        <div style={{ height: 260, borderRadius: 20, background: "#fff", border: "1px solid rgba(0,0,0,0.06)", animation: "pulse 1.5s ease-in-out infinite" }} />
+        <div style={{ height: 260, borderRadius: 20, background: "#fff", border: "1px solid rgba(0,0,0,0.06)", animation: "pulse 1.5s ease-in-out infinite" }} />
+      </div>
+      <div style={{ height: 220, borderRadius: 20, background: "#fff", border: "1px solid rgba(0,0,0,0.06)", animation: "pulse 1.5s ease-in-out infinite" }} />
+    </div>
+  );
+
+  const renderMessagesPage = () => (
+    <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
+      <div
+        style={{
+          borderRadius: 24,
+          padding: 24,
+          background:
+            "radial-gradient(circle at top right, rgba(16,185,129,0.16), transparent 30%), linear-gradient(135deg,#0f172a 0%, #134e4a 56%, #115e59 100%)",
+          color: "#fff",
+          boxShadow: "0 18px 40px rgba(15,23,42,0.12)",
+        }}
+      >
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.72)" }}>
+          Messages
+        </div>
+        <h2 style={{ margin: "10px 0 0", fontFamily: "'Fraunces', serif", fontSize: 28, lineHeight: 1.15 }}>
+          Recruiter conversations will feel cleaner here
+        </h2>
+        <p style={{ marginTop: 12, maxWidth: 680, fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.82)" }}>
+          This section is now designed as a quiet inbox area rather than a crowded placeholder. Once backend messaging is connected, conversations, interview invites, and status notes can slide into this layout naturally.
+        </p>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 18 }}>
+        <div style={{ background: "#fff", borderRadius: 22, border: "1px solid rgba(0,0,0,0.08)", padding: 20 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Inbox
+          </div>
+          <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              "Interview invitations",
+              "Application updates",
+              "Recruiter feedback",
+            ].map((item) => (
+              <div key={item} style={{ padding: "14px 16px", borderRadius: 16, background: "#f8fafc", color: "#475569", fontSize: 13.5, fontWeight: 600 }}>
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background: "#fff", borderRadius: 22, border: "1px solid rgba(0,0,0,0.08)", padding: 26, display: "flex", flexDirection: "column", justifyContent: "center", minHeight: 320 }}>
+          <div style={{ width: 68, height: 68, borderRadius: 20, background: "#ecfdf5", display: "flex", alignItems: "center", justifyContent: "center", color: "#059669" }}>
+            {Icon.msg}
+          </div>
+          <h3 style={{ margin: "18px 0 0", fontFamily: "'Fraunces', serif", fontSize: 24, color: "#1a1a2e" }}>
+            No live messages yet
+          </h3>
+          <p style={{ marginTop: 10, maxWidth: 520, color: "#6b7280", fontSize: 14, lineHeight: 1.7 }}>
+            Your future inbox can show recruiter messages, interview schedules, and hiring follow-ups without feeling congested. The page shell is ready even before data arrives.
+          </p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }}>
+            <button
+              onClick={() => setActiveNav("applications")}
+              style={{ padding: "11px 14px", borderRadius: 12, border: "none", background: "#1a6edb", color: "#fff", fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}
+            >
+              View applications
+            </button>
+            <button
+              onClick={() => setActiveNav("dashboard")}
+              style={{ padding: "11px 14px", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)", background: "#fff", color: "#475569", fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}
+            >
+              Browse jobs
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const F = ({ label, value, color }) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 12 }}>
@@ -758,16 +1343,21 @@ const UserProfileDashboard = () => {
     </div>
   );
 
-  // ─── Nav page content ─────────────────────────────────────────────────────
   const renderPageContent = () => {
+    if (loading) {
+      return renderLoadingPage();
+    }
+
     switch (activeNav) {
-     case "dashboard":
+    case "dashboard":
   return (
     <Dashboard
       profile={profile}
       token={token}
       onNav={setActiveNav}
       onQuickApply={() => setShowApply(true)}
+      savedJobIds={savedJobIds}
+      onToggleSave={toggleSave}
     />
   );
       case "cv":
@@ -790,10 +1380,8 @@ const UserProfileDashboard = () => {
                       <div style={{ fontSize: 12, color: "#9090a8", marginTop: 2 }}>This CV will be used for quick applications</div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setModal("cvpreview")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-white transition"
-                  >
+                  <button onClick={() => setModal("cvpreview")}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-white transition">
                     {Icon.eye} Preview
                   </button>
                 </div>
@@ -802,10 +1390,8 @@ const UserProfileDashboard = () => {
                   <div style={{ fontSize: 32, marginBottom: 8 }}>📄</div>
                   <div style={{ fontSize: 13, color: "#92400e", fontWeight: 500 }}>No CV saved yet</div>
                   <div style={{ fontSize: 12, color: "#9090a8", marginTop: 4 }}>Upload your CV to enable Quick Apply and share with employers</div>
-                  <button
-                    onClick={() => cvRef.current?.click()}
-                    className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#1a6edb] text-white rounded-xl text-sm font-medium hover:bg-[#0d4fa3] transition mx-auto"
-                  >
+                  <button onClick={() => cvRef.current?.click()}
+                    className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#1a6edb] text-white rounded-xl text-sm font-medium hover:bg-[#0d4fa3] transition mx-auto">
                     {Icon.upload} Upload CV
                   </button>
                 </div>
@@ -824,44 +1410,47 @@ const UserProfileDashboard = () => {
             </SectionCard>
           </div>
         );
-      case "saved":
-        return (
-          <PlaceholderPage
-            title="Saved Jobs"
-            icon={Icon.bookmark}
-            description="Jobs you've bookmarked for later will appear here. Browse open positions and save the ones you like."
-          />
-        );
+case "saved":
+  return (
+    <SavedJobsPanel
+      savedJobs={savedJobs}
+      loading={loadingSaved}
+      onUnsave={toggleSave}
+      onApply={(job) => {
+        setShowApply(true);
+      }}
+    />
+  );
       case "settings":
         return (
-          <PlaceholderPage
-            title="Job Settings"
-            icon={Icon.settings}
-            description="Configure your job preferences, notification settings, and search filters here."
+          <JobSettingsPage
+            token={token}
+            profile={profile}
+            savedJobs={savedJobs}
+            loadingSaved={loadingSaved}
+            onBrowseJobs={() => setActiveNav("dashboard")}
+            onOpenProfile={() => setActiveNav("profile")}
+            onOpenSaved={() => setActiveNav("saved")}
+            onOpenApplications={() => setActiveNav("applications")}
           />
         );
-      case "applications":
-        return (
-          <PlaceholderPage
-            title="Applications"
-            icon={Icon.briefcase}
-            description="Track all your job applications, their statuses, and any recruiter feedback here."
-          />
-        );
+        case "applications":
+  return (
+    <ApplicationsPage
+      token={token}
+      profile={profile}
+      onBrowseJobs={() => setActiveNav("dashboard")}
+    />
+  );
+    //   case "applications":
+    //     return <PlaceholderPage title="Applications" icon={Icon.briefcase} description="Track all your job applications, their statuses, and any recruiter feedback here." />;
       case "messages":
-        return (
-          <PlaceholderPage
-            title="Messages"
-            icon={Icon.msg}
-            description="Your conversations with recruiters and hiring managers will appear here."
-          />
-        );
-      default: // "profile"
+        return renderMessagesPage();
+      default:
         return renderProfilePage();
     }
   };
 
-  // ─── Profile page ─────────────────────────────────────────────────────────
   const renderProfilePage = () => (
     <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
       {saveMsg && !modal && (
@@ -870,7 +1459,7 @@ const UserProfileDashboard = () => {
         </div>
       )}
 
-      {/* ── Completion card ── */}
+      {/* Completion card */}
       <div style={{ background: "#fff", borderRadius: 14, border: "1px solid rgba(0,0,0,0.08)", padding: "18px 24px", display: "flex", alignItems: "center", gap: 24 }}>
         <div style={{ flex: "0 0 auto" }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: "#1a1a2e", marginBottom: 3 }}>Complete your profile</div>
@@ -892,11 +1481,10 @@ const UserProfileDashboard = () => {
         </div>
       </div>
 
-      {/* ── Personal Information ── */}
+      {/* Personal Information */}
       <SectionCard dotColor="#1a6edb" title="Personal information"
         action={<GhostBtn onClick={() => { setForm(profile); setModal("personal"); setSaveMsg(""); }}>{Icon.edit} Edit</GhostBtn>}>
         <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
-          {/* Avatar — clickable to change photo */}
           <div style={{ flexShrink: 0, textAlign: "center" }}>
             <div
               onClick={() => setModal("avatar")}
@@ -910,25 +1498,12 @@ const UserProfileDashboard = () => {
                   <circle cx="30" cy="22" r="12" /><path d="M8 52c0-12.15 9.85-22 22-22s22 9.85 22 22" />
                 </svg>
               )}
-              {/* Hover overlay */}
-              <div style={{
-                position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                opacity: 0, transition: "opacity 0.2s", borderRadius: 14,
-              }}
-                className="group-hover:opacity-100"
-              >
-                <span style={{ color: "white", fontSize: 11, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
-                  {Icon.camera}
-                </span>
+              <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0, transition: "opacity 0.2s", borderRadius: 14 }}
+                className="group-hover:opacity-100">
+                <span style={{ color: "white", fontSize: 11, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>{Icon.camera}</span>
               </div>
             </div>
-            <div
-              onClick={() => setModal("avatar")}
-              style={{ marginTop: 8, fontSize: 11, color: "#1a6edb", cursor: "pointer", fontWeight: 500 }}
-            >
-              Change photo
-            </div>
+            <div onClick={() => setModal("avatar")} style={{ marginTop: 8, fontSize: 11, color: "#1a6edb", cursor: "pointer", fontWeight: 500 }}>Change photo</div>
           </div>
 
           <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 24px" }}>
@@ -946,7 +1521,7 @@ const UserProfileDashboard = () => {
         </div>
       </SectionCard>
 
-      {/* ── Two-column row ── */}
+      {/* Two-column row */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         <SectionCard dotColor="#6366f1" title="Professional summary"
           action={<GhostBtn onClick={() => setModal("summary")}>{Icon.edit} Edit</GhostBtn>}>
@@ -1000,14 +1575,11 @@ const UserProfileDashboard = () => {
         </SectionCard>
       </div>
 
-      {/* ── Work Experience ── */}
+      {/* Work Experience */}
       <SectionCard dotColor="#0d9488" title="Work experience"
         action={
-          <AddBtn onClick={() => {
-            setWorkExpModalData({ entry: {}, index: -1, isNew: true });
-            setModal("workexp");
-          }}>
-            {Icon.plus} Add experience
+          <AddBtn onClick={() => { setWorkExpModalData({ entry: {}, index: -1, isNew: true }); setModal("workexp"); }}>
+             Add experience
           </AddBtn>
         }>
         {filledWE.length > 0 ? (
@@ -1016,23 +1588,16 @@ const UserProfileDashboard = () => {
               if (!w.company) return null;
               return (
                 <div key={i} style={{ display: "flex", gap: 14, padding: "14px 0", borderBottom: i < workExperience.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none", alignItems: "flex-start" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 9, background: "#f4f6fb", border: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {Icon.briefcase}
-                  </div>
+                  <div style={{ width: 38, height: 38, borderRadius: 9, background: "#f4f6fb", border: "1px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Icon.briefcase}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13.5, fontWeight: 500, color: "#1a1a2e" }}>{w.position || "—"}</div>
                     <div style={{ fontSize: 12, color: "#5a5a72", marginTop: 2 }}>{w.company}</div>
                     {w.duration && <div style={{ fontSize: 11.5, color: "#9090a8", marginTop: 3 }}>{w.duration}</div>}
                     {w.description && <div style={{ fontSize: 12, color: "#5a5a72", marginTop: 6, lineHeight: 1.5 }}>{w.description}</div>}
                   </div>
-                  {/* Individual edit button */}
                   <button
-                    onClick={() => {
-                      setWorkExpModalData({ entry: w, index: i, isNew: false });
-                      setModal("workexp");
-                    }}
+                    onClick={() => { setWorkExpModalData({ entry: w, index: i, isNew: false }); setModal("workexp"); }}
                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[rgba(0,0,0,0.1)] text-[#5a5a72] text-[11.5px] hover:bg-[#f4f6fb] transition flex-shrink-0"
-                    title="Edit this entry"
                   >
                     {Icon.edit}
                   </button>
@@ -1042,17 +1607,13 @@ const UserProfileDashboard = () => {
           </div>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f4f6fb", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {Icon.briefcase}
-            </div>
-            <div style={{ fontSize: 13, color: "#5a5a72" }}>
-              No work experience added yet. Adding experience increases your profile completion by <strong>+20%</strong>.
-            </div>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f4f6fb", display: "flex", alignItems: "center", justifyContent: "center" }}>{Icon.briefcase}</div>
+            <div style={{ fontSize: 13, color: "#5a5a72" }}>No work experience added yet. Adding experience increases your profile completion by <strong>+20%</strong>.</div>
           </div>
         )}
       </SectionCard>
 
-      {/* ── Education ── */}
+      {/* Education */}
       <SectionCard dotColor="#7c3aed" title="Education"
         action={
           <GhostBtn onClick={() => setModal("education")}>
@@ -1063,15 +1624,11 @@ const UserProfileDashboard = () => {
           <div>
             {education.filter(e => e.degree || e.institution).map((e, i, arr) => (
               <div key={i} style={{ display: "flex", gap: 14, padding: "12px 0", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}>
-                <div style={{ width: 38, height: 38, borderRadius: 9, background: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 14, fontWeight: 600, color: "#7c3aed" }}>
-                  {(e.degree || "E")[0]}
-                </div>
+                <div style={{ width: 38, height: 38, borderRadius: 9, background: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 14, fontWeight: 600, color: "#7c3aed" }}>{(e.degree || "E")[0]}</div>
                 <div>
                   <div style={{ fontSize: 13.5, fontWeight: 500, color: "#1a1a2e" }}>{e.degree || "—"}</div>
                   {e.institution && <div style={{ fontSize: 12, color: "#5a5a72", marginTop: 2 }}>{e.institution}</div>}
-                  {(e.yearStart || e.yearEnd) && (
-                    <div style={{ fontSize: 11.5, color: "#9090a8", marginTop: 3 }}>{e.yearStart}{e.yearStart && e.yearEnd ? " – " : ""}{e.yearEnd}</div>
-                  )}
+                  {(e.yearStart || e.yearEnd) && <div style={{ fontSize: 11.5, color: "#9090a8", marginTop: 3 }}>{e.yearStart}{e.yearStart && e.yearEnd ? " – " : ""}{e.yearEnd}</div>}
                 </div>
               </div>
             ))}
@@ -1086,7 +1643,7 @@ const UserProfileDashboard = () => {
         )}
       </SectionCard>
 
-      {/* ── Saved CV ── */}
+      {/* Saved CV */}
       <SectionCard dotColor="#1a6edb" title="Uploaded CV"
         action={
           <button onClick={() => cvRef.current?.click()}
@@ -1104,10 +1661,8 @@ const UserProfileDashboard = () => {
                 <div style={{ fontSize: 12, color: "#9090a8", marginTop: 2 }}>This CV will be used for quick applications</div>
               </div>
             </div>
-            <button
-              onClick={() => setModal("cvpreview")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-white transition"
-            >
+            <button onClick={() => setModal("cvpreview")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-white transition">
               {Icon.eye} Preview
             </button>
           </div>
@@ -1131,15 +1686,9 @@ const UserProfileDashboard = () => {
     </div>
   );
 
-  // ── Page title map ────────────────────────────────────────────────────────
   const pageTitles = {
-    profile: "Profile Update",
-    dashboard: "Dashboard",
-    cv: "Uploaded CV",
-    saved: "Saved Jobs",
-    settings: "Job Settings",
-    applications: "Applications",
-    messages: "Messages",
+    profile: "Profile Update", dashboard: "Dashboard", cv: "Uploaded CV",
+    saved: "Saved Jobs", settings: "Job Settings", applications: "Applications", messages: "Messages",
   };
 
   return (
@@ -1154,7 +1703,7 @@ const UserProfileDashboard = () => {
         .group:hover .group-hover\\:opacity-100 { opacity: 1 !important; }
       `}</style>
 
-      {/* ── Modals ── */}
+      {/* Modals */}
       {showApply && <QuickApplyModal onClose={() => setShowApply(false)} savedCvName={profile?.savedCvName} token={token} />}
 
       {modal === "personal" && (
@@ -1167,15 +1716,9 @@ const UserProfileDashboard = () => {
           saveMsg={saving ? "" : saveMsg}
         />
       )}
-      {modal === "summary" && (
-        <SummaryModal form={form} onClose={() => setModal(null)} onSave={saveSummary} saving={saving} />
-      )}
-      {modal === "skills" && (
-        <SkillsModal skills={skills} onClose={() => setModal(null)} onSave={saveSkills} saving={saving} />
-      )}
-      {modal === "education" && (
-        <EducationModal education={education} onClose={() => setModal(null)} onSave={saveEducation} saving={saving} />
-      )}
+      {modal === "summary" && <SummaryModal form={form} onClose={() => setModal(null)} onSave={saveSummary} saving={saving} />}
+      {modal === "skills" && <SkillsModal skills={skills} onClose={() => setModal(null)} onSave={saveSkills} saving={saving} />}
+      {modal === "education" && <EducationModal education={education} onClose={() => setModal(null)} onSave={saveEducation} saving={saving} />}
       {modal === "workexp" && (
         <WorkExpModal
           entry={workExpModalData.entry}
@@ -1187,26 +1730,13 @@ const UserProfileDashboard = () => {
           saving={saving}
         />
       )}
-      {modal === "avatar" && (
-        <AvatarModal
-          currentUrl={displayAvatar}
-          onClose={() => setModal(null)}
-          onSave={saveAvatar}
-          saving={saving}
-        />
-      )}
-      {modal === "cvpreview" && (
-        <CvPreviewModal
-          cvUrl={cvPreviewUrl}
-          cvName={profile?.savedCvName}
-          onClose={() => setModal(null)}
-        />
-      )}
+      {modal === "avatar" && <AvatarModal currentUrl={displayAvatar} onClose={() => setModal(null)} onSave={saveAvatar} saving={saving} />}
+      {modal === "cvpreview" && <CvPreviewModal cvUrl={cvPreviewUrl} cvName={profile?.savedCvName} onClose={() => setModal(null)} />}
 
-      {/* ── Layout ── */}
+      {/* Layout */}
       <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", minHeight: "100vh", background: "#f4f6fb", fontFamily: "'DM Sans', sans-serif" }}>
 
-        {/* ── Sidebar ── */}
+        {/* Sidebar */}
         <aside style={{ background: "#fff", borderRight: "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", padding: "28px 0" }}>
           <div style={{ padding: "0 24px 24px", borderBottom: "1px solid rgba(0,0,0,0.08)", marginBottom: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1216,8 +1746,8 @@ const UserProfileDashboard = () => {
                 </svg>
               </div>
               <div>
-                <div style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1a1a2e" }}>AMSOL</div>
-                <div style={{ fontSize: 10, color: "#9090a8", letterSpacing: "0.08em", textTransform: "uppercase" }}>Jobs Portal</div>
+                <div style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1a1a2e" }}><button href='/'>AMSOL</button></div>
+                <div style={{ fontSize: 10, color: "#9090a8", letterSpacing: "0.08em", textTransform: "uppercase" }}><button href='/'>Jobs Portal</button></div>
               </div>
             </div>
           </div>
@@ -1230,43 +1760,32 @@ const UserProfileDashboard = () => {
             <NavItem icon={Icon.bookmark} label="Saved Jobs" active={activeNav === "saved"} onClick={() => setActiveNav("saved")} />
             <div style={{ fontSize: 10, fontWeight: 500, color: "#9090a8", letterSpacing: "0.1em", textTransform: "uppercase", padding: "14px 12px 4px" }}>Career</div>
             <NavItem icon={Icon.settings} label="Job Settings" active={activeNav === "settings"} onClick={() => setActiveNav("settings")} />
-            <NavItem icon={Icon.briefcase} label="Applications" active={activeNav === "applications"} badge={0} onClick={() => setActiveNav("applications")} />
+            <NavItem icon={Icon.briefcase} label="Applications" active={activeNav === "applications"} badge={applicationsCount} onClick={() => setActiveNav("applications")} />
             <NavItem icon={Icon.msg} label="Messages" active={activeNav === "messages"} onClick={() => setActiveNav("messages")} />
           </div>
 
           <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: "50%",
-                background: displayAvatar ? "transparent" : "linear-gradient(135deg,#1a6edb,#6366f1)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 13, fontWeight: 600, color: "white", flexShrink: 0,
-                overflow: "hidden",
-              }}>
-                {displayAvatar
-                  ? <img src={displayAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : initials
-                }
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: displayAvatar ? "transparent" : "linear-gradient(135deg,#1a6edb,#6366f1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 600, color: "white", flexShrink: 0, overflow: "hidden" }}>
+                {displayAvatar ? <img src={displayAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
               </div>
               <div style={{ overflow: "hidden" }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: "#1a1a2e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fullName}</div>
                 <div style={{ fontSize: 11, color: "#9090a8" }}>Job Seeker</div>
-                <div style={{ fontSize: 15, color: "#f30928ff", fontWeight: 500, }}><button>Log out</button></div>
+                <div style={{ fontSize: 15, color: "#f30928ff", fontWeight: 500 }}><button onClick={handleLogoutClick}>Log out</button></div>
               </div>
             </div>
           </div>
         </aside>
 
-        {/* ── Main ── */}
+        {/* Main content */}
         <div style={{ overflowY: "auto" }}>
-          {/* Topbar */}
           <div style={{ background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.08)", padding: "0 32px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
             <span style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 600, color: "#1a1a2e" }}>
               {pageTitles[activeNav] || "Profile"}
             </span>
             <div style={{ display: "flex", gap: 8 }}>
-              <button
-                onClick={handlePreviewCv}
+              <button onClick={handlePreviewCv}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-[9px] border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[13px] font-medium hover:bg-[#f4f6fb] transition">
                 {Icon.eye} Preview CV
               </button>
