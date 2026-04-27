@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "https://amsol-api-production.up.railway.app/api";
+const API = "http://localhost:5001/api";
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -136,7 +136,7 @@ const Timeline = ({ status }) => {
                   </svg>
                 )}
               </div>
-              <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: done && !isRejected ? stepCfg.color : "#9090a8", whiteSpace: "nowrap" }}>
+             <span className="timeline-label" style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: done && !isRejected ? stepCfg.color : "#9090a8", whiteSpace: "nowrap" }}>
                 {step.label}
               </span>
             </div>
@@ -178,7 +178,7 @@ const AppCard = ({ app }) => {
       {/* Card header */}
       <div
         onClick={() => setExpanded(e => !e)}
-        style={{ padding: "16px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
+        className="app-card-header"
       >
         {/* Icon */}
         <div style={{
@@ -193,24 +193,22 @@ const AppCard = ({ app }) => {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 650, color: "#1a1a2e", letterSpacing: "-0.01em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div className="app-card-title">
             {app.positionapplied || app.positionApplied || "—"}
           </div>
-          <div style={{ fontSize: 12, color: "#9090a8", marginTop: 3 }}>
+          <div className="app-card-meta">
             Applied {formatDate(app.createdAt)}
             {app.location ? ` · ${app.location}` : ""}
           </div>
         </div>
 
         {/* Status badge */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 5, flexShrink: 0,
-          padding: "5px 12px", borderRadius: 99,
-          background: cfg.bg, border: `1px solid ${cfg.border}`,
-          fontSize: 12, fontWeight: 600, color: cfg.color,
-        }}>
+        <div
+          className="app-status-badge"
+          style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}
+        >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot, flexShrink: 0 }} />
-          {cfg.label}
+          <span className="app-status-badge-text">{cfg.label}</span>
         </div>
 
         {/* Chevron */}
@@ -283,7 +281,7 @@ const StatsBar = ({ applications }) => {
   ];
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 12, marginBottom: 24 }}>
       {stats.map(s => (
         <div key={s.label} style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(0,0,0,0.07)", padding: "14px 18px" }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{s.label}</div>
@@ -314,7 +312,7 @@ const SpotlightCard = ({ application }) => {
       <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.72)" }}>
         Latest application
       </div>
-      <div style={{ marginTop: 14, fontFamily: "'Fraunces', serif", fontSize: 24, lineHeight: 1.15 }}>
+      <div className="spotlight-title">
         {application.positionapplied || application.positionApplied || "Recent role"}
       </div>
       <div style={{ marginTop: 10, fontSize: 13.5, color: "rgba(255,255,255,0.8)", lineHeight: 1.6 }}>
@@ -418,9 +416,67 @@ const ApplicationsPage = ({ token, profile, onBrowseJobs }) => {
   const latestApplication = applications[0];
 
   return (
-    <div style={{ padding: "28px 32px" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600&display=swap');`}</style>
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}`}</style>
+    <div style={{ padding: "clamp(16px, 4vw, 32px)" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600&display=swap');
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+        .app-card-header {
+          padding: 16px 20px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+        .app-card-title {
+          font-size: 14px;
+          font-weight: 650;
+          color: #1a1a2e;
+          letter-spacing: -0.01em;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .app-card-meta {
+          font-size: 12px;
+          color: #9090a8;
+          margin-top: 3px;
+        }
+        .app-status-badge {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          flex-shrink: 0;
+          padding: 5px 12px;
+          border-radius: 99px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .spotlight-title {
+          margin-top: 14px;
+          font-family: 'Fraunces', serif;
+          font-size: 24px;
+          line-height: 1.15;
+        }
+        .tracker-heading {
+          margin: 8px 0 10px;
+          font-family: 'Fraunces', serif;
+          font-size: 26px;
+          color: #1a1a2e;
+          line-height: 1.15;
+        }
+
+        @media (max-width: 480px) {
+          .app-card-header { padding: 12px 14px; gap: 10px; }
+          .app-card-title { font-size: 13px; }
+          .app-card-meta { font-size: 11px; }
+          .app-status-badge { padding: 4px 8px; font-size: 11px; }
+          .app-status-badge-text { display: none; }
+          .spotlight-title { font-size: 18px; }
+          .tracker-heading { font-size: 20px; }
+          .timeline-label { display: none; }
+        }
+      `}</style>
 
       {error && (
         <div style={{ padding: "12px 16px", background: "#fee2e2", borderRadius: 10, border: "1px solid #fecaca", fontSize: 13, color: "#991b1b", marginBottom: 20 }}>
@@ -432,20 +488,20 @@ const ApplicationsPage = ({ token, profile, onBrowseJobs }) => {
         <EmptyState onBrowse={onBrowseJobs} />
       ) : (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.15fr) minmax(300px,0.85fr)", gap: 16, marginBottom: 22 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 22 }}>
             <div
               style={{
                 background: "#fff",
-                borderRadius: 20,
-                border: "1px solid rgba(0,0,0,0.08)",
-                padding: "20px 22px",
-                boxShadow: "0 12px 34px rgba(15,23,42,0.05)",
+              borderRadius: 20,
+              border: "1px solid rgba(0,0,0,0.08)",
+              padding: "clamp(14px, 3vw, 22px)",
+              boxShadow: "0 12px 34px rgba(15,23,42,0.05)",
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#9090a8" }}>
                 Application tracker
               </div>
-              <h2 style={{ margin: "8px 0 10px", fontFamily: "'Fraunces', serif", fontSize: 26, color: "#1a1a2e", lineHeight: 1.15 }}>
+              <h2 className="tracker-heading" style={{ margin: 0 }}>
                 See every live status update in one place
               </h2>
               <p style={{ margin: 0, fontSize: 13.5, color: "#6b7280", lineHeight: 1.7, maxWidth: 620 }}>
@@ -471,7 +527,8 @@ const ApplicationsPage = ({ token, profile, onBrowseJobs }) => {
                   placeholder="Search by role, status, location, or nationality"
                   style={{
                     width: "100%",
-                    padding: "13px 16px 13px 42px",
+                    boxSizing: "border-box",
+                    padding: "11px 14px 11px 40px",
                     borderRadius: 14,
                     border: "1px solid rgba(0,0,0,0.1)",
                     background: "#f8fafc",

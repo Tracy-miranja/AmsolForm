@@ -13,7 +13,7 @@ const HandleLogout = () => {
       console.log("Current cookies before logout:", Cookies.get());
 
     
-      await axios.post("https://amsol-api-production.up.railway.app/logout", {}, { withCredentials: true });
+      await axios.post("http://localhost:5001/logout", {}, { withCredentials: true });
 
       Cookies.remove("token");
       Cookies.remove("authToken");

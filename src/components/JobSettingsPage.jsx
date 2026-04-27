@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
-const API = "https://amsol-api-production.up.railway.app/api";
+const API = "http://localhost:5001/api";
 
 const iconStyle = { width: 16, height: 16, flexShrink: 0 };
 
@@ -269,18 +269,23 @@ const JobSettingsPage = ({
     [applications]
   );
 
-  const preferenceChips = [
+ const preferenceChips = [
     profile?.positionApplied || profile?.positionapplied,
     profile?.specialization,
     profile?.location,
-    profile?.academicLevel,
+    // academicLevel is an array of objects from DB — extract the highest level string
+    Array.isArray(profile?.academicLevel)
+      ? profile.academicLevel[0]?.level || null
+      : typeof profile?.academicLevel === "string"
+      ? profile.academicLevel
+      : null,
     profile?.nationality,
   ].filter(Boolean);
 
   const profileSignals = [
     !!profile?.specialization,
     !!profile?.location,
-    !!profile?.academicLevel,
+  !!(Array.isArray(profile?.academicLevel) ? profile.academicLevel.length : profile?.academicLevel),
     !!profile?.savedCvFileId,
     (savedJobs || []).length > 0,
     applications.length > 0,
@@ -294,8 +299,35 @@ const JobSettingsPage = ({
     "Open opportunities";
 
   return (
-    <div style={{ padding: "28px 32px 36px", display: "flex", flexDirection: "column", gap: 20 }}>
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}`}</style>
+    <div style={{ padding: "clamp(16px, 4vw, 32px)", paddingBottom: 36, display: "flex", flexDirection: "column", gap: 20 }}>
+      <style>{`
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+        .js-hero-grid { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(320px,1fr); gap: 18px; }
+        .js-stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
+        .js-mid-grid   { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,0.85fr); gap: 18px; }
+        .js-action-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+        .js-hero-h2 { font-size: 30px; }
+        .js-cat-row { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 14px; }
+        .js-recent-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+
+        @media (max-width: 900px) {
+          .js-hero-grid  { grid-template-columns: 1fr; }
+          .js-stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .js-mid-grid   { grid-template-columns: 1fr; }
+          .js-action-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 540px) {
+          .js-stats-grid  { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .js-action-grid { grid-template-columns: 1fr; }
+          .js-hero-h2     { font-size: 22px !important; }
+          .js-cat-row     { grid-template-columns: 40px 1fr; }
+          .js-cat-chip    { display: none; }
+          .js-recent-header { flex-direction: column; align-items: flex-start; }
+          .js-recent-header button { width: 100%; }
+        }
+      `}</style>
       {error && (
         <div
           style={{
@@ -311,15 +343,15 @@ const JobSettingsPage = ({
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.35fr) minmax(320px,1fr)", gap: 18 }}>
+     <div className="js-hero-grid">
         <div
           style={{
             borderRadius: 24,
-            padding: 24,
+            padding: "clamp(16px, 3vw, 24px)",
             background:
               "radial-gradient(circle at top right, rgba(249,115,22,0.18), transparent 32%), linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1d4ed8 100%)",
             color: "#fff",
-            minHeight: 250,
+            minHeight: 200,
             boxShadow: "0 20px 50px rgba(15,23,42,0.16)",
           }}
         >
@@ -327,7 +359,7 @@ const JobSettingsPage = ({
             {Icons.spark}
             Live career settings
           </div>
-          <h2 style={{ margin: "18px 0 10px", fontSize: 30, lineHeight: 1.15, fontWeight: 700, letterSpacing: "-0.03em" }}>
+          <h2 className="js-hero-h2" style={{ margin: "18px 0 10px", lineHeight: 1.15, fontWeight: 700, letterSpacing: "-0.03em" }}>
             Your search is aligned around {featuredRole}
           </h2>
           <p style={{ margin: 0, maxWidth: 620, color: "rgba(255,255,255,0.82)", fontSize: 14.5, lineHeight: 1.7 }}>
@@ -442,7 +474,7 @@ const JobSettingsPage = ({
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 14 }}>
+      <div className="js-mid-grid">
         <StatCard
           label="Open Roles"
           value={openJobs.length}
@@ -507,12 +539,9 @@ const JobSettingsPage = ({
             ) : topCategories.length > 0 ? (
               topCategories.map((item, index) => (
                 <div
-                  key={item.name}
+                 key={item.name}
+                  className="js-cat-row"
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "52px 1fr auto",
-                    alignItems: "center",
-                    gap: 14,
                     padding: 14,
                     borderRadius: 18,
                     background: index === 0 ? "#f8fbff" : "#fbfcfe",
@@ -540,7 +569,9 @@ const JobSettingsPage = ({
                       Strong hiring activity based on currently open roles.
                     </div>
                   </div>
-                  <Chip tone={index === 0 ? "blue" : "green"}>{item.count} openings</Chip>
+                  <span className="js-cat-chip">
+                    <Chip tone={index === 0 ? "blue" : "green"}>{item.count} openings</Chip>
+                  </span>
                 </div>
               ))
             ) : (
@@ -614,7 +645,7 @@ const JobSettingsPage = ({
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 14 }}>
+     <div className="js-action-grid">
         <ActionCard
           title="Tune profile details"
           body="Keep your role preference, specialization, and location current so recruiters see the right match signals."
@@ -647,7 +678,7 @@ const JobSettingsPage = ({
           boxShadow: "0 12px 34px rgba(15,23,42,0.05)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
+       <div className="js-recent-header">
           <div>
             <div style={sectionTitle}>Recent activity</div>
             <h3 style={{ margin: "8px 0 0", fontSize: 22, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em" }}>
@@ -683,10 +714,11 @@ const JobSettingsPage = ({
               <div
                 key={application._id}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(0,1fr) auto",
-                  gap: 14,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 12,
                   alignItems: "center",
+                  justifyContent: "space-between",
                   padding: 16,
                   borderRadius: 18,
                   background: "#fbfcfe",

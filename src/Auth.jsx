@@ -19,7 +19,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
   useEffect(() => {
     const token = Cookies.get("token");
     if (token) {
-      navigate("/Formlayout");
+      navigate("/profile");
     }
   }, [navigate]);
 
@@ -35,8 +35,8 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
 
     try {
       const endpoint = isLogin
-        ? "https://amsol-api-production.up.railway.app/api/login"
-        : "https://amsol-api-production.up.railway.app/api/register";
+        ? "http://localhost:5001/api/login"
+        : "http://localhost:5001/api/register";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,7 +54,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
         if (data.role === "nurse") {
           navigate("/NurseForm");
         } else {
-          navigate("/Formlayout");
+          navigate("/profile");
         }
         onSuccess();
       } else {

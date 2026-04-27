@@ -1,8 +1,9 @@
 import { useState, useContext } from "react";
 import axios from "axios";
 import { JobContext } from "./JobContext";
+import FormLayout from "./Formlayout";
 
-const API = "https://amsol-api-production.up.railway.app/api";
+const API = "http://localhost:5001/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const stripHtml = (html) => {
@@ -330,7 +331,9 @@ const JobDetailPanel = ({ job, onClose, onApply, applyingId, onToggleSave, isSav
 };
 
 // ─── Confirm Apply Modal ──────────────────────────────────────────────────────
-const ApplyConfirmModal = ({ job, profile, onConfirm, onClose, loading, error, success }) => (
+const ApplyConfirmModal = ({ job, profile, onConfirm, onClose, loading, error, success, onViewTerms }) => {
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  return (
   <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.52)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 16 }}>
     <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.2)", width: "100%", maxWidth: 500, overflow: "hidden", animation: "fadeUp 0.22s ease" }}>
       <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
@@ -420,24 +423,62 @@ const ApplyConfirmModal = ({ job, profile, onConfirm, onClose, loading, error, s
                 ✕ Profile incomplete — please fill in your name and email before applying.
               </div>
             )}
-            {error && (
+          {error && (
               <div style={{ padding: "10px 14px", background: "#fee2e2", borderRadius: 10, fontSize: 12.5, color: "#991b1b" }}>{error}</div>
             )}
+
+            {/* ── Terms checkbox ── */}
+            <div style={{
+              padding: "12px 16px",
+              background: "#f8f9fc",
+              borderRadius: 10,
+              border: "1px solid rgba(0,0,0,0.08)",
+              marginTop: 4,
+            }}>
+              <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  style={{
+                    width: 16, height: 16, marginTop: 2,
+                    accentColor: "#1a6edb", flexShrink: 0, cursor: "pointer"
+                  }}
+                />
+                <span style={{ fontSize: 12, color: "#5a5a72", lineHeight: 1.6 }}>
+                  I confirm all information is accurate and consent to AMSOL processing my personal data for recruitment purposes in accordance with the{" "}
+                 <button
+                    onClick={() => {
+                      onClose();
+                      if (onViewTerms) onViewTerms();
+                    }}
+                    style={{
+                      color: "#1a6edb", background: "none", border: "none",
+                      cursor: "pointer", fontSize: 12, padding: 0,
+                      textDecoration: "underline", fontFamily: "inherit"
+                    }}
+                  >
+                    Terms &amp; Conditions
+                  </button>
+                </span>
+              </label>
+            </div>
+
           </div>
 
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.07)", display: "flex", gap: 10, justifyContent: "flex-end" }}>
             <button onClick={onClose} style={{ padding: "9px 20px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", background: "transparent", color: "#5a5a72", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
               Cancel
             </button>
-            <button
+          <button
               onClick={onConfirm}
-              disabled={loading || !profile?.firstName || !profile?.email}
+              disabled={loading || !profile?.firstName || !profile?.email || !termsAccepted}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
                 padding: "9px 24px", borderRadius: 10,
-                background: loading || !profile?.firstName || !profile?.email ? "#93c5fd" : "#1a6edb",
+                background: loading || !profile?.firstName || !profile?.email || !termsAccepted ? "#93c5fd" : "#1a6edb",
                 color: "#fff", fontSize: 13, fontWeight: 650, border: "none",
-                cursor: loading || !profile?.firstName || !profile?.email ? "default" : "pointer",
+                cursor: loading || !profile?.firstName || !profile?.email || !termsAccepted ? "default" : "pointer",
                 boxShadow: "0 3px 12px rgba(26,110,219,0.3)",
               }}
             >
@@ -449,10 +490,10 @@ const ApplyConfirmModal = ({ job, profile, onConfirm, onClose, loading, error, s
       )}
     </div>
   </div>
-);
+    )};
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
-const Dashboard = ({ profile, token, onNav, onQuickApply, savedJobIds = new Set(), onToggleSave }) => {
+const Dashboard = ({ profile, token, onNav, onQuickApply, savedJobIds = new Set(), onToggleSave, onViewTerms }) => {
   const { jobs, loading: jobsLoading, error: jobsError } = useContext(JobContext);
 
   const [filter, setFilter]           = useState("All");
@@ -463,6 +504,7 @@ const Dashboard = ({ profile, token, onNav, onQuickApply, savedJobIds = new Set(
   const [applyingId, setApplyingId]   = useState(null);
   const [applyError, setApplyError]   = useState("");
   const [applySuccess, setApplySuccess] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
 const toggleSave = (job) => onToggleSave(job);
 const isJobSaved = (jobId) => savedJobIds.has(jobId);
 
@@ -489,32 +531,77 @@ const isJobSaved = (jobId) => savedJobIds.has(jobId);
     setApplySuccess(false);
   };
 
-  const submitApplication = async () => {
-    if (!applyModal) return;
-    setApplying(true);
-    setApplyError("");
-    setApplyingId(applyModal.job.id);
-    try {
-      const fd = new FormData();
-      fd.append("positionapplied", applyModal.job.title);
-      fd.append("salaryInfo", profile?.salaryInfo || "");
-      await axios.post(`${API}/quick-apply`, fd, {
-        headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
-      setApplySuccess(true);
-      setTimeout(() => {
-        setApplyModal(null);
-        setApplySuccess(false);
-        setApplyingId(null);
-      }, 2800);
-    } catch (err) {
-      setApplyError(err.response?.data?.message || "Error submitting. Please try again.");
-    } finally {
-      setApplying(false);
-    }
-  };
+const submitApplication = async () => {
+  if (!applyModal) return;
+  setApplying(true);
+  setApplyError("");
+  setApplyingId(applyModal.job.id);
 
+  try {
+    const job = applyModal.job;
+    
+    // Debug — confirm these are populated before sending
+    console.log("job.id:", job.id, "job.title:", job.title);
+    console.log("profile.email:", profile?.email);
+    console.log("profile.savedCvFileId:", profile?.savedCvFileId);
+
+    const fd = new FormData();
+
+    // ── Three fields your backend explicitly validates ──
+    fd.append("email",    String(profile?.email   || "").trim().toLowerCase());
+    fd.append("jobId",    String(job.id           || "").trim());  // e.g. "146"
+    fd.append("jobTitle", String(job.title        || "").trim());
+
+    // ── Profile fields used by extractProfileUpdate() ──
+    fd.append("firstName",    profile?.firstName    || "");
+    fd.append("lastName",     profile?.lastName     || "");
+    fd.append("secondName",   profile?.secondName   || "");
+    fd.append("idNumber",     profile?.idNumber     || "");
+    fd.append("PassportNo",   profile?.PassportNo   || "");
+    fd.append("whatsAppNo",   profile?.whatsAppNo   || "");
+    fd.append("phoneNumber",  profile?.phoneNumber  || "");
+    fd.append("nationality",  profile?.nationality  || "");
+    fd.append("location",     profile?.location     || "");
+    fd.append("homeCounty",   profile?.homeCounty   || "");
+    fd.append("salaryInfo",   profile?.salaryInfo   || "");
+    fd.append("coverLetter",  "");
+
+    // specialization is String[] in UserProfile
+    fd.append("specialization", Array.isArray(profile?.specialization)
+      ? profile.specialization.join(", ")
+      : profile?.specialization || "");
+
+    // ── CV: backend already falls back to profile.savedCvFileId ──
+    // So CV file is optional — only attach if you want to override saved CV
+    // If profile.savedCvFileId exists, backend will use it automatically
+    // If you want to force-attach it anyway:
+    if (!profile?.savedCvFileId) {
+      setApplyError("No CV found on your profile. Please upload a CV first.");
+      return;
+    }
+
+    await axios.post(`${API}/applications`, fd, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    });
+
+    setApplySuccess(true);
+    setTimeout(() => {
+      setApplyModal(null);
+      setApplySuccess(false);
+      setApplyingId(null);
+    }, 2800);
+
+  } catch (err) {
+    const msg = err.response?.data?.message || "Error submitting. Please try again.";
+    setApplyError(msg);
+  } finally {
+    setApplying(false);
+  }
+};
   return (
     <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", gap: 24 }}>
       <style>{`
@@ -543,18 +630,20 @@ const isJobSaved = (jobId) => savedJobIds.has(jobId);
               : `${filteredJobs.length} job${filteredJobs.length !== 1 ? "s" : ""} available — apply instantly using your saved profile & CV.`}
           </div>
         </div>
-        <button onClick={onQuickApply} style={{
-          flexShrink: 0, padding: "12px 26px", borderRadius: 13,
-          background: "#f26722", color: "#fff", border: "none",
-          fontSize: 13.5, fontWeight: 700, cursor: "pointer",
-          boxShadow: "0 4px 18px rgba(242,103,34,0.45)",
-          transition: "transform 0.15s, box-shadow 0.15s",
-          display: "flex", alignItems: "center", gap: 7,
-        }}
+        <button onClick={() => setShowFormModal(true)} style={{
+  flexShrink: 0, padding: "12px 26px", borderRadius: 13,
+  background: "#f26722", color: "#fff", border: "none",
+  fontSize: 13.5, fontWeight: 700, cursor: "pointer",
+  boxShadow: "0 4px 18px rgba(242,103,34,0.45)",
+  transition: "transform 0.15s, box-shadow 0.15s",
+  display: "flex", alignItems: "center", gap: 7,
+  position: "relative",  
+  zIndex: 1,             
+}}
           onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.04)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(242,103,34,0.5)"; }}
           onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 18px rgba(242,103,34,0.45)"; }}
         >
-          {Ico.lightning} Quick Apply
+          {Ico.lightning} Apply using form
         </button>
       </div>
 
@@ -611,7 +700,7 @@ const isJobSaved = (jobId) => savedJobIds.has(jobId);
           <QuickLink icon={Ico.profile} label="My Profile"   desc="View & edit details"      color="#1a6edb" bg="#e8f1fd"  onClick={() => onNav("profile")} />
           <QuickLink icon={Ico.cv}      label="Uploaded CV"  desc="Manage your CV file"      color="#7c3aed" bg="#ede9fe"  onClick={() => onNav("cv")} />
           <QuickLink icon={Ico.apply}   label="Quick Apply"  desc="1-click applications"     color="#f26722" bg="#fff0e8"  onClick={onQuickApply} />
-          <QuickLink icon={Ico.apps}    label="Applications" desc="Track your submissions"   color="#0d9488" bg="#ccfbf1"  onClick={() => onNav("applications")} badge="3" />
+          <QuickLink icon={Ico.apps}    label="Applications" desc="Track your submissions"   color="#0d9488" bg="#ccfbf1"  onClick={() => onNav("applications")} badge="" />
           {/* Saved Jobs quick link — shows count badge when jobs are saved */}
           <QuickLink
             icon={Ico.saved}
@@ -721,7 +810,7 @@ const isJobSaved = (jobId) => savedJobIds.has(jobId);
         )}
       </div>
 
-      {applyModal && (
+     {applyModal && (
         <ApplyConfirmModal
           job={applyModal.job}
           profile={profile}
@@ -730,10 +819,48 @@ const isJobSaved = (jobId) => savedJobIds.has(jobId);
           loading={applying}
           error={applyError}
           success={applySuccess}
+          onViewTerms={onViewTerms}
         />
       )}
+      {showFormModal && (
+  <div
+    style={{
+      position: "fixed", inset: 0, zIndex: 80,
+      background: "rgba(0,0,0,0.6)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16,
+      overflowY: "auto",
+    }}
+    onClick={(e) => { if (e.target === e.currentTarget) setShowFormModal(false); }}
+  >
+    <div style={{
+      background: "#fff", borderRadius: 16,
+      width: "100%", maxWidth: 900,
+      maxHeight: "92vh", overflowY: "auto",
+      position: "relative",
+      boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
+    }}>
+      {/* Close button */}
+      <button
+        onClick={() => setShowFormModal(false)}
+        style={{
+          position: "sticky", top: 12, right: 12, float: "right",
+          zIndex: 10, width: 32, height: 32, borderRadius: 8,
+          border: "1px solid rgba(0,0,0,0.1)", background: "#f4f6fb",
+          cursor: "pointer", display: "flex", alignItems: "center",
+          justifyContent: "center", color: "#5a5a72", margin: "12px 12px 0 0",
+        }}
+      >
+        {Ico.close}
+      </button>
+
+      <FormLayout onClose={() => setShowFormModal(false)} />
+    </div>
+  </div>
+)}
     </div>
   );
 };
 
+export { ApplyConfirmModal };
 export default Dashboard;

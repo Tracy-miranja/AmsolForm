@@ -67,7 +67,7 @@ const Navbar = () => {
           >
             Jobs
           </Link>
-          <Link to="/profile">My Profile</Link>
+          {/* <Link to="/profile">My Profile</Link> */}
           {/* <Link
             to="/signupform"
             className={`rounded-full ${
@@ -100,7 +100,7 @@ const Navbar = () => {
           >
             Jobs
           </Link>
-          <Link to="/profile">My Profile</Link>
+          {/* <Link to="/profile">My Profile</Link> */}
           {/* <Link
             to="/signupform"
             className="text-[#0A599E] hover:text-white hover:bg-gray-400 p-2 rounded-md w-full"

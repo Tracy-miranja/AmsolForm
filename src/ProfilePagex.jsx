@@ -35,7 +35,7 @@ const ProfileXPage = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          `https://amsol-api-production.up.railway.app/api/users/${userId}`,
+          `http://localhost:5001/api/users/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -57,7 +57,7 @@ const ProfileXPage = () => {
 
     try {
       await axios.put(
-        `https://amsol-api-production.up.railway.app/api/profile/resume/${userId}`,
+        `http://localhost:5001/api/profile/resume/${userId}`,
         formData,
         {
           headers: {
@@ -84,7 +84,7 @@ const ProfileXPage = () => {
 
     try {
       await axios.put(
-        `https://amsol-api-production.up.railway.app/api/profile/picture/${userId}`,
+        `http://localhost:5001/api/profile/picture/${userId}`,
         formData,
         {
           headers: {
@@ -131,7 +131,7 @@ const ProfileXPage = () => {
       };
 
       await axios.put(
-        `https://amsol-api-production.up.railway.app/api/profile/${userId}`,
+        `http://localhost:5001/api/profile/${userId}`,
         profileData,
         {
           headers: {

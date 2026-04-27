@@ -212,7 +212,7 @@ const NurseForm = () => {
       formData.append("cv", cv);
   
       const response = await axios.post(
-        "https://amsol-api-production.up.railway.app/api/nurse-applications",
+        "http://localhost:5001/api/nurse-applications",
         formData,
         {
           headers: {

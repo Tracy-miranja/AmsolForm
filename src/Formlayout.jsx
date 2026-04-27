@@ -152,7 +152,7 @@ const TermsModal = ({ onClose }) => (
   </div>
 );
 
-const FormLayout = () => {
+const FormLayout = ({ onClose }) => {
   const { token } = useUser();
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState("personalDetails");
@@ -245,7 +245,7 @@ const FormLayout = () => {
       formData.append("cv", cv);
 
       const response = await axios.post(
-        "https://amsol-api-production.up.railway.app/api/applications",
+        "http://localhost:5001/api/applications",
         formData,
         {
           headers: {
@@ -261,9 +261,9 @@ const FormLayout = () => {
       setShowPopup(true);
 
       setTimeout(() => {
-        setShowPopup(false);
-        navigate("/");
-      }, 3000);
+    setShowPopup(false);
+    onClose ? onClose() : navigate("/");
+  }, 3000);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Error submitting form");
@@ -299,31 +299,23 @@ const FormLayout = () => {
 
   return (
     <>
-      {showTermsModal && <TermsModal onClose={() => setShowTermsModal(false)} />}
+     {showTermsModal && <TermsModal onClose={() => setShowTermsModal(false)} />}
 
+    {!onClose && (
       <div className="w-[100%] h-[20px] bg-gradient-to-r from-[#25b2e6] to-blue-500 flex items-center justify-around shadow-2xl p-8 text-white gap-5 overflow-fixed">
         <div className="bg-white rounded-full sm:w-[100px] md:w-[200px] flex items-center justify-center">
-          <img
-            src={logo}
-            alt="hrOutsourcing"
-            className="sm:w-[50px] md:w-[110px] p-1"
-          />
+          <img src={logo} alt="hrOutsourcing" className="sm:w-[50px] md:w-[110px] p-1" />
         </div>
         <div className="flex gap-3">
           <div className="flex flex-row items-center gap-5">
-            <Link className="text-white flex flex-row gap-2" to="/">
-              <FaHome className="mt-1" />
-              Home
-            </Link>
+            <Link className="text-white flex flex-row gap-2" to="/"><FaHome className="mt-1" />Home</Link>
           </div>
-          <div className="flex gap-5">
-            {/* <Link to="/dashboard" className="mt-1 text-white">Profile Dashbaord</Link> */}
-            <HandleLogout />
-          </div>
+          <div className="flex gap-5"><HandleLogout /></div>
         </div>
       </div>
+    )}
       <div className="flex justify-center">
-        <div className="sm:w-[98%] md:w-[70%] h-screen flex flex-col items-center p-2 mt-10 border border-b-6 shadow-lg">
+        <div className={`sm:w-[98%] md:w-[70%] flex flex-col items-center p-2 border border-b-6 shadow-lg ${!onClose ? "h-screen mt-10" : "mt-4"}`}>
           {showPopup && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg shadow-lg text-center">

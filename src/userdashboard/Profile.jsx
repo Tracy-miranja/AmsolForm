@@ -21,7 +21,7 @@ const Profile = ({ userCV = null }) => {
 
     try {
       setIsUploading(true);
-      const response = await fetch(`https://amsol-api-production.up.railway.app/api/applications/cv/${userId}`, {
+      const response = await fetch(`http://localhost:5001/api/applications/cv/${userId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -53,7 +53,7 @@ const Profile = ({ userCV = null }) => {
     }
 
     try {
-      const response = await fetch(`https://amsol-api-production.up.railway.app/api/user/${userId}/cv`, {
+      const response = await fetch(`http://localhost:5001/api/user/${userId}/cv`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
