@@ -35,29 +35,29 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
 
     try {
       const endpoint = isLogin
-        ? "http://localhost:5001/api/login"
-        : "http://localhost:5001/api/register";
+  ? "https://amsol-api-production.up.railway.app/api/auth/login"
+  : "https://amsol-api-production.up.railway.app/api/auth/register";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username, role }), 
+        credentials: "include",   
+        body: JSON.stringify({ email, password, username, role }),
       });
 
       const data = await response.json();
       setLoading(false);
 
-      if (response.ok) {
-        Cookies.set("token", data.token, { expires: 7 });
-        setUserId(data.id);
-        setToken(data.token);
-
-        if (data.role === "nurse") {
-          navigate("/NurseForm");
-        } else {
-          navigate("/profile");
-        }
-        onSuccess();
-      } else {
+   if (response.ok) {
+  setUserId(data.id);
+  setToken(data.token); 
+  
+  if (data.role === "nurse") {
+    navigate("/NurseForm");
+  } else {
+    navigate("/profile");
+  }
+  onSuccess();
+} else {
         if (data.errors) {
           data.errors.forEach((error) => toast.error(error.msg));
         } else {

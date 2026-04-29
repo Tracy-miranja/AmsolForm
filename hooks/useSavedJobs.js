@@ -24,7 +24,7 @@ export const useSavedJobs = (userId, token) => {
       });
       const data = await res.json();
       setSavedJobs(data.savedJobs || []);
-      setSavedJobIds(new Set((data.savedJobs || []).map(j => j._id)));
+      setSavedJobIds(new Set((data.savedJobs || []).map(j => j._id || j.id)));
     } catch (err) {
       console.error("Failed to fetch saved jobs:", err);
     } finally {
@@ -37,32 +37,33 @@ export const useSavedJobs = (userId, token) => {
   }, [fetchSavedJobs]);
 
   // Toggle save/unsave
-  const toggleSave = useCallback(async (job) => {
-    const isSaved = savedJobIds.has(job._id);
-    const method = isSaved ? "DELETE" : "POST";
+const toggleSave = useCallback(async (job) => {
+  const jobId = job._id || job.id; // ← handle both _id and id
+  const isSaved = savedJobIds.has(jobId);
+  const method = isSaved ? "DELETE" : "POST";
 
-    // Optimistic update
-    setSavedJobIds(prev => {
-      const next = new Set(prev);
-      isSaved ? next.delete(job._id) : next.add(job._id);
-      return next;
+  // Optimistic update
+  setSavedJobIds(prev => {
+    const next = new Set(prev);
+    isSaved ? next.delete(jobId) : next.add(jobId);
+    return next;
+  });
+  setSavedJobs(prev =>
+    isSaved ? prev.filter(j => (j._id || j.id) !== jobId) : [...prev, { ...job, _id: jobId }]
+  );
+
+  try {
+    await fetch(`${API}/api/users/${userId}/saved-jobs/${jobId}`, {
+      method,
+      headers,
+      credentials: "include",
+      body: method === "POST" ? JSON.stringify(job) : undefined,
     });
-    setSavedJobs(prev =>
-      isSaved ? prev.filter(j => j._id !== job._id) : [...prev, job]
-    );
-
-    try {
-      await fetch(`${API}/api/users/${userId}/saved-jobs/${job._id}`, {
-        method,
-        headers,
-        credentials: "include",
-      });
-    } catch (err) {
-      // Rollback on failure
-      console.error("Toggle save failed:", err);
-      fetchSavedJobs();
-    }
-  }, [savedJobIds, userId]);
+  } catch (err) {
+    console.error("Toggle save failed:", err);
+    fetchSavedJobs();
+  }
+}, [savedJobIds, userId, fetchSavedJobs]);
 
   return { savedJobIds, savedJobs, loading, toggleSave, refetch: fetchSavedJobs };
 };

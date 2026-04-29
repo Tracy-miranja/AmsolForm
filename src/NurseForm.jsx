@@ -2,7 +2,7 @@ import { useState } from "react";
 import logo from "./assets/amsolJobVacancies.png";
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import arrow from "./assets/Vector1.svg";
 import HandleLogout from "./logout";
 import { useNavigate } from "react-router-dom";

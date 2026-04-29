@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 
-const API = "http://localhost:5001/api";
+const API = "/api";
 
 const iconStyle = { width: 16, height: 16, flexShrink: 0 };
 
@@ -184,13 +184,10 @@ const JobSettingsPage = ({
       setError("");
 
       const requests = await Promise.allSettled([
-        axios.get(`${API}/jobs?page=1&limit=120`, { withCredentials: true }),
-        axios.get(`${API}/categories`, { withCredentials: true }),
-        axios.get(`${API}/my-applications`, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }),
-      ]);
+  api.get(`${API}/jobs?page=1&limit=120`),
+  api.get(`${API}/categories`),
+  api.get(`${API}/my-applications`),
+]);
 
       if (cancelled) return;
 

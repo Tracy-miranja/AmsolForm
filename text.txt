@@ -15,7 +15,7 @@ const getUserDetails = async (e) => {
   };
 
   import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { FaUser } from "react-icons/fa";
 
 const Home = () => {

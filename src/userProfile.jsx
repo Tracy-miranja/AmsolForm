@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Tab } from "@headlessui/react";
 import { Toaster, toast } from "react-hot-toast";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "./Context/UserContext";
 
@@ -34,12 +34,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5001/api/users/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+       const response = await api.get(`/api/users/${userId}`);
         setUserData(response.data);
       } catch (error) {
         toast.error("Failed to fetch user data");
@@ -56,16 +51,9 @@ const ProfilePage = () => {
     formData.append("file", file);
 
     try {
-      await axios.put(
-        `http://localhost:5001/api/profile/resume/${userId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+     await api.put(`/api/profile/resume/${userId}`, formData, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
       toast.success("CV uploaded successfully");
       setSelectedTab(1);
     } catch (error) {
@@ -83,16 +71,9 @@ const ProfilePage = () => {
     formData.append("file", file);
 
     try {
-      await axios.put(
-        `http://localhost:5001/api/profile/picture/${userId}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+     await api.put(`/api/profile/picture/${userId}`, formData, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
       toast.success("Profile picture uploaded successfully");
       navigate("/profile-details", { state: { userData } });
     } catch (error) {
@@ -130,16 +111,7 @@ const ProfilePage = () => {
         },
       };
 
-      await axios.put(
-        `http://localhost:5001/api/profile/${userId}`,
-        profileData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await api.put(`/api/profile/${userId}`, profileData);
       toast.success("Profile updated successfully!");
       setSelectedTab(2);
     } catch (error) {

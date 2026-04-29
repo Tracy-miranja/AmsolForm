@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 
-const API = "http://localhost:5001/api";
+const API = "/api";
 
 // ─── Icons (self-contained, matches your existing Icon style) ─────────────────
 const MsgIcon = {
@@ -309,10 +309,9 @@ const ConversationView = ({ conversationId, currentUserId, token, onBack, otherP
 
   const fetchMessages = useCallback(async (p = 1, append = false) => {
     try {
-      const { data } = await axios.get(
-        `${API}/messages/conversations/${conversationId}?page=${p}&limit=30`,
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
+      const { data } = await api.get(
+  `${API}/messages/conversations/${conversationId}?page=${p}&limit=30`
+);
       setTotal(data.total);
       setHasMore(data.total > p * 30);
       if (append) {
@@ -330,11 +329,7 @@ const ConversationView = ({ conversationId, currentUserId, token, onBack, otherP
   // Mark as read
   const markRead = useCallback(async () => {
     try {
-      await axios.put(
-        `${API}/messages/conversations/${conversationId}/read`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
+      await api.put(`${API}/messages/conversations/${conversationId}/read`, {});
     } catch (_) {}
   }, [conversationId, token]);
 
@@ -356,11 +351,9 @@ const ConversationView = ({ conversationId, currentUserId, token, onBack, otherP
   const handleSend = async (body) => {
     setSending(true);
     try {
-      await axios.post(
-        `${API}/messages/conversations/${conversationId}/reply`,
-        { body, channels: ["system"], category: "general" },
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-      );
+     await api.post(`${API}/messages/conversations/${conversationId}/reply`, {
+  body, channels: ["system"], category: "general"
+});
       await fetchMessages(1);
       await markRead();
     } catch (err) {
@@ -372,9 +365,7 @@ const ConversationView = ({ conversationId, currentUserId, token, onBack, otherP
 
   const handleDeleteMessage = async (messageId) => {
     try {
-      await axios.delete(`${API}/messages/${messageId}`, {
-        headers: { Authorization: `Bearer ${token}` }, withCredentials: true
-      });
+      await api.delete(`${API}/messages/${messageId}`);
       setMessages((prev) => prev.filter((m) => m._id !== messageId));
     } catch (err) {
       console.error("Delete message failed:", err);
@@ -486,9 +477,7 @@ const MessagesPage = ({ token, userId, socket }) => {
     if (!token) return;
     try {
       const params = categoryFilter ? `?category=${categoryFilter}` : "";
-      const { data } = await axios.get(`${API}/messages/conversations${params}`, {
-        headers: { Authorization: `Bearer ${token}` }, withCredentials: true
-      });
+      const { data } = await api.get(`${API}/messages/conversations${params}`);
       setConversations(data || []);
     } catch (err) {
       console.error("Failed to fetch conversations:", err);
@@ -500,9 +489,7 @@ const MessagesPage = ({ token, userId, socket }) => {
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
     try {
-      const { data } = await axios.get(`${API}/messages/unread-count`, {
-        headers: { Authorization: `Bearer ${token}` }, withCredentials: true
-      });
+     const { data } = await api.get(`${API}/messages/unread-count`);
       setTotalUnread(data.count || 0);
     } catch (_) {}
   }, [token]);
@@ -548,9 +535,8 @@ const MessagesPage = ({ token, userId, socket }) => {
   const handleDeleteConversation = async (conversationId) => {
     if (!window.confirm("Delete this conversation?")) return;
     try {
-      await axios.delete(`${API}/messages/conversations/${conversationId}`, {
-        headers: { Authorization: `Bearer ${token}` }, withCredentials: true
-      });
+      await api.delete(`${API}/messages/conversations/${conversationId}`);
+
       setConversations((prev) => prev.filter((c) => c._id !== conversationId));
       if (selectedConv?._id === conversationId) setSelectedConv(null);
     } catch (err) {

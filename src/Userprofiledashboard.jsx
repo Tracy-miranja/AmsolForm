@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { useUser } from "./Context/UserContext";
 import Dashboard from "./Dashboard";
 import { ApplyConfirmModal } from "./Dashboard";
@@ -13,7 +13,7 @@ import MessagesPage from "./components/MessagesPage";
 import { io } from "socket.io-client";
 
 
-const API = "http://localhost:5001/api";
+const API = "/api";
 
 // ─── Icon helpers ─────────────────────────────────────────────────────────────
 const Icon = {
@@ -1090,13 +1090,7 @@ const QuickApplyModal = ({ onClose, savedCvName, token }) => {
       fd.append("positionapplied", position);
       fd.append("salaryInfo", salary);
       if (!useSaved && cvFile) fd.append("cv", cvFile);
-      await axios.post(`${API}/applications`, fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      await api.post(`${API}/applications`, fd);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -1809,13 +1803,9 @@ const SummaryModal = ({ form, onClose, onSave, saving, token }) => {
     try {
       const fd = new FormData();
       fd.append("payslip", payslipFile);
-      const { data } = await axios.post(`${API}/profile/payslip`, fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      const { data } = await api.post(`${API}/profile/payslip`, fd, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
       // ✅ capture the returned IDs
       uploadedPayslipFileId = data.payslipAttachmentFileId;
       uploadedPayslipName = data.payslipAttachmentName;
@@ -2382,13 +2372,12 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
     try {
       const fd = new FormData();
       fd.append("certificate", file);
-      const { data } = await axios.post(`${API}/profile/certificate`, fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      fd.append("name", list[i].courseName || list[i].academicLevel || file.name);
+      fd.append("institution", list[i].institution || "");
+      fd.append("dateObtained", list[i].dateEnd || list[i].dateStart || "");
+      const { data } = await api.post(`${API}/certificates`, fd, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
       setCertMsg(i, `Uploaded: ${file.name}`);
       // store the returned fileId back into the list entry
       ch(i, "certificateFileId", data.certificateFileId || data.fileId || null);
@@ -2432,15 +2421,24 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const handleSave = async () => {
+ const handleSave = async () => {
     // Upload any pending certificate files before saving
-    const uploadPromises = certFiles.map((file, i) =>
-      file ? uploadCert(i) : Promise.resolve(null)
+    // and wait for all fileIds to be stored back in list state
+    const uploadResults = await Promise.all(
+      certFiles.map((file, i) => file ? uploadCert(i) : Promise.resolve(null))
     );
-    await Promise.all(uploadPromises);
+
+    // Build final list with uploaded fileIds merged in
+    const finalList = list.map((e, i) => ({
+      ...e,
+      // If a new cert was just uploaded, use the returned fileId
+      certificateFileId: uploadResults[i] !== null && uploadResults[i] !== undefined
+        ? uploadResults[i]
+        : e.certificateFileId,
+    }));
 
     onSave(
-      list
+      finalList
         .filter((e) => e.academicLevel || e.degree || e.institution)
         .map((e) => ({
           ...e,
@@ -2732,16 +2730,17 @@ const CvPreviewModal = ({ cvUrl, cvName, onClose, token }) => {
     }
     setLoadState("loading");
 
-    fetch(cvUrl, {
+ fetch(cvUrl, {
   credentials: "include",
   headers: {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
   },
 })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch CV");
-        return res.blob();
-      })
+  .then((res) => {
+    console.log("CV fetch status:", res.status, res.headers.get("content-type"));
+    if (!res.ok) throw new Error("Failed to fetch CV");
+    return res.blob();
+  })
       .then((blob) => {
         const url = URL.createObjectURL(blob);
         setBlobUrl(url);
@@ -2833,29 +2832,14 @@ const CvPreviewModal = ({ cvUrl, cvName, onClose, token }) => {
             </div>
           )}
 
-          {loadState === "ready" && blobUrl && (
-            <object
-              data={blobUrl}
-              type="application/pdf"
-              className="w-full h-full"
-              style={{ display: "block" }}
-            >
-              {/* Fallback for browsers that can't render PDF in object tag */}
-              <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-8">
-                <div className="text-4xl">📄</div>
-                <p className="text-[#1a1a2e] font-medium text-sm">
-                  Your browser can't display PDFs inline.
-                </p>
-                <a
-                  href={blobUrl}
-                  download={cvName}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1a6edb] text-white text-sm hover:bg-[#0d4fa3] transition"
-                >
-                  {Icon.download} Download to view
-                </a>
-              </div>
-            </object>
-          )}
+        {loadState === "ready" && blobUrl && (
+  <iframe
+   src={blobUrl}
+    className="w-full h-full"
+    style={{ display: "block", border: "none" }}
+    title="CV Preview"
+  />
+)}
         </div>
       </div>
     </div>
@@ -2889,18 +2873,18 @@ const CertificateActions = ({ fileId, token, fileName }) => {
   const [blobUrl, setBlobUrl] = useState(null);
   const [loadState, setLoadState] = useState("idle");
 
-  const viewUrl = `${API}/certificates/${fileId}/view`;
-  const downloadUrl = `${API}/certificates/${fileId}/download`;
+const viewUrl = `http://localhost:5001${API}/certificates/${fileId}`;
+const downloadUrl = `http://localhost:5001${API}/certificates/${fileId}/download`;
 
   const handlePreview = async () => {
     if (blobUrl) { setPreviewing(true); return; }
     setLoadState("loading");
     setPreviewing(true);
     try {
-      const res = await fetch(viewUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
-      });
+     const res = await fetch(viewUrl, {
+  headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+  credentials: "include",
+});
       if (!res.ok) throw new Error("Failed");
       const blob = await res.blob();
       setBlobUrl(URL.createObjectURL(blob));
@@ -2913,9 +2897,9 @@ const CertificateActions = ({ fileId, token, fileName }) => {
   const handleDownload = async () => {
     try {
       const res = await fetch(downloadUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
-      });
+  headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+  credentials: "include",
+});
       if (!res.ok) throw new Error("Failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -3006,15 +2990,13 @@ const CertificateActions = ({ fileId, token, fileName }) => {
                 </div>
               )}
               {loadState === "ready" && blobUrl && (
-                <object data={blobUrl} type="application/pdf" className="w-full h-full" style={{ display: "block" }}>
-                  <div className="flex flex-col items-center justify-center h-full gap-3">
-                    <p className="text-[#1a1a2e] font-medium text-sm">Can't display inline.</p>
-                    <button onClick={handleDownload} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1a6edb] text-white text-sm">
-                      {Icon.download} Download to view
-                    </button>
-                  </div>
-                </object>
-              )}
+  <iframe
+    src={blobUrl}
+    className="w-full h-full"
+    style={{ display: "block", border: "none" }}
+    title="Certificate Preview"
+  />
+)}
             </div>
           </div>
         </div>
@@ -3056,43 +3038,50 @@ const ProfessionalModal = ({ qualifications, memberships, onClose, onSave, savin
   const setCertUploadingAt = (i, val) => setCertUploading(u => u.map((v, idx) => idx === i ? val : v));
 
   const uploadCert = async (i) => {
-    const file = certFiles[i];
-    const qual = quals[i];
-    if (!file) return null;
+  const file = certFiles[i];
+  const qual = quals[i];
+  if (!file) return null;
 
-    setCertUploadingAt(i, true);
-    setCertMsg(i, "");
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("name", qual.name || "Certificate");
-      if (qual.institution) fd.append("institution", qual.institution);
-      if (qual.dateObtained) fd.append("dateObtained", qual.dateObtained);
+  setCertUploadingAt(i, true);
+  setCertMsg(i, "");
+  try {
+    const fd = new FormData();
+    fd.append("certificate", file);
+    fd.append("name", qual.name || file.name);          // ← add this
+    fd.append("institution", qual.institution || "");   // ← add this
+    fd.append("dateObtained", qual.dateObtained || ""); // ← add this
 
-      const { data } = await axios.post(`${API}/certificates`, fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+    const { data } = await api.post(`${API}/certificates`, fd, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
 
-      const fileId = data.certificateFileId || null;
-      chQ(i, "certificateFileId", fileId);
-      setCertMsg(i, `✓ ${file.name} uploaded`);
-      return fileId;
-    } catch (err) {
-      setCertMsg(i, err.response?.data?.message || "Upload failed.");
-      return null;
-    } finally {
-      setCertUploadingAt(i, false);
-    }
-  };
+    const fileId = data.certificateFileId || null;
+    chQ(i, "certificateFileId", fileId);
+    setCertMsg(i, `✓ ${file.name} uploaded`);
+    return fileId;
+  } catch (err) {
+    setCertMsg(i, err.response?.data?.message || "Upload failed.");
+    return null;
+  } finally {
+    setCertUploadingAt(i, false);
+  }
+};
 
-  const handleSave = async () => {
-    // Upload any pending cert files first
-    await Promise.all(certFiles.map((file, i) => file ? uploadCert(i) : Promise.resolve(null)));
-    onSave({ qualifications: quals, memberships: mems });
+const handleSave = async () => {
+   
+    const uploadResults = await Promise.all(
+      certFiles.map((file, i) => file ? uploadCert(i) : Promise.resolve(null))
+    );
+
+    
+    const finalQuals = quals.map((q, i) => ({
+      ...q,
+      certificateFileId: uploadResults[i] !== null && uploadResults[i] !== undefined
+        ? uploadResults[i]
+        : q.certificateFileId,
+    }));
+
+    onSave({ qualifications: finalQuals, memberships: mems });
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -3390,11 +3379,7 @@ const [generalApplySuccess, setGeneralApplySuccess] = useState(false);
 
   useEffect(() => {
     if (!token) return;
-    axios
-      .get(`${API}/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      })
+    api.get(`${API}/profile`)
     .then(({ data }) => {
   // ADD THESE LINES 👇
   if (data.dob) {
@@ -3420,7 +3405,7 @@ setMemberships(data.professionalMemberships || []);
 
   // academicLevel from DB is [{level, courseName, institution, ...}]
   // map it to the shape your EducationModal/display expects
-  const mappedEdu = (data.academicLevel || []).map((e) => ({
+ const mappedEdu = (data.academicLevel || []).map((e) => ({
     academicLevel: e.level || "",
     degree: e.courseName || "",
     courseName: e.courseName || "",
@@ -3428,6 +3413,7 @@ setMemberships(data.professionalMemberships || []);
     dateStart: e.startDate ? new Date(e.startDate).toISOString().split("T")[0] : "",
     dateEnd: e.endDate ? new Date(e.endDate).toISOString().split("T")[0] : "",
     currentlyStudying: false,
+    certificateFileId: e.certificateFileId || null,  // ← ADD THIS
   }));
   setEducation(mappedEdu);
 
@@ -3451,11 +3437,7 @@ setMemberships(data.professionalMemberships || []);
 
     let cancelled = false;
 
-    axios
-      .get(`${API}/my-applications`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      })
+   api.get(`${API}/my-applications`)
       .then(({ data }) => {
         if (!cancelled) {
           setApplicationsCount((data.applications || []).length);
@@ -3479,9 +3461,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
       professionalQualifications: newQuals.filter(q => q.name || q.institution),
       professionalMemberships: newMems.filter(m => m.organization || m.membershipId),
     };
-    const { data } = await axios.post(`${API}/profile`, merged, {
-      headers: { Authorization: `Bearer ${token}` }, withCredentials: true,
-    });
+  const { data } = await api.post(`${API}/profile`, merged)
     const p = data.profile || data;
     setProfile(p);
     setForm(p);
@@ -3497,11 +3477,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
 };
   const handleLogoutClick = async () => {
     try {
-      await axios.post(
-        "http://localhost:5001/logout",
-        {},
-        { withCredentials: true },
-      );
+      await api.post("/api/auth/logout");
     } catch (error) {
       console.error("Logout request failed:", error);
     } finally {
@@ -3521,7 +3497,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
  const savePersonal = async () => {
   setSaving(true);
   try {
-    const { data } = await axios.post(`${API}/profile`, form, {
+    const { data } = await api.post(`${API}/profile`, form, {
       headers: { Authorization: `Bearer ${token}` },
       withCredentials: true,
     });
@@ -3532,7 +3508,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
     setWorkExperience(Array.isArray(p.workExperience) ? p.workExperience : []);
 
     // Remap academicLevel → frontend education shape (same as initial load)
-    const mappedEdu = (p.academicLevel || []).map((e) => ({
+  const mappedEdu = (p.academicLevel || []).map((e) => ({
       academicLevel: e.level || "",
       degree: e.courseName || "",
       courseName: e.courseName || "",
@@ -3544,6 +3520,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
         ? new Date(e.endDate).toISOString().split("T")[0]
         : "",
       currentlyStudying: false,
+      certificateFileId: e.certificateFileId || null,  // ← ADD THIS
     }));
     setEducation(mappedEdu);
 
@@ -3560,10 +3537,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
   setSaving(true);
   try {
     const merged = { ...form, ...localData };
-    const { data } = await axios.post(`${API}/profile`, merged, {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
-    });
+    const { data } = await api.post(`${API}/profile`, merged);
    
     const p = data.profile || data;
     setProfile(p);
@@ -3589,10 +3563,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
         );
       }
       const merged = { ...form, workExperience: updated };
-      const { data } = await axios.post(`${API}/profile`, merged, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const { data } = await api.post(`${API}/profile`, merged);
       setProfile(data.profile);
       setForm(data.profile);
       setWorkExperience(updated);
@@ -3616,10 +3587,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
     try {
       const updated = workExperience.filter((_, i) => i !== index);
       const merged = { ...form, workExperience: updated };
-      const { data } = await axios.post(`${API}/profile`, merged, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const { data } = await api.post(`${API}/profile`, merged);
       setProfile(data.profile);
       setForm(data.profile);
       setWorkExperience(updated);
@@ -3636,10 +3604,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
     setSaving(true);
     try {
       const merged = { ...form, skills: newSkills };
-      const { data } = await axios.post(`${API}/profile`, merged, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+     const { data } = await api.post(`${API}/profile`, merged);
       setProfile(data.profile);
       setForm(data.profile);
       setSkills(newSkills);
@@ -3655,20 +3620,18 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
  const saveEducation = async (newEdu) => {
   setSaving(true);
   try {
-    // Map frontend shape → DB academicLevelSchema shape
+
     const academicLevel = newEdu.map((e) => ({
       level: e.academicLevel || "",
       courseName: e.degree || e.courseName || "",
       institution: e.institution || "",
       startDate: e.dateStart ? new Date(e.dateStart) : null,
       endDate: e.currentlyStudying ? null : (e.dateEnd ? new Date(e.dateEnd) : null),
+      certificateFileId: e.certificateFileId || null,  // ← ADD THIS
     }));
 
     const merged = { ...form, academicLevel };
-    const { data } = await axios.post(`${API}/profile`, merged, {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
-    });
+  const { data } = await api.post(`${API}/profile`, merged);
 
     const p = data.profile || data;
     setProfile(p);
@@ -3689,13 +3652,9 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
     try {
       const fd = new FormData();
       fd.append("profilePhoto", file);
-      const { data } = await axios.post(`${API}/profile/photo`, fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      const { data } = await api.post(`${API}/profile/photo`, fd, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
       setAvatarUrl(data.profilePhotoUrl);
       setAvatarPreview(null);
       setProfile((p) => ({ ...p, profilePhotoUrl: data.profilePhotoUrl }));
@@ -3715,13 +3674,9 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
     try {
       const fd = new FormData();
       fd.append("cv", cvFile);
-      const { data } = await axios.post(`${API}/profile/cv`, fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      const { data } = await api.post(`${API}/profile/cv`, fd, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
       setProfile((p) => ({
         ...p,
         savedCvFileId: data.cvFileId,
@@ -3745,10 +3700,10 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
     setModal("cvpreview");
   };
 
-  const cvPreviewUrl =
+const cvPreviewUrl =
   profile?.savedCvUrl ||
   (profile?.savedCvFileId
-    ? `${API}/profile/cv/${profile.savedCvFileId}`   
+    ? `http://localhost:5001${API}/profile/cv/${profile.savedCvFileId}`
     : null);
 
   const pct = calcCompletion(profile);
@@ -4716,6 +4671,14 @@ profile?.highestEducationLevel ? (
                         {e.institution}
                       </div>
                     )}
+                    {/* Certificate viewer */}
+                    {e.certificateFileId && (
+                      <CertificateActions
+                        fileId={e.certificateFileId}
+                        token={token}
+                        fileName={`${e.courseName || e.academicLevel || "Certificate"}`}
+                      />
+                    )}
 
                     {/* Date range */}
                     {(e.dateStart || e.dateEnd || e.yearStart || e.yearEnd) &&
@@ -5081,10 +5044,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
           setGeneralApplying(false);
           return;
         }
-        await axios.post(`${API}/applications`, fd, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        });
+       await api.post(`${API}/applications`, fd, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
         setGeneralApplySuccess(true);
         setTimeout(() => {
           setGeneralApplyModal(false);

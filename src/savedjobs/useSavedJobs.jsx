@@ -1,7 +1,7 @@
 // hooks/useSavedJobs.js
 import { useState, useEffect, useCallback } from "react";
 
-const API = "http://localhost:5001";
+const API = "https://amsol-api-production.up.railway.app";
 
 export const useSavedJobs = (userId, token) => {
   const [savedJobIds, setSavedJobIds] = useState(new Set());

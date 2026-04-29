@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { Link } from "react-router-dom";
 
 const UpdateCV = () => {
@@ -14,7 +14,7 @@ const UpdateCV = () => {
   // Fetch user ID from cookie-stored session
 const fetchUserId = async () => {
   try {
-    const response = await axios.get("http://localhost:5001/api/users/me", {
+    const response = await axios.get("https://amsol-api-production.up.railway.app/api/users/me", {
       withCredentials: true, // Ensure cookies are sent with the request
     });
 
@@ -49,7 +49,7 @@ const fetchUserId = async () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:5001/api/users/${userId}/cv`,
+        `https://amsol-api-production.up.railway.app/api/users/${userId}/cv`,
         formData,
         {
           headers: {
@@ -59,7 +59,7 @@ const fetchUserId = async () => {
         }
       );
 
-      setMessage(response.data.message); // Display success message
+      setMessage(response.data.message); 
     } catch (error) {
       console.error("Error updating CV:", error);
       setMessage("Failed to update CV.No user found.");
@@ -70,7 +70,7 @@ const fetchUserId = async () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5001/api/login", {
+      const response = await axios.post("https://amsol-api-production.up.railway.app/api/auth/login", {
         email,
         password,
       }, { withCredentials: true });

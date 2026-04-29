@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 
-const API = "http://localhost:5001/api";
+const API = "/api";
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -358,19 +358,15 @@ const ApplicationsPage = ({ token, profile, onBrowseJobs }) => {
     const fetchMyApplications = async () => {
       try {
         // Try the dedicated endpoint first
-        const { data } = await axios.get(`${API}/my-applications`, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        });
+        const { data } = await api.get(`${API}/my-applications`);
         setApplications(data.applications || []);
       } catch (err) {
         // Fallback: search by email from profile
         if (profile?.email) {
           try {
-            const { data } = await axios.get(
-              `${API}/applications/all/search?query=${encodeURIComponent(profile.email)}`,
-              { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
-            );
+           const { data } = await api.get(
+  `${API}/applications/all/search?query=${encodeURIComponent(profile.email)}`
+);
             const myApps = (data.applications || []).filter(
               a => a.email?.toLowerCase() === profile.email?.toLowerCase()
             );

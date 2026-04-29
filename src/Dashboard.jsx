@@ -1,9 +1,9 @@
 import { useState, useContext } from "react";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { JobContext } from "./JobContext";
 import FormLayout from "./Formlayout";
 
-const API = "http://localhost:5001/api";
+const API = "/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const stripHtml = (html) => {
@@ -580,13 +580,9 @@ const submitApplication = async () => {
       return;
     }
 
-    await axios.post(`${API}/applications`, fd, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-      withCredentials: true,
-    });
+    await api.post(`${API}/applications`, fd, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
 
     setApplySuccess(true);
     setTimeout(() => {
@@ -823,23 +819,27 @@ const submitApplication = async () => {
         />
       )}
       {showFormModal && (
-  <div
-    style={{
-      position: "fixed", inset: 0, zIndex: 80,
-      background: "rgba(0,0,0,0.6)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: 16,
-      overflowY: "auto",
-    }}
+
+<div
+  style={{
+    position: "fixed", inset: 0, zIndex: 80,
+  background: "rgba(0,0,0,0.6)",
+  display: "flex", alignItems: "flex-start", justifyContent: "center",
+  padding: "10px 16px",
+  overflowY: "auto",
+  fontFamily: "'DM Sans', sans-serif",
+  }}
     onClick={(e) => { if (e.target === e.currentTarget) setShowFormModal(false); }}
   >
-    <div style={{
-      background: "#fff", borderRadius: 16,
-      width: "100%", maxWidth: 900,
-      maxHeight: "92vh", overflowY: "auto",
-      position: "relative",
-      boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
-    }}>
+ <div style={{
+  background: "#fff", borderRadius: 16,
+  width: "100%", maxWidth: 860,
+  minHeight: "90vh",
+  position: "relative",
+  boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
+  fontFamily: "'DM Sans', sans-serif",
+  fontSize: 13,
+}}>
       {/* Close button */}
       <button
         onClick={() => setShowFormModal(false)}

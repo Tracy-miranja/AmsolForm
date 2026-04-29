@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +10,7 @@ const ForgetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5001/forgot-password", {
+      await axios.post("https://amsol-api-production.up.railway.app/forgot-password", {
         email,
       });
       toast.success("Reset link sent to your email!");

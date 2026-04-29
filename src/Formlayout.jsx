@@ -2,7 +2,7 @@ import { useState } from "react";
 import logo from "./assets/amsolJobVacancies.png";
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import arrow from "./assets/Vector1.svg";
 import HandleLogout from "./logout";
 import { useNavigate } from "react-router-dom";
@@ -244,17 +244,9 @@ const FormLayout = ({ onClose }) => {
       formData.append("PassportNo", PassportNo)
       formData.append("cv", cv);
 
-      const response = await axios.post(
-        "http://localhost:5001/api/applications",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`
-          },
-          withCredentials: true,
-        }
-      );
+     const response = await api.post("/api/applications", formData, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
 
       setMessage("Form submitted successfully!");
       setError("");
