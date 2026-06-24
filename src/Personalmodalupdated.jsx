@@ -29,7 +29,7 @@ function useCountries() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("https://restcountries.com/v3.1/all?fields=name,idd,flags,capital,region,subregion,cca2")
+    fetch("https://countriesnow.space/api/v0.1/countries?fields=name,idd,flags,capital,region,subregion,cca2")
       .then((r) => r.json())
       .then((data) => {
         const list = data

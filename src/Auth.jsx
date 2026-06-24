@@ -4,13 +4,15 @@ import { useUser } from "./Context/UserContext";
 import Cookies from "js-cookie";
 import { Toaster, toast } from "react-hot-toast";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import api from "../api/axiosInstance";
+import axios from "axios";
 
 const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState("job applicant"); 
+  const [role, setRole] = useState("job applicant");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setUserId, setToken } = useUser();
@@ -27,6 +29,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isLogin && password !== confirmPassword) {
       return toast.error("Passwords do not match!");
     }
@@ -34,42 +37,30 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
     setLoading(true);
 
     try {
-      const endpoint = isLogin
-  ? "https://amsol-api-production.up.railway.app/api/auth/login"
-  : "https://amsol-api-production.up.railway.app/api/auth/register";
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",   
-        body: JSON.stringify({ email, password, username, role }),
-      });
+      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register"; 
+      const { data } = await api.post(endpoint, { email, password, username, role });
 
-      const data = await response.json();
-      setLoading(false);
+      setUserId(data.id);
+      setToken(data.token);
 
-   if (response.ok) {
-  setUserId(data.id);
-  setToken(data.token); 
-  
-  if (data.role === "nurse") {
-    navigate("/NurseForm");
-  } else {
-    navigate("/profile");
-  }
-  onSuccess();
-} else {
-        if (data.errors) {
-          data.errors.forEach((error) => toast.error(error.msg));
-        } else {
-          toast.error(data.message || "Something went wrong!");
-        }
+      if (data.role === "nurse") {
+        navigate("/NurseForm");
+      } else {
+        navigate("/profile");
       }
+
+      if (typeof onSuccess === "function") onSuccess(); 
     } catch (error) {
-      setLoading(false);
-      if (typeof onError === "function") {
-        onError();
+      const data = error.response?.data;
+      if (data?.errors) {
+        data.errors.forEach((err) => toast.error(err.msg));
+      } else {
+        toast.error(data?.message || "Something went wrong!");
       }
-      // toast.error("Failed to connect to the server!");
+
+      if (typeof onError === "function") onError();
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -83,7 +74,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700">Full Name</label>
               <input
                 type="text"
                 value={username}
@@ -92,22 +83,19 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
                 required
                 className="w-full px-4 py-2 border rounded-md focus:outline-none bg-gray-50 text-gray-700"
               />
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">Select Role</label>
+              <label className="block text-sm font-medium text-gray-700">Select Role</label>
               <select
-                id="role"
-                name="role" 
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none bg-gray-50 text-gray-700"
                 required
               >
-              <option value="nurse">Nurse</option>
-              <option value="job applicant">Other roles</option>
-                
+                <option value="nurse">Nurse</option>
+                <option value="job applicant">Other roles</option>
               </select>
             </>
           )}
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+          <label className="block text-sm font-medium text-gray-700">Email</label>
           <input
             type="email"
             value={email}
@@ -116,7 +104,7 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
             required
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700"
           />
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+          <label className="block text-sm font-medium text-gray-700">Password</label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -134,35 +122,35 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
               {showPassword ? <FiEyeOff /> : <FiEye />}
             </button>
           </div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
           {!isLogin && (
-            
-            <input
-              type={showPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm Password"
-              required
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700"
-            />
+            <>
+              <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+                required
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700"
+              />
+            </>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50"
           >
             {loading ? "Loading..." : isLogin ? "Login" : "Signup"}
           </button>
           <Link to="/forgetPassword" className="flex text-blue-500 hover:underline justify-center">
-              ForgetPassword
-            </Link>
+            Forgot Password
+          </Link>
         </form>
         <p className="text-center mt-4">
           {isLogin ? (
             <Link to="/register" className="text-blue-500 hover:underline">
               Create an account
             </Link>
-            
           ) : (
             <Link to="/auth" className="text-blue-500 hover:underline">
               Already have an account? Login

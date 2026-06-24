@@ -11,6 +11,8 @@ import ApplicationsPage from "./components/ApplicationsPage";
 import JobSettingsPage from "./components/JobSettingsPage";
 import MessagesPage from "./components/MessagesPage";
 import { io } from "socket.io-client";
+import * as countryCodes from "country-codes-list";
+console.log(countryCodes);
 
 
 const API = "/api";
@@ -336,134 +338,155 @@ const NavItem = ({ icon, label, active, badge, onClick }) => (
 
 
 // ─── Country data hook ────────────────────────────────────────────────────────
+// function useCountries() {
+//   const [countries, setCountries] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     fetch(
+//       "https://countriesnow.space/api/v0.1/countries?fields=name,idd,flags,capital,region,subregion,cca2",
+//     )
+//       .then((r) => r.json())
+//       .then((data) => {
+//         const list = data
+//           .map((c) => {
+//             const root = c.idd?.root || "";
+//             const suffix = c.idd?.suffixes?.[0] || "";
+//             const dialCode = root && suffix ? `${root}${suffix}` : root || "";
+//             return {
+//               name: c.name.common,
+//               cca2: c.cca2,
+//               flag: c.flags?.emoji || "",
+//               flagPng: c.flags?.png || "",
+//               dialCode,
+//               capital: c.capital?.[0] || "",
+//               region: c.region || "",
+//             };
+//           })
+//           .filter((c) => c.dialCode)
+//           .sort((a, b) => a.name.localeCompare(b.name));
+//         setCountries(list);
+//       })
+//       .catch(() => {
+//         // Fallback list if API is unreachable
+//         setCountries([
+//           {
+//             name: "Kenya",
+//             cca2: "KE",
+//             flag: "🇰🇪",
+//             flagPng: "",
+//             dialCode: "+254",
+//             capital: "Nairobi",
+//             region: "Africa",
+//           },
+//           {
+//             name: "Uganda",
+//             cca2: "UG",
+//             flag: "🇺🇬",
+//             flagPng: "",
+//             dialCode: "+256",
+//             capital: "Kampala",
+//             region: "Africa",
+//           },
+//           {
+//             name: "Tanzania",
+//             cca2: "TZ",
+//             flag: "🇹🇿",
+//             flagPng: "",
+//             dialCode: "+255",
+//             capital: "Dodoma",
+//             region: "Africa",
+//           },
+//           {
+//             name: "United States",
+//             cca2: "US",
+//             flag: "🇺🇸",
+//             flagPng: "",
+//             dialCode: "+1",
+//             capital: "Washington D.C.",
+//             region: "Americas",
+//           },
+//           {
+//             name: "United Kingdom",
+//             cca2: "GB",
+//             flag: "🇬🇧",
+//             flagPng: "",
+//             dialCode: "+44",
+//             capital: "London",
+//             region: "Europe",
+//           },
+//           {
+//             name: "South Africa",
+//             cca2: "ZA",
+//             flag: "🇿🇦",
+//             flagPng: "",
+//             dialCode: "+27",
+//             capital: "Pretoria",
+//             region: "Africa",
+//           },
+//           {
+//             name: "Nigeria",
+//             cca2: "NG",
+//             flag: "🇳🇬",
+//             flagPng: "",
+//             dialCode: "+234",
+//             capital: "Abuja",
+//             region: "Africa",
+//           },
+//           {
+//             name: "India",
+//             cca2: "IN",
+//             flag: "🇮🇳",
+//             flagPng: "",
+//             dialCode: "+91",
+//             capital: "New Delhi",
+//             region: "Asia",
+//           },
+//           {
+//             name: "Canada",
+//             cca2: "CA",
+//             flag: "🇨🇦",
+//             flagPng: "",
+//             dialCode: "+1",
+//             capital: "Ottawa",
+//             region: "Americas",
+//           },
+//           {
+//             name: "Australia",
+//             cca2: "AU",
+//             flag: "🇦🇺",
+//             flagPng: "",
+//             dialCode: "+61",
+//             capital: "Canberra",
+//             region: "Oceania",
+//           },
+//         ]);
+//       })
+//       .finally(() => setLoading(false));
+//   }, []);
+
+//   return { countries, loading };
+// }
+
+
 function useCountries() {
-  const [countries, setCountries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [countries] = useState(() => {
+    return countryCodes
+      .all()
+      .map((c) => ({
+        name: c.countryNameEn,
+        cca2: c.countryCode,
+        flag: "",
+        flagPng: `https://flagcdn.com/w20/${c.countryCode.toLowerCase()}.png`,
+        dialCode: `+${c.countryCallingCode}`,
+        capital: "",
+        region: "",
+      }))
+      .filter((c) => c.dialCode && c.dialCode !== "+")
+      .sort((a, b) => a.name.localeCompare(b.name));
+  });
 
-  useEffect(() => {
-    fetch(
-      "https://restcountries.com/v3.1/all?fields=name,idd,flags,capital,region,subregion,cca2",
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        const list = data
-          .map((c) => {
-            const root = c.idd?.root || "";
-            const suffix = c.idd?.suffixes?.[0] || "";
-            const dialCode = root && suffix ? `${root}${suffix}` : root || "";
-            return {
-              name: c.name.common,
-              cca2: c.cca2,
-              flag: c.flags?.emoji || "",
-              flagPng: c.flags?.png || "",
-              dialCode,
-              capital: c.capital?.[0] || "",
-              region: c.region || "",
-            };
-          })
-          .filter((c) => c.dialCode)
-          .sort((a, b) => a.name.localeCompare(b.name));
-        setCountries(list);
-      })
-      .catch(() => {
-        // Fallback list if API is unreachable
-        setCountries([
-          {
-            name: "Kenya",
-            cca2: "KE",
-            flag: "🇰🇪",
-            flagPng: "",
-            dialCode: "+254",
-            capital: "Nairobi",
-            region: "Africa",
-          },
-          {
-            name: "Uganda",
-            cca2: "UG",
-            flag: "🇺🇬",
-            flagPng: "",
-            dialCode: "+256",
-            capital: "Kampala",
-            region: "Africa",
-          },
-          {
-            name: "Tanzania",
-            cca2: "TZ",
-            flag: "🇹🇿",
-            flagPng: "",
-            dialCode: "+255",
-            capital: "Dodoma",
-            region: "Africa",
-          },
-          {
-            name: "United States",
-            cca2: "US",
-            flag: "🇺🇸",
-            flagPng: "",
-            dialCode: "+1",
-            capital: "Washington D.C.",
-            region: "Americas",
-          },
-          {
-            name: "United Kingdom",
-            cca2: "GB",
-            flag: "🇬🇧",
-            flagPng: "",
-            dialCode: "+44",
-            capital: "London",
-            region: "Europe",
-          },
-          {
-            name: "South Africa",
-            cca2: "ZA",
-            flag: "🇿🇦",
-            flagPng: "",
-            dialCode: "+27",
-            capital: "Pretoria",
-            region: "Africa",
-          },
-          {
-            name: "Nigeria",
-            cca2: "NG",
-            flag: "🇳🇬",
-            flagPng: "",
-            dialCode: "+234",
-            capital: "Abuja",
-            region: "Africa",
-          },
-          {
-            name: "India",
-            cca2: "IN",
-            flag: "🇮🇳",
-            flagPng: "",
-            dialCode: "+91",
-            capital: "New Delhi",
-            region: "Asia",
-          },
-          {
-            name: "Canada",
-            cca2: "CA",
-            flag: "🇨🇦",
-            flagPng: "",
-            dialCode: "+1",
-            capital: "Ottawa",
-            region: "Americas",
-          },
-          {
-            name: "Australia",
-            cca2: "AU",
-            flag: "🇦🇺",
-            flagPng: "",
-            dialCode: "+61",
-            capital: "Canberra",
-            region: "Oceania",
-          },
-        ]);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { countries, loading };
+  return { countries, loading: false };
 }
 
 const FlagIcon = ({ flagPng, flagEmoji, cca2, size = 16 }) => {
@@ -1731,7 +1754,7 @@ const PersonalModal = ({
               max={new Date().toISOString().split("T")[0]}
               value={form.dateOfBirth || ""}
               onChange={(e) => {
-                const dob = e.target.value;
+                const dob = e.target.value; 
                 onChange("dateOfBirth", dob);
                 if (dob) {
                   const today = new Date();
@@ -1785,49 +1808,67 @@ const SummaryModal = ({ form, onClose, onSave, saving, token }) => {
     positionApplied: form.positionApplied || "",
     highestEducationLevel: form.highestEducationLevel || "",
     salaryInfo: form.salaryInfo || "",
+    expectedSalary: form.expectedSalary || "",   
   });
+  const [errors, setErrors] = useState({});      
   const [payslipFile, setPayslipFile] = useState(null);
   const [payslipUploading, setPayslipUploading] = useState(false);
   const [payslipMsg, setPayslipMsg] = useState("");
   const payslipRef = useRef();
 
-  const ch = (k, v) => setLocal((s) => ({ ...s, [k]: v }));
+  const ch = (k, v) => {
+    setLocal((s) => ({ ...s, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: "" }));       
+  };
 
- const handleSave = async () => {
-  let uploadedPayslipFileId = null;
-  let uploadedPayslipName = null;
-
-  if (payslipFile) {
-    setPayslipUploading(true);
-    setPayslipMsg("");
-    try {
-      const fd = new FormData();
-      fd.append("payslip", payslipFile);
-      const { data } = await api.post(`${API}/profile/payslip`, fd, {
-  headers: { "Content-Type": "multipart/form-data" },
-});
-      // ✅ capture the returned IDs
-      uploadedPayslipFileId = data.payslipAttachmentFileId;
-      uploadedPayslipName = data.payslipAttachmentName;
-      setPayslipMsg(`Payslip "${payslipFile.name}" uploaded.`);
-    } catch (err) {
-      setPayslipMsg(err.response?.data?.message || "Error uploading payslip.");
-      setPayslipUploading(false);
-      return;
-    } finally {
-      setPayslipUploading(false);
+  //validate salary fields before saving
+  const validate = () => {
+    const newErrors = {};
+    if (!local.salaryInfo || Number(local.salaryInfo) <= 0) {
+      newErrors.salaryInfo = "Current salary is required and must be greater than 0.";
     }
-  }
+    if (!local.expectedSalary || Number(local.expectedSalary) <= 0) {
+      newErrors.expectedSalary = "Expected salary is required and must be greater than 0.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  // ✅ pass the fileId along with the rest of the data
-  onSave({
-    ...local,
-    ...(uploadedPayslipFileId && {
-      payslipAttachmentFileId: uploadedPayslipFileId,
-      payslipAttachmentName: uploadedPayslipName,
-    }),
-  });
-};
+  const handleSave = async () => {
+    if (!validate()) return;   
+
+    let uploadedPayslipFileId = null;
+    let uploadedPayslipName = null;
+
+    if (payslipFile) {
+      setPayslipUploading(true);
+      setPayslipMsg("");
+      try {
+        const fd = new FormData();
+        fd.append("payslip", payslipFile);
+        const { data } = await api.post(`${API}/profile/payslip`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        uploadedPayslipFileId = data.payslipAttachmentFileId;
+        uploadedPayslipName = data.payslipAttachmentName;
+        setPayslipMsg(`Payslip "${payslipFile.name}" uploaded.`);
+      } catch (err) {
+        setPayslipMsg(err.response?.data?.message || "Error uploading payslip.");
+        setPayslipUploading(false);
+        return;
+      } finally {
+        setPayslipUploading(false);
+      }
+    }
+
+    onSave({
+      ...local,
+      ...(uploadedPayslipFileId && {
+        payslipAttachmentFileId: uploadedPayslipFileId,
+        payslipAttachmentName: uploadedPayslipName,
+      }),
+    });
+  };
 
   return (
     <Modal
@@ -1845,14 +1886,7 @@ const SummaryModal = ({ form, onClose, onSave, saving, token }) => {
           onChange={(e) => ch("specialization", e.target.value)}
         />
       </MF>
-      {/* <MF label="Position Applied *">
-        <Inp
-          type="text"
-          placeholder="e.g. Senior Developer, Accountant…"
-          value={local.positionApplied}
-          onChange={(e) => ch("positionApplied", e.target.value)}
-        />
-      </MF> */}
+
       <MF label="Highest Academic Level *">
         <Sel
           value={local.highestEducationLevel}
@@ -1870,12 +1904,12 @@ const SummaryModal = ({ form, onClose, onSave, saving, token }) => {
             "Certificate",
             "others",
           ].map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
+            <option key={v} value={v}>{v}</option>
           ))}
         </Sel>
       </MF>
+
+      {/* ✅ Current Salary — required, must be > 0 */}
       <MF label="Current Salary *">
         <Inp
           type="number"
@@ -1883,6 +1917,26 @@ const SummaryModal = ({ form, onClose, onSave, saving, token }) => {
           value={local.salaryInfo}
           onChange={(e) => ch("salaryInfo", e.target.value)}
         />
+        {errors.salaryInfo && (
+          <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>
+            {errors.salaryInfo}
+          </p>
+        )}
+      </MF>
+
+      {/* ✅ Expected Salary — new mandatory field */}
+      <MF label="Expected Salary *">
+        <Inp
+          type="number"
+          placeholder="e.g. 100000"
+          value={local.expectedSalary}
+          onChange={(e) => ch("expectedSalary", e.target.value)}
+        />
+        {errors.expectedSalary && (
+          <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>
+            {errors.expectedSalary}
+          </p>
+        )}
       </MF>
 
       {/* ── Payslip upload (optional) ── */}
@@ -1897,20 +1951,18 @@ const SummaryModal = ({ form, onClose, onSave, saving, token }) => {
           }}
           className="hidden"
         />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* ✅ confirmation notice */}
+          <p style={{ fontSize: 11.5, color: "#9090a8", margin: 0 }}>
+            📋 Uploaded payslips will be confirmed and verified during the interview.
+          </p>
           <button
             type="button"
             onClick={() => payslipRef.current?.click()}
             className="flex items-center gap-2 px-3 py-2 border-[1.5px] border-dashed border-[#1a6edb60] rounded-lg text-[#1a6edb] hover:bg-[#e8f1fd] transition text-[12.5px] font-medium w-fit"
           >
             {Icon.upload}
-            {payslipFile ? payslipFile.name : "Choose payslip file (PDF / Image / DOC)"}
+            {payslipFile ? payslipFile.name : "Choose payslip file (PDF / DOC)"}
           </button>
           {payslipFile && (
             <button
@@ -1944,66 +1996,54 @@ const WorkExpModal = ({
   onDelete,
   saving,
 }) => {
-  const blank = {
-    company: "",
-    position: "",
-    duration: "",
-    responsibilities: [],
-  };
-  const [local, setLocal] = useState({
-    ...blank,
-    ...entry,
-    responsibilities: (entry && entry.responsibilities) || [],
-  });
-  const ch = (k, v) => setLocal((s) => ({ ...s, [k]: v }));
+  const INDUSTRIES = [
+    "Technology & ICT",
+    "Finance & Banking",
+    "Insurance",
+    "Healthcare & Pharmaceuticals",
+    "Education & Training",
+    "Engineering & Construction",
+    "Manufacturing & Production",
+    "Retail & Consumer Goods",
+    "Hospitality & Tourism",
+    "Media & Communications",
+    "Telecommunications",
+    "Government & Public Sector",
+    "Agriculture & Agribusiness",
+    "Human Resources & Recruitment",
+    "Legal & Professional Services",
+    "Real Estate & Property Management",
+    "Energy & Utilities",
+    "Logistics, Transportation & Supply Chain",
+    "Mining, Oil & Gas",
+    "Non-Profit & NGO",
+    "Arts, Entertainment & Recreation",
+    "Environmental & Sustainability Services",
+    "Security Services",
+    "Other"
+  ];
 
   const MONTHS_SHORT = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec",
   ];
 
   const parseMonthYearToDateInput = (txt) => {
     if (!txt) return "";
-    const m = String(txt)
-      .trim()
-      .match(/([A-Za-z]{3,9})\s+(\d{4})/);
+    const m = String(txt).trim().match(/([A-Za-z]{3,9})\s+(\d{4})/);
     if (!m) return "";
     const monthName = m[1].slice(0, 3).toLowerCase();
     const year = m[2];
-    const idx = [
-      "jan",
-      "feb",
-      "mar",
-      "apr",
-      "may",
-      "jun",
-      "jul",
-      "aug",
-      "sep",
-      "oct",
-      "nov",
-      "dec",
-    ].indexOf(monthName);
+    const idx = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"].indexOf(monthName);
     if (idx < 0) return "";
     const month = String(idx + 1).padStart(2, "0");
-    // Use the first day of the month for <input type="date" />
-    return `${year}-${month}-01`; // yyyy-MM-dd for <input type="date" />
+    return `${year}-${month}-01`;
   };
 
   const formatDateInputToMonthYearText = (yyyyMmDd) => {
     if (!yyyyMmDd) return "";
     const [year, month] = yyyyMmDd.split("-");
-    const idx = Number(month) ? Number(month) - 1 : -1; // month is 1-12
+    const idx = Number(month) ? Number(month) - 1 : -1;
     if (idx < 0 || idx > 11) return "";
     return `${MONTHS_SHORT[idx]} ${year}`;
   };
@@ -2011,25 +2051,36 @@ const WorkExpModal = ({
   const parseDuration = (durationStr) => {
     const s = String(durationStr || "");
     const isPresent = /present|current|now/i.test(s);
-    const parts = s
-      .split(/[-–]/)
-      .map((p) => p.trim())
-      .filter(Boolean);
-    const startPart = parts[0] || "";
-    const endPart = parts[1] || "";
+    const parts = s.split(/[-–]/).map((p) => p.trim()).filter(Boolean);
     return {
-      startDate: parseMonthYearToDateInput(startPart),
-      endDate: isPresent ? "" : parseMonthYearToDateInput(endPart),
+      startDate: parseMonthYearToDateInput(parts[0] || ""),
+      endDate: isPresent ? "" : parseMonthYearToDateInput(parts[1] || ""),
       currentlyWorking: isPresent,
     };
   };
 
   const initialParsed = parseDuration(entry?.duration);
+
+  // ── all useState hooks declared together ──────────────────────────────────
+ const [local, setLocal] = useState({
+  industry: entry?.industry || "",
+  company: entry?.company || "",
+  position: entry?.position || "",
+  duration: entry?.duration || "",
+  responsibilities: (entry?.responsibilities) || [],
+  salary: entry?.salary || "",
+  ...entry,
+});
+  const [errors, setErrors] = useState({});
   const [startDate, setStartDate] = useState(initialParsed.startDate || "");
   const [endDate, setEndDate] = useState(initialParsed.endDate || "");
-  const [currentlyWorking, setCurrentlyWorking] = useState(
-    !!initialParsed.currentlyWorking,
-  );
+  const [currentlyWorking, setCurrentlyWorking] = useState(!!initialParsed.currentlyWorking);
+
+  // ── helpers ───────────────────────────────────────────────────────────────
+  const ch = (k, v) => {
+    setLocal((s) => ({ ...s, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: "" }));
+  };
 
   const totalWorkedText = (() => {
     if (!startDate) return "";
@@ -2040,16 +2091,11 @@ const WorkExpModal = ({
         ? new Date(`${endDate}T00:00:00`)
         : null;
     if (!end) return "";
-
-    const endY = end.getFullYear();
-    const endM = end.getMonth(); // 0-11
-    const startY = start.getFullYear();
-    const startM = start.getMonth();
+    const endY = end.getFullYear(), endM = end.getMonth();
+    const startY = start.getFullYear(), startM = start.getMonth();
     let diffMonths = endY * 12 + endM - (startY * 12 + startM);
-    // If the end day is before the start day, count one fewer month.
     if (end.getDate() < start.getDate()) diffMonths -= 1;
     diffMonths = Math.max(0, diffMonths);
-
     const years = Math.floor(diffMonths / 12);
     const months = diffMonths % 12;
     const yTxt = `${years} year${years === 1 ? "" : "s"}`;
@@ -2059,19 +2105,28 @@ const WorkExpModal = ({
     return mTxt;
   })();
 
-  // Keep duration in sync for immediate preview and saving
   const computedDuration = (() => {
     const startTxt = formatDateInputToMonthYearText(startDate);
     if (!startTxt) return "";
-    if (currentlyWorking) {
+    if (currentlyWorking)
       return `${startTxt} – Present${totalWorkedText ? ` | ${totalWorkedText}` : ""}`;
-    }
-
     const endTxt = formatDateInputToMonthYearText(endDate);
     if (!endTxt) return `${startTxt} –`;
     return `${startTxt} – ${endTxt}${totalWorkedText ? ` | ${totalWorkedText}` : ""}`;
   })();
 
+  // ── validate — now safe because startDate is already declared above ───────
+  const validate = () => {
+    const newErrors = {};
+    if (!local.industry) newErrors.industry = "Industry is required.";
+    if (!local.company.trim()) newErrors.company = "Company / Organisation is required.";
+    if (!local.position.trim()) newErrors.position = "Position / Job Title is required.";
+    if (!startDate) newErrors.duration = "Start date is required.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // ── render ────────────────────────────────────────────────────────────────
   return (
     <Modal
       title={isNew ? "Add Work Experience" : "Edit Work Experience"}
@@ -2081,9 +2136,27 @@ const WorkExpModal = ({
           : "Update this work experience entry"
       }
       onClose={onClose}
-      onSave={() => onSave({ ...local, duration: computedDuration })}
+      onSave={() => {
+        if (!validate()) return;
+        onSave({ ...local, duration: computedDuration });
+      }}
       saving={saving}
     >
+      <MF label="Industry *">
+        <Sel
+          value={local.industry}
+          onChange={(e) => ch("industry", e.target.value)}
+        >
+          <option value="">Select industry</option>
+          {INDUSTRIES.map((v) => (
+            <option key={v} value={v}>{v}</option>
+          ))}
+        </Sel>
+        {errors.industry && (
+          <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>{errors.industry}</p>
+        )}
+      </MF>
+
       <MF label="Company / Organisation *">
         <Inp
           type="text"
@@ -2091,7 +2164,11 @@ const WorkExpModal = ({
           value={local.company}
           onChange={(e) => ch("company", e.target.value)}
         />
+        {errors.company && (
+          <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>{errors.company}</p>
+        )}
       </MF>
+
       <MF label="Position / Job Title *">
         <Inp
           type="text"
@@ -2099,7 +2176,11 @@ const WorkExpModal = ({
           value={local.position}
           onChange={(e) => ch("position", e.target.value)}
         />
+        {errors.position && (
+          <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>{errors.position}</p>
+        )}
       </MF>
+
       <MF label="Duration *">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
@@ -2108,7 +2189,10 @@ const WorkExpModal = ({
               type="date"
               className={inputCls}
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setErrors((err) => ({ ...err, duration: "" }));
+              }}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -2123,15 +2207,11 @@ const WorkExpModal = ({
           </div>
         </div>
 
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginTop: 10,
-            cursor: "pointer",
-          }}
-        >
+        {errors.duration && (
+          <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>{errors.duration}</p>
+        )}
+
+        <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, cursor: "pointer" }}>
           <input
             type="checkbox"
             checked={currentlyWorking}
@@ -2140,31 +2220,19 @@ const WorkExpModal = ({
               setCurrentlyWorking(v);
               if (v) setEndDate("");
             }}
-            style={{
-              width: 16,
-              height: 16,
-              backgroundColor: "#e7ebf3",
-              border: "1px solid #2e6ee6",
-              borderRadius: 4,
-            }}
+            style={{ width: 16, height: 16, backgroundColor: "#e7ebf3", border: "1px solid #2e6ee6", borderRadius: 4 }}
           />
-          <span style={{ fontSize: 12.5, color: "#5a5a72" }}>
-            Currently working here
-          </span>
+          <span style={{ fontSize: 12.5, color: "#5a5a72" }}>Currently working here</span>
         </label>
 
         {!!computedDuration && (
-          <p style={{ fontSize: 11, color: "#9090a8", marginTop: 8 }}>
-            Preview: {computedDuration}
-          </p>
+          <p style={{ fontSize: 11, color: "#9090a8", marginTop: 8 }}>Preview: {computedDuration}</p>
         )}
-
         {totalWorkedText && (
-          <p style={{ fontSize: 11, color: "#9090a8", marginTop: 4 }}>
-            Total worked: {totalWorkedText}
-          </p>
+          <p style={{ fontSize: 11, color: "#9090a8", marginTop: 4 }}>Total worked: {totalWorkedText}</p>
         )}
       </MF>
+
       <MF label="Key Responsibilities (optional)">
         <div className="space-y-2">
           {local.responsibilities.map((item, i) => (
@@ -2183,10 +2251,7 @@ const WorkExpModal = ({
               />
               <button
                 onClick={() =>
-                  ch(
-                    "responsibilities",
-                    local.responsibilities.filter((_, idx) => idx !== i),
-                  )
+                  ch("responsibilities", local.responsibilities.filter((_, idx) => idx !== i))
                 }
                 className="text-[#9090a8] hover:text-red-500 transition flex-shrink-0"
               >
@@ -2194,23 +2259,21 @@ const WorkExpModal = ({
               </button>
             </div>
           ))}
-          <AddBtn
-            onClick={() =>
-              ch("responsibilities", [...local.responsibilities, ""])
-            }
-          >
+          <AddBtn onClick={() => ch("responsibilities", [...local.responsibilities, ""])}>
             Add responsibility
           </AddBtn>
         </div>
       </MF>
+
       <MF label="Current/Last Salary per month (optional)">
-  <Inp
-    type="text"
-    placeholder="e.g. KES 80,000"
-    value={local.salary || ""}
-    onChange={(e) => ch("salary", e.target.value)}
-  />
-</MF>
+        <Inp
+          type="text"
+          placeholder="e.g. KES 80,000"
+          value={local.salary || ""}
+          onChange={(e) => ch("salary", e.target.value)}
+        />
+      </MF>
+
       {!isNew && (
         <div className="pt-1">
           <button
@@ -2873,8 +2936,8 @@ const CertificateActions = ({ fileId, token, fileName }) => {
   const [blobUrl, setBlobUrl] = useState(null);
   const [loadState, setLoadState] = useState("idle");
 
-const viewUrl = `http://localhost:5001${API}/certificates/${fileId}`;
-const downloadUrl = `http://localhost:5001${API}/certificates/${fileId}/download`;
+const viewUrl = `https://amsol-api-production.up.railway.app${API}/certificates/${fileId}`;
+const downloadUrl = `https://amsol-api-production.up.railway.app${API}/certificates/${fileId}/download`;
 
   const handlePreview = async () => {
     if (blobUrl) { setPreviewing(true); return; }
@@ -3362,7 +3425,7 @@ const socketRef = useRef(null);
 // Add the socket useEffect here too:
 useEffect(() => {
   if (!token) return;
-  const socket = io("http://localhost:5001", {
+  const socket = io("https://amsol-api-production.up.railway.app", {
     auth: { token },
     withCredentials: true,
   });
@@ -3703,7 +3766,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
 const cvPreviewUrl =
   profile?.savedCvUrl ||
   (profile?.savedCvFileId
-    ? `http://localhost:5001${API}/profile/cv/${profile.savedCvFileId}`
+    ? `https://amsol-api-production.up.railway.app${API}/profile/cv/${profile.savedCvFileId}`
     : null);
 
   const pct = calcCompletion(profile);
@@ -4937,80 +5000,403 @@ profile?.highestEducationLevel ? (
   return (
     <>
      <style>{`
- @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap');
-* { box-sizing: border-box; }
-body { font-family: 'DM Sans', sans-serif; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-.fade-in { animation: fadeIn 0.25s ease; }
-.group:hover .group-hover\\:opacity-100 { opacity: 1 !important; }
-input[type="date"] { color-scheme: dark; }
+ @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --canvas:    #F7F8FA;
+  --surface:   #FFFFFF;
+  --border:    rgba(0,0,0,0.07);
+  --border-md: rgba(0,0,0,0.11);
+  --accent:    #1a6edb;
+  --accent-lt: #EBF2FF;
+  --text-1:    #0F1523;
+  --text-2:    #4A5068;
+  --text-3:    #9098B1;
+  --orange:    #f26722;
+  --green:     #16a34a;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Keyframes ─────────────────────────────────────────────────────── */
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes fadeUp  { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pulse   { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+
+.fade-in { animation: fadeUp 0.28s cubic-bezier(.22,.68,0,1.2) both; }
+
+/* ── Group hover util ──────────────────────────────────────────────── */
+.group:hover .group-hover\:opacity-100 { opacity: 1 !important; }
+
+/* ── Date input ────────────────────────────────────────────────────── */
+input[type="date"] { color-scheme: light; }
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: brightness(0) saturate(100%);
+  opacity: 0.5; cursor: pointer;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════════════════════════════ */
+.main-layout {
+  display: grid;
+  grid-template-columns: 256px 1fr;
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────── */
 .sidebar {
-  position: fixed; top: 0; left: 0; height: 100vh;
-  transform: translateX(-100%); transition: transform 0.25s ease;
-  z-index: 50; width: 240px;
-  background: #fff;
-  border-right: 1px solid rgba(0,0,0,0.08);
-  display: flex; flex-direction: column; padding: 28px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
-.sidebar.open { transform: translateX(0); }
+
 .sidebar-overlay {
   display: none;
-  position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 40;
+  position: fixed; inset: 0;
+  background: rgba(15,21,35,0.5);
+  backdrop-filter: blur(2px);
+  z-index: 40;
 }
 .sidebar-overlay.open { display: block; }
+
+/* ── Bottom nav (mobile) ───────────────────────────────────────────── */
 .bottom-nav {
   display: none;
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: #fff; border-top: 1px solid rgba(0,0,0,0.08);
-  z-index: 30; padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  z-index: 30;
+  padding: 6px 0 max(8px, env(safe-area-inset-bottom));
 }
-.main-layout {
+
+/* ── Main content ──────────────────────────────────────────────────── */
+.main-content { overflow-y: auto; min-height: 100vh; }
+
+/* ── Page padding ──────────────────────────────────────────────────── */
+.page-padding { padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── 2-col grid ────────────────────────────────────────────────────── */
+.profile-grid-2col {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-  background: #f4f6fb;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   CARDS  — signature element: left accent stripe
+══════════════════════════════════════════════════════════════════════ */
+.bg-white.rounded-\[14px\] {
+  background: var(--surface) !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.bg-white.rounded-\[14px\]:hover {
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* ── Card header row ───────────────────────────────────────────────── */
+.bg-white.rounded-\[14px\] > div:first-child {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border) !important;
+  padding: 16px 22px !important;
+}
+
+/* ── Card body ─────────────────────────────────────────────────────── */
+.bg-white.rounded-\[14px\] > div:last-child {
+  padding: 22px !important;
+}
+
+/* ── Completion card ───────────────────────────────────────────────── */
+.completion-card {
+  background: linear-gradient(135deg, #0F1523 0%, #1a3a6e 100%) !important;
+  border-radius: var(--radius-lg) !important;
+  border: none !important;
+  padding: 24px 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 28px !important;
+  box-shadow: 0 8px 32px rgba(26,110,219,0.25) !important;
+  color: #fff;
+}
+.completion-card * { color: inherit; }
+.completion-card > div:first-child > div:first-child {
+  font-size: 14px !important; font-weight: 600 !important;
+  color: rgba(255,255,255,0.95) !important;
+}
+.completion-card > div:first-child > div:last-child {
+  font-size: 12px !important;
+  color: rgba(255,255,255,0.55) !important;
+  margin-top: 2px;
+}
+
+/* ── Modal ─────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,21,35,0.6);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 16px;
+}
+.modal-sheet {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  animation: fadeUp 0.22s cubic-bezier(.22,.68,0,1.1) both;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TOP BAR
+══════════════════════════════════════════════════════════════════════ */
+.main-content > div:first-child {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 0 24px !important;
+  height: 64px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  box-shadow: 0 1px 0 var(--border) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   NAV ITEMS  — active state uses left border + background
+══════════════════════════════════════════════════════════════════════ */
+button.flex.items-center.gap-2\.5.w-full {
+  border-radius: var(--radius-sm) !important;
+  font-size: 13.5px !important;
+  padding: 9px 12px !important;
+  transition: background 0.15s, color 0.15s !important;
+  position: relative;
+}
+button.flex.items-center.gap-2\.5.w-full.bg-\[\#e8f1fd\] {
+  background: var(--accent-lt) !important;
+  color: var(--accent) !important;
+  font-weight: 600 !important;
+}
+button.flex.items-center.gap-2\.5.w-full.bg-\[\#e8f1fd\]::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   INPUTS
+══════════════════════════════════════════════════════════════════════ */
+input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+select,
+textarea {
+  background: #F7F8FA !important;
+  border: 1.5px solid #E2E5EE !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 13.5px !important;
+  color: var(--text-1) !important;
+  padding: 9px 12px !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+  outline: none !important;
+  width: 100%;
+}
+input:not([type="radio"]):not([type="checkbox"]):not([type="file"]):focus,
+select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(26,110,219,0.12) !important;
+  background: #fff !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════════════════════════════ */
+
+/* Ghost */
+button.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-lg.border {
+  border: 1.5px solid #E2E5EE !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 12.5px !important;
+  color: var(--text-2) !important;
+  background: #fff !important;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s !important;
+  font-weight: 500 !important;
+}
+button.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-lg.border:hover {
+  background: var(--canvas) !important;
+  border-color: #c8cdd8 !important;
+}
+
+/* Primary */
+button.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-lg.bg-\[\#1a6edb\] {
+  background: var(--accent) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(26,110,219,0.3) !important;
+  transition: background 0.15s, box-shadow 0.15s !important;
+}
+button.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-lg.bg-\[\#1a6edb\]:hover {
+  background: #155bba !important;
+  box-shadow: 0 4px 14px rgba(26,110,219,0.4) !important;
+}
+
+/* Add/dashed */
+button.flex.items-center.gap-1\.5.px-3\.5.py-1\.5 {
+  border: 1.5px dashed rgba(26,110,219,0.4) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--accent) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  transition: background 0.15s !important;
+}
+button.flex.items-center.gap-1\.5.px-3\.5.py-1\.5:hover {
+  background: var(--accent-lt) !important;
+}
+
+/* Top bar buttons */
+.top-bar-btn {
+  border-radius: var(--radius-sm) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  transition: background 0.15s, box-shadow 0.15s !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SKILL TAGS
+══════════════════════════════════════════════════════════════════════ */
+span.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
+  background: #F0F2F8 !important;
+  border: 1.5px solid #E2E5EE !important;
+  border-radius: 99px !important;
+  font-size: 12.5px !important;
+  color: var(--text-2) !important;
+  font-weight: 500 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PERSONAL INFO LAYOUT
+══════════════════════════════════════════════════════════════════════ */
+.personal-info-inner {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+.personal-info-fields {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 28px;
+}
+
+/* ── Profile avatar ring ───────────────────────────────────────────── */
+.personal-info-inner > div:first-child > div:first-child {
+  border-radius: 18px !important;
+  border: 3px solid var(--accent-lt) !important;
+  box-shadow: 0 0 0 1px rgba(26,110,219,0.15) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SIDEBAR HEADER / FOOTER
+══════════════════════════════════════════════════════════════════════ */
+.sidebar > div:first-child {
+  padding: 24px 20px 20px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.sidebar > div:last-child {
+  padding: 16px 20px !important;
+  border-top: 1px solid var(--border) !important;
+  background: #FAFBFC;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EDUCATION & WORK EXPERIENCE ITEMS
+══════════════════════════════════════════════════════════════════════ */
+.bg-\[\#ede9fe\] { background: #EDE9FE !important; }
+.bg-\[\#f4f6fb\] { background: #F0F2F8 !important; }
+
+/* Sub-card items inside section cards */
+.p-4.bg-\[\#f8f9fc\].rounded-xl {
+  background: #F7F8FA !important;
+  border: 1.5px solid #E8EBF2 !important;
+  border-radius: 12px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5E0; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9098B1; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .main-layout { grid-template-columns: 1fr; }
   .main-content { padding-bottom: 72px; }
   .page-padding { padding: 16px !important; }
   .profile-grid-2col { grid-template-columns: 1fr !important; }
-  .personal-inner { flex-direction: column !important; align-items: center !important; }
-  .personal-fields { grid-template-columns: 1fr !important; }
-  .completion-card { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+  .completion-card { flex-direction: column !important; gap: 14px !important; }
+  .bottom-nav { display: flex; justify-content: space-around; align-items: center; }
+  .sidebar-overlay.open { display: block; }
   .modal-sheet {
-    max-width: 100% !important; width: 100% !important;
+    max-width: 100% !important;
     max-height: 92vh !important;
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
   }
   .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
-  .bottom-nav { display: flex; justify-content: space-around; align-items: center; }
-  .sidebar-overlay.open { display: block; }
+  .personal-info-inner { flex-direction: column !important; align-items: center !important; }
+  .personal-info-fields { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 480px) {
   .top-bar-label { display: none; }
-  .top-bar-btn { min-width: unset !important; padding: 8px 10px !important; }
+  .top-bar-btn { padding: 8px 10px !important; }
 }
 @media (min-width: 769px) {
   .sidebar {
-    position: sticky !important; top: 0;
+    position: sticky !important;
+    top: 0 !important;
     transform: translateX(0) !important;
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
   }
-    @media (max-width: 768px) {
-  .personal-info-inner {
-    flex-direction: column !important;
-    align-items: center !important;
-  }
-  .personal-info-fields {
-    grid-template-columns: 1fr !important;
-  }
-}
   .bottom-nav { display: none !important; }
   .sidebar-overlay { display: none !important; }
   .hamburger-btn { display: none !important; }
@@ -5388,12 +5774,44 @@ input[type="date"]::-webkit-calendar-picker-indicator {
               >
                 {Icon.eye} <span className="top-bar-label">Preview CV</span>
               </button>
-              <button
-               onClick={() => setGeneralApplyModal(true)}
-                className="top-bar-btn flex items-center gap-1.5 px-4 py-2 rounded-[9px] bg-[#f26722] text-white text-[13px] font-medium hover:bg-[#d95a1a] transition"
-              >
-                 <span className="top-bar-label">Quick Apply</span>
-              </button>
+             <button
+  onClick={() => {
+    // Reuse the same required fields list inline
+    const REQUIRED = [
+      { key: "firstName",             label: "First Name" },
+      { key: "lastName",              label: "Last Name" },
+      { key: "email",                 label: "Email" },
+      { key: "phoneNumber",           label: "Phone Number" },
+      { key: "whatsAppNo",            label: "WhatsApp Number" },
+      { key: "nationality",           label: "Nationality" },
+      { key: "location",              label: "Current Location" },
+      { key: "idNumber",              label: "ID Number" },
+      { key: "specialization",        label: "Specialization (Professional Summary)" },
+      { key: "highestEducationLevel", label: "Highest Education Level" },
+      { key: "savedCvFileId",         label: "Uploaded CV" },
+      { key: "workExperience",        label: "Work Experience (at least one entry)" },
+    ];
+    const missing = REQUIRED.filter(({ key }) => {
+      if (key === "workExperience") {
+        const we = profile?.[key];
+        return !Array.isArray(we) || we.filter(w => w.company).length === 0;
+      }
+      const val = profile?.[key];
+      if (Array.isArray(val)) return val.length === 0;
+      return !val;
+    }).map(f => f.label);
+
+    if (missing.length > 0) {
+      flashMsg("⚠️ Profile incomplete — please fill in: " + missing.join(", "));
+      setActiveNav("profile");
+      return;
+    }
+    setGeneralApplyModal(true);
+  }}
+  className="top-bar-btn flex items-center gap-1.5 px-4 py-2 rounded-[9px] bg-[#f26722] text-white text-[13px] font-medium hover:bg-[#d95a1a] transition"
+>
+  <span className="top-bar-label">Quick Apply</span>
+</button>
             </div>
           </div>
 

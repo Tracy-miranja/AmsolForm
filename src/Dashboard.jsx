@@ -6,19 +6,260 @@ import FormLayout from "./Formlayout";
 const API = "/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Decode ALL HTML entities using the browser's own parser */
+const decodeHtmlEntities = (str) => {
+  if (!str) return "";
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+};
+
 const stripHtml = (html) => {
   if (!html) return "";
-  return html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
+  return decodeHtmlEntities(
+    html
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+};
+
+/** HTML → plain text with newlines so section headings & lists can be detected */
+const htmlToPlainForJobDescription = (html) => {
+  if (!html) return "";
+  // First decode all entities so &rsquo; → ' etc.
+  let s = decodeHtmlEntities(String(html));
+  // Then convert block-level tags to newlines
+  s = s
+    .replace(/<\s*br\s*\/?>/gi, "\n")
+    .replace(/<\/\s*(p|div|h[1-6]|blockquote|section|article)\s*>/gi, "\n\n")
+    .replace(/<\s*li[^>]*>/gi, "\n- ")
+    .replace(/<\/\s*li\s*>/gi, "\n")
+    .replace(/<\/\s*tr\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ");
+  return s
+    .replace(/[ \t\f\v]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 };
+
+const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Longer phrases first so alternation matches the intended heading
+const JOB_DESC_SECTION_HEADINGS = [
+  // — exact headings seen in your screenshots —
+  "Requirements & Responsibilities",
+  "Requirements and Responsibilities",
+  "Qualifications & Requirements",
+  "Qualifications and Requirements",
+  "Key Responsibilities",
+  "Roles and Responsibilities",
+  "Role Responsibilities",
+  "Required Qualifications and Experience",
+  "Required Qualifications & Experience",
+  "Key Competencies",
+  "Key Performance Indicators",
+  "Application Process",
+  "Application Details",
+  // — generic headings —
+  "Position Overview",
+  "About the Role",
+  "Role Overview",
+  "Job Purpose",
+  "What You'll Do",
+  "What You Will Do",
+  "Education & Experience",
+  "Education and Experience",
+  "Required Skills",
+  "Nice to Have",
+  "Benefits & Perks",
+  "Benefits",
+  "Company Overview",
+  "Who We Are",
+  "How to Apply",
+];
+
+const parseJobDescriptionSections = (rawHtml) => {
+  const text = htmlToPlainForJobDescription(rawHtml);
+  if (!text) return [];
+
+  const inner = JOB_DESC_SECTION_HEADINGS.map(escapeRegExp).join("|");
+  const re = new RegExp(`(?:^|\\n)\\s*(${inner})\\s*:?\\s*(?=\\n|$)`, "gi");
+  const matches = [...text.matchAll(re)];
+
+  if (matches.length === 0) {
+    return [{ title: null, body: text }];
+  }
+
+  const sections = [];
+  const preamble = text.slice(0, matches[0].index).trim();
+  if (preamble) {
+    sections.push({ title: null, body: preamble });
+  }
+
+  for (let i = 0; i < matches.length; i++) {
+    const title = matches[i][1].replace(/\s+/g, " ").trim();
+    const start = matches[i].index + matches[i][0].length;
+    const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+    sections.push({ title, body: text.slice(start, end).trim() });
+  }
+
+  return sections;
+};
+
+
+/** Detect "Key: Value" pairs even when they run together without newlines */
+const parseDescriptionHeader = (text) => {
+  const headerKeys = [
+    "Job Title",
+    "Location",
+    "Employment Type",
+    "Reporting To",
+    "Department",
+    "Contract Type",
+    "Salary",
+    "Deadline"
+  ];
+
+  // Build regex for known keys
+  const keyPattern = new RegExp(
+    `(${headerKeys.map(k => k.replace(/\s+/g, "\\s+")).join("|")})\\s*:`,
+    "gi"
+  );
+
+  const matches = [...text.matchAll(keyPattern)];
+
+  if (matches.length === 0) {
+    return { headers: [], remainingText: text };
+  }
+
+  const headers = [];
+  let remainingStart = 0;
+
+  for (let i = 0; i < matches.length; i++) {
+    const key = matches[i][1].replace(/\s+/g, " ").trim();
+
+    const valueStart = matches[i].index + matches[i][0].length;
+
+    const valueEnd =
+      i + 1 < matches.length
+        ? matches[i + 1].index
+        : valueStart + text.slice(valueStart).length;
+
+    const value = text.slice(valueStart, valueEnd).trim();
+
+    // Only keep short header-like values
+    if (value.length < 120) {
+      headers.push({ key, value });
+      remainingStart = valueEnd;
+    }
+  }
+
+  const remainingText = text.slice(remainingStart).trim();
+
+  return { headers, remainingText };
+};
+
+/** Turn one section body into alternating prose blocks and bullet lists */
+const chunkSectionBody = (body) => {
+  if (!body) return [];
+  const lines = body.split(/\n/);
+  const chunks = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    while (i < lines.length && !lines[i].trim()) i++;
+    if (i >= lines.length) break;
+
+    const bulletOrNum = (line) =>
+      /^\s*[-*•▪·]\s+/.test(line) || /^\s*\d+[\.)]\s+/.test(line);
+
+    if (bulletOrNum(lines[i])) {
+      const items = [];
+      while (i < lines.length) {
+        const L = lines[i];
+        if (!L.trim()) break;
+        const mDash = L.match(/^\s*[-*•▪·]\s+(.*)$/);
+        const mNum = L.match(/^\s*\d+[\.)]\s+(.*)$/);
+        const raw = mDash ? mDash[1] : mNum ? mNum[1] : null;
+        if (raw == null) break;
+        items.push(raw.trim());
+        i++;
+      }
+      if (items.length) chunks.push({ type: "list", items });
+    } else {
+      const paraLines = [];
+      while (i < lines.length && lines[i].trim()) {
+        if (bulletOrNum(lines[i])) break;
+        paraLines.push(lines[i].trim());
+        i++;
+      }
+      if (paraLines.length) chunks.push({ type: "text", text: paraLines.join(" ") });
+    }
+  }
+
+  return chunks;
+};
+
+const JobDescriptionSectionChunks = ({ chunks }) => (
+  <>
+    {chunks.map((chunk, idx) =>
+      chunk.type === "list" ? (
+        <ul
+          key={idx}
+          style={{
+            margin: idx === 0 ? "6px 0 0" : "12px 0 0",
+            padding: 0,
+            listStyle: "none",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          {chunk.items.map((item, j) => (
+            <li key={j} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <span
+                style={{
+                  flexShrink: 0,
+                  width: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  background: "#e8f1fd",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#1a6edb",
+                  marginTop: 1,
+                }}
+              >
+                <svg viewBox="0 0 16 16" fill="currentColor" width="9" height="9">
+                  <path d="M6.293 11.707a1 1 0 010-1.414L8.586 8 6.293 5.707a1 1 0 111.414-1.414l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414 0z" />
+                </svg>
+              </span>
+              <span style={{ fontSize: 13, color: "#3a3a52", lineHeight: 1.65 }}>{item}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p
+          key={idx}
+          style={{
+            fontSize: 13.5,
+            color: "#3a3a52",
+            lineHeight: 1.75,
+            margin: idx === 0 ? 0 : "12px 0 0",
+            whiteSpace: "pre-line",
+          }}
+        >
+          {chunk.text}
+        </p>
+      )
+    )}
+  </>
+);
 
 // ─── Inline SVG icons ─────────────────────────────────────────────────────────
 const Ico = {
@@ -90,6 +331,7 @@ const SkeletonCard = () => (
 // Reusable bookmark button used in both JobListCard and JobDetailPanel
 const SaveButton = ({ isSaved, onToggle, size = "normal" }) => {
   const isSmall = size === "small";
+
   return (
     <button
       onClick={e => { e.stopPropagation(); onToggle(); }}
@@ -97,38 +339,53 @@ const SaveButton = ({ isSaved, onToggle, size = "normal" }) => {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 4,
-        padding: isSmall ? "7px 10px" : "8px 14px",
+        gap: 5,
+        padding: isSmall ? "6px 10px" : "7px 14px",
         borderRadius: 9,
-        border: `1.5px solid ${isSaved ? "#fde68a" : "rgba(0,0,0,0.1)"}`,
+        border: `1.5px solid ${isSaved ? "#fbbf24" : "rgba(0,0,0,0.1)"}`,
         background: isSaved ? "#fef3c7" : "#f4f6fb",
         color: isSaved ? "#d97706" : "#9090a8",
         fontSize: 12,
         fontWeight: 600,
         cursor: "pointer",
-        transition: "all 0.18s",
+        transition: "all 0.2s ease",
         flexShrink: 0,
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.background = isSaved ? "#fde68a" : "#e8f1fd";
-        e.currentTarget.style.color = isSaved ? "#b45309" : "#1a6edb";
-        e.currentTarget.style.borderColor = isSaved ? "#fcd34d" : "rgba(26,110,219,0.3)";
+        if (!isSaved) {
+          e.currentTarget.style.background = "#e8f1fd";
+          e.currentTarget.style.color = "#1a6edb";
+          e.currentTarget.style.borderColor = "rgba(26,110,219,0.35)";
+        }
       }}
       onMouseLeave={e => {
         e.currentTarget.style.background = isSaved ? "#fef3c7" : "#f4f6fb";
         e.currentTarget.style.color = isSaved ? "#d97706" : "#9090a8";
-        e.currentTarget.style.borderColor = isSaved ? "#fde68a" : "rgba(0,0,0,0.1)";
+        e.currentTarget.style.borderColor = isSaved ? "#fbbf24" : "rgba(0,0,0,0.1)";
       }}
     >
-      {Ico.savedSm}
-      {!isSmall && (isSaved ? "Saved" : "Save")}
+      {/* Bookmark icon — filled golden when saved, grey outline when not */}
+      <svg
+        viewBox="0 0 20 20"
+        width={isSmall ? 13 : 14}
+        height={isSmall ? 13 : 14}
+        fill={isSaved ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth={isSaved ? 0 : 1.8}
+      >
+        <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+      </svg>
+
+      {!isSmall && (
+        <span>{isSaved ? "Saved ✓" : "Save"}</span>
+      )}
     </button>
   );
 };
 
 // ─── Job List Card (compact, row-style) ───────────────────────────────────────
 // NEW props added: onToggleSave, isSaved
-const JobListCard = ({ job, onView, onApply, applyingId, isSelected, onToggleSave, isSaved }) => {
+const JobListCard = ({ job, onView, onApply, applyingId, isSelected, onToggleSave, isSaved, isApplied }) => {
   const plainDesc = stripHtml(job.description);
   const preview = plainDesc.length > 120 ? plainDesc.slice(0, 120) + "…" : plainDesc;
   const isApplying = applyingId === job.id;
@@ -186,21 +443,26 @@ const JobListCard = ({ job, onView, onApply, applyingId, isSelected, onToggleSav
 
         {/* Right side: Quick Apply */}
         <button
-          onClick={e => { e.stopPropagation(); onApply(job); }}
-          disabled={isApplying}
-          style={{
-            display: "flex", alignItems: "center", gap: 5,
-            padding: "7px 16px", borderRadius: 9, fontSize: 12.5, fontWeight: 650,
-            background: "#1a6edb", color: "#fff", border: "none",
-            cursor: isApplying ? "default" : "pointer",
-            opacity: isApplying ? 0.6 : 1, transition: "background 0.15s",
-          }}
-          onMouseEnter={e => { if (!isApplying) e.currentTarget.style.background = "#0d4fa3"; }}
-          onMouseLeave={e => { if (!isApplying) e.currentTarget.style.background = "#1a6edb"; }}
-        >
-          {Ico.lightning}
-          {isApplying ? "Applying…" : "Quick Apply"}
-        </button>
+  onClick={e => { e.stopPropagation(); if (!isApplied) onApply(job); }}
+  disabled={isApplying || isApplied}
+  style={{
+    display: "flex", alignItems: "center", gap: 5,
+    padding: "7px 16px", borderRadius: 9, fontSize: 12.5, fontWeight: 650,
+    background: isApplied ? "#d1fae5" : "#1a6edb",
+    color: isApplied ? "#065f46" : "#fff",
+    border: isApplied ? "1.5px solid #6ee7b7" : "none",
+    cursor: (isApplying || isApplied) ? "default" : "pointer",
+    opacity: isApplying ? 0.6 : 1,
+    transition: "all 0.2s ease",
+  }}
+  onMouseEnter={e => { if (!isApplying && !isApplied) e.currentTarget.style.background = "#0d4fa3"; }}
+  onMouseLeave={e => { if (!isApplied) e.currentTarget.style.background = "#1a6edb"; }}
+>
+  {isApplied
+    ? <><svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg> Applied</>
+    : <>{Ico.lightning}{isApplying ? "Applying…" : "Quick Apply"}</>
+  }
+</button>
       </div>
     </div>
   );
@@ -208,13 +470,13 @@ const JobListCard = ({ job, onView, onApply, applyingId, isSelected, onToggleSav
 
 // ─── Job Detail Side Panel ────────────────────────────────────────────────────
 // NEW props added: onToggleSave, isSaved
-const JobDetailPanel = ({ job, onClose, onApply, applyingId, onToggleSave, isSaved }) => {
+const JobDetailPanel = ({ job, onClose, onApply, applyingId, onToggleSave, isSaved, isApplied }) => {
   if (!job) return null;
   const isApplying = applyingId === job.id;
 
   const raw = job.description || "";
-  const liItems = [...raw.matchAll(/<li[^>]*>(.*?)<\/li>/gis)].map(m => stripHtml(m[1]));
-  const bodyText = stripHtml(raw.replace(/<ul[\s\S]*?<\/ul>/gi, "").replace(/<ol[\s\S]*?<\/ol>/gi, ""));
+  const descSections = parseJobDescriptionSections(raw);
+  const hasDesc = descSections.some((s) => s.body?.trim());
 
   return (
     <div style={{
@@ -267,61 +529,97 @@ const JobDetailPanel = ({ job, onClose, onApply, applyingId, onToggleSave, isSav
       </div>
 
       {/* Scrollable body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
-        {bodyText && (
-          <div style={{ marginBottom: liItems.length > 0 ? 20 : 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>About This Role</div>
-            <p style={{ fontSize: 13.5, color: "#3a3a52", lineHeight: 1.75, margin: 0, whiteSpace: "pre-line" }}>
-              {bodyText}
-            </p>
+      {/* Scrollable body */}
+<div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+  {hasDesc && (() => {
+    // Pull out key:value header lines from the first section
+    const firstBody = descSections[0]?.body || "";
+    const { headers, remainingText } = parseDescriptionHeader(firstBody);
+    const sectionsToRender = headers.length > 0
+      ? [{ title: descSections[0].title, body: remainingText }, ...descSections.slice(1)]
+      : descSections;
+
+    return (
+      <>
+        {/* Structured header block */}
+        {headers.length > 0 && (
+          <div style={{
+            background: "#f8f9fc", borderRadius: 12, padding: "14px 16px",
+            marginBottom: 22, border: "1px solid rgba(0,0,0,0.07)",
+            display: "flex", flexDirection: "column", gap: 8,
+          }}>
+            {headers.map(({ key, value }) => (
+              <div key={key} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: "#9090a8", minWidth: 130, flexShrink: 0, textTransform: "uppercase", letterSpacing: "0.05em", paddingTop: 1 }}>{key}</span>
+                <span style={{ fontSize: 13, color: "#1a1a2e", lineHeight: 1.5 }}>{value}</span>
+              </div>
+            ))}
           </div>
         )}
 
-        {liItems.length > 0 && (
-          <div style={{ marginTop: bodyText ? 0 : 4 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
-              {bodyText ? "Requirements & Responsibilities" : "About This Role"}
+        {/* Rest of sections */}
+        {sectionsToRender.map((sec, si) => {
+          if (!sec.body?.trim()) return null;
+          const chunks = chunkSectionBody(sec.body);
+          if (!chunks.length) return null;
+          return (
+            <div key={si} style={{ marginBottom: si < sectionsToRender.length - 1 ? 26 : 0 }}>
+              {sec.title ? (
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", letterSpacing: "-0.01em", marginBottom: 10, lineHeight: 1.35 }}>
+                  {sec.title}
+                </div>
+              ) : sec.body?.trim() ? (
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
+                  {descSections.length === 1 ? "About This Role" : "Overview"}
+                </div>
+              ) : null}
+              <JobDescriptionSectionChunks chunks={chunks} />
             </div>
-            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
-              {liItems.map((item, i) => (
-                <li key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                  <span style={{ flexShrink: 0, width: 18, height: 18, borderRadius: "50%", background: "#e8f1fd", display: "flex", alignItems: "center", justifyContent: "center", color: "#1a6edb", marginTop: 1 }}>
-                    <svg viewBox="0 0 16 16" fill="currentColor" width="9" height="9"><path d="M6.293 11.707a1 1 0 010-1.414L8.586 8 6.293 5.707a1 1 0 111.414-1.414l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414 0z"/></svg>
-                  </span>
-                  <span style={{ fontSize: 13, color: "#3a3a52", lineHeight: 1.65 }}>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          );
+        })}
+      </>
+    );
+  })()}
 
-        {!bodyText && liItems.length === 0 && (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "#9090a8" }}>
-            <div style={{ fontSize: 28, marginBottom: 8 }}>📋</div>
-            <div style={{ fontSize: 13 }}>No detailed description available for this role.</div>
-          </div>
-        )}
-      </div>
+  {!hasDesc && (
+    <div style={{ textAlign: "center", padding: "32px 0", color: "#9090a8" }}>
+      <div style={{ fontSize: 28, marginBottom: 8 }}>📋</div>
+      <div style={{ fontSize: 13 }}>No detailed description available for this role.</div>
+    </div>
+  )}
+</div>
 
       {/* CTA footer */}
       <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.07)", flexShrink: 0, background: "#fafbfd" }}>
-        <button
-          onClick={() => onApply(job)}
-          disabled={isApplying}
-          style={{
-            width: "100%", padding: "13px", borderRadius: 12, border: "none",
-            background: isApplying ? "#93c5fd" : "linear-gradient(135deg,#1a6edb,#3b5fc0)",
-            color: "#fff", fontSize: 14, fontWeight: 700, cursor: isApplying ? "default" : "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            boxShadow: isApplying ? "none" : "0 4px 16px rgba(26,110,219,0.35)",
-            transition: "transform 0.15s",
-          }}
-          onMouseEnter={e => { if (!isApplying) e.currentTarget.style.transform = "scale(1.015)"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
-        >
-          {Ico.lightning}
-          {isApplying ? "Submitting Application…" : "Quick Apply to This Role"}
-        </button>
+       <button
+  onClick={() => { if (!isApplied) onApply(job); }}
+  disabled={isApplying || isApplied}
+  style={{
+    width: "100%", padding: "13px", borderRadius: 12,
+    border: isApplied ? "1.5px solid #6ee7b7" : "none",
+    background: isApplied
+      ? "#d1fae5"
+      : isApplying
+      ? "#93c5fd"
+      : "linear-gradient(135deg,#1a6edb,#3b5fc0)",
+    color: isApplied ? "#065f46" : "#fff",
+    fontSize: 14, fontWeight: 700,
+    cursor: (isApplying || isApplied) ? "default" : "pointer",
+    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+    boxShadow: (isApplying || isApplied) ? "none" : "0 4px 16px rgba(26,110,219,0.35)",
+    transition: "all 0.2s ease",
+  }}
+  onMouseEnter={e => { if (!isApplying && !isApplied) e.currentTarget.style.transform = "scale(1.015)"; }}
+  onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
+>
+  {isApplied ? (
+    <><svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg> Application Submitted</>
+  ) : isApplying ? (
+    <>Submitting Application…</>
+  ) : (
+    <>{Ico.lightning} Quick Apply to This Role</>
+  )}
+</button>
         <div style={{ textAlign: "center", fontSize: 11.5, color: "#9090a8", marginTop: 8 }}>
           Your saved profile, CV &amp; work experience will be attached automatically
         </div>
@@ -492,6 +790,159 @@ const ApplyConfirmModal = ({ job, profile, onConfirm, onClose, loading, error, s
   </div>
     )};
 
+    // ─── Incomplete Profile Modal ─────────────────────────────────────────────────
+const IncompleteProfileModal = ({ missingFields, onClose, onGoToProfile }) => (
+  <div style={{
+    position: "fixed", inset: 0, background: "rgba(0,0,0,0.52)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 70, padding: 16,
+  }}>
+    <div style={{
+      background: "#fff", borderRadius: 20,
+      boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+      width: "100%", maxWidth: 440, overflow: "hidden",
+      animation: "fadeUp 0.22s ease",
+    }}>
+      <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
+
+      {/* Header */}
+      <div style={{
+        padding: "20px 24px 16px",
+        borderBottom: "1px solid rgba(0,0,0,0.07)",
+        display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12,
+            background: "#fee2e2", display: "flex",
+            alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <svg viewBox="0 0 20 20" fill="#ef4444" width="22" height="22">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e" }}>
+              Profile Incomplete
+            </div>
+            <div style={{ fontSize: 12, color: "#9090a8", marginTop: 2 }}>
+              Please complete your profile before applying
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            color: "#9090a8", padding: 4, flexShrink: 0,
+          }}
+        >
+          {Ico.close}
+        </button>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: "20px 24px" }}>
+        <div style={{ fontSize: 13, color: "#5a5a72", marginBottom: 14, lineHeight: 1.6 }}>
+          The following required fields are missing from your profile:
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {missingFields.map((field, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "10px 14px", borderRadius: 10,
+              background: "#fff7ed", border: "1px solid #fed7aa",
+            }}>
+              <span style={{
+                width: 20, height: 20, borderRadius: "50%",
+                background: "#fee2e2", display: "flex",
+                alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <svg viewBox="0 0 20 20" fill="#ef4444" width="11" height="11">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+                </svg>
+              </span>
+              <span style={{ fontSize: 13, color: "#7c2d12", fontWeight: 500 }}>
+                {field}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          marginTop: 16, padding: "12px 14px",
+          background: "#eff6ff", borderRadius: 10,
+          border: "1px solid rgba(26,110,219,0.15)",
+          fontSize: 12, color: "#1e40af", lineHeight: 1.6,
+        }}>
+          💡 <strong>Note:</strong> Only <em>Professional Qualifications &amp; Memberships</em> is optional. All other sections must be filled in.
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.07)",
+        display: "flex", gap: 10, justifyContent: "flex-end",
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            padding: "9px 20px", borderRadius: 10,
+            border: "1px solid rgba(0,0,0,0.12)",
+            background: "transparent", color: "#5a5a72",
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onGoToProfile}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "9px 24px", borderRadius: 10,
+            background: "#1a6edb", color: "#fff",
+            fontSize: 13, fontWeight: 650, border: "none",
+            cursor: "pointer",
+            boxShadow: "0 3px 12px rgba(26,110,219,0.3)",
+          }}
+        >
+          {Ico.profile} Complete Profile
+        </button>
+      </div>
+    </div>
+  </div>
+);
+// ─── Required profile fields for apply gate ───────────────────────────────────
+const REQUIRED_PROFILE_FIELDS = [
+  { key: "firstName",             label: "First Name" },
+  { key: "lastName",              label: "Last Name" },
+  { key: "email",                 label: "Email" },
+  { key: "phoneNumber",           label: "Phone Number" },
+  { key: "whatsAppNo",            label: "WhatsApp Number" },
+  { key: "nationality",           label: "Nationality" },
+  { key: "location",              label: "Current Location" },
+  { key: "idNumber",              label: "ID Number" },
+  { key: "specialization",        label: "Specialization (Professional Summary)" },
+  { key: "highestEducationLevel", label: "Highest Education Level" },
+  { key: "savedCvFileId",         label: "Uploaded CV" },
+  { key: "workExperience",        label: "Work Experience (at least one entry)" },
+];
+
+const checkProfileMissing = (profile) => {
+  if (!profile) return REQUIRED_PROFILE_FIELDS.map(f => f.label);
+  return REQUIRED_PROFILE_FIELDS
+    .filter(({ key }) => {
+      if (key === "workExperience") {
+        // Must have at least one entry with a company name filled in
+        const we = profile[key];
+        return !Array.isArray(we) || we.filter(w => w.company).length === 0;
+      }
+      const val = profile[key];
+      if (Array.isArray(val)) return val.length === 0;
+      return !val;
+    })
+    .map(f => f.label);
+};
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 const Dashboard = ({ profile, token, onNav, onQuickApply, savedJobIds = new Set(), onToggleSave, onViewTerms }) => {
   const { jobs, loading: jobsLoading, error: jobsError } = useContext(JobContext);
@@ -505,8 +956,13 @@ const Dashboard = ({ profile, token, onNav, onQuickApply, savedJobIds = new Set(
   const [applyError, setApplyError]   = useState("");
   const [applySuccess, setApplySuccess] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
-const toggleSave = (job) => onToggleSave(job);
-const isJobSaved = (jobId) => savedJobIds.has(jobId);
+  const [incompleteModal, setIncompleteModal] = useState(false);
+const [missingFields, setMissingFields]     = useState([]);
+const [appliedIds, setAppliedIds]           = useState(new Set());
+const toggleSave = (job) => onToggleSave({ ...job, _id: String(job._id ?? job.id) });
+const isJobSaved = (jobId) => savedJobIds.has(String(jobId));
+const [disqualifyModal, setDisqualifyModal]     = useState(false);
+const [disqualifyMessage, setDisqualifyMessage] = useState("");
 
   const locations = [...new Set(jobs.map(j => j.location).filter(Boolean))].slice(0, 6);
 
@@ -525,11 +981,229 @@ const isJobSaved = (jobId) => savedJobIds.has(jobId);
   const missingSummary = !profile?.specialization;
   const firstName      = profile?.firstName || "there";
 
-  const openApply = (job) => {
-    setApplyModal({ job });
-    setApplyError("");
-    setApplySuccess(false);
-  };
+  // const openApply = (job) => {
+  //   setApplyModal({ job });
+  //   setApplyError("");
+  //   setApplySuccess(false);
+  // };
+// ─── Experience extraction helper ────────────────────────────────────────────
+const extractJobRequirements = (job) => {
+  const text = htmlToPlainForJobDescription(job.description || "").toLowerCase();
+  const titleText = (job.title || "").toLowerCase();
+  const combined = `${titleText}\n${text}`;
+
+  // ── Experience extraction ──────────────────────────────────────────────────
+  // Split into lines and skip any line that talks about "years of education"
+  // or uses "months" as the unit (e.g. "12 months experience")
+  const isEducationYearsLine = (line) =>
+    /years?\s+of\s+(formal\s+)?education/.test(line) ||
+    /years?\s+of\s+schooling/.test(line);
+
+  const expPatterns = [
+    /(?:minimum\s+of|minimum|at\s+least)\s+(\d+)\s*(?:to\s*\d+\s*)?years?(?!\s*of\s*(?:formal\s+)?education)/i,
+    /(\d+)\s*[-–]\s*\d+\s*years?\s+(?:of\s+)?(?:experience|exp)/i,
+    /(\d+)\+\s*years?\s+(?:of\s+)?(?:experience|exp)/i,
+    /(\d+)\s+(?:or\s+more\s+)?years?\s+(?:of\s+)?(?:progressive|proven|relevant|demonstrable|senior)?\s*(?:experience|exp)/i,
+    /experience\s*(?:of|:)?\s*(\d+)\s*\+?\s*years?/i,
+    /(\d+)\s+years?['']?\s+(?:work|professional|industry|managerial|leadership)\s+experience/i,
+  ];
+
+  let minYears = 0;
+  const lines = combined.split(/\n/);
+
+  for (const line of lines) {
+    // Skip lines about years of education (e.g. "Minimum of 12 years of formal education")
+    if (isEducationYearsLine(line)) continue;
+
+    // Skip lines where the number is followed by "month(s)" — not years
+    // e.g. "Minimum 12 months experience"
+    if (/\d+\s*months?\s+(?:of\s+)?(?:experience|exp)/i.test(line)) continue;
+    if (/(?:minimum|at\s+least)\s+\d+\s*months?/i.test(line)) continue;
+
+    for (const pattern of expPatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        const parsed = parseInt(match[1], 10);
+        if (!isNaN(parsed)) minYears = Math.max(minYears, parsed);
+      }
+    }
+  }
+
+  // ── Education extraction ───────────────────────────────────────────────────
+  // Helper: returns true if a line is "advantage / preferred / optional" language
+  const isOptionalEduLine = (line) =>
+    /\b(?:added?\s+advantage|advantage|preferred?|desirable|bonus|plus|beneficial|an?\s+asset|ideal(?:ly)?|welcome|nice\s+to\s+have|preferred\s+but\s+not\s+required)\b/.test(line);
+
+  let requiredEdu = null;
+
+  // Check "A or B" patterns on non-optional lines first
+  const nonOptionalLines = lines.filter((l) => !isOptionalEduLine(l)).join("\n");
+
+  const certOrDiploma      = /certificate.*or.*diploma|diploma.*or.*certificate/i.test(nonOptionalLines);
+  const certOrBachelors    = /certificate.*or.*bachelor|bachelor.*or.*certificate/i.test(nonOptionalLines);
+  const certOrMasters      = /certificate.*or.*master|master.*or.*certificate/i.test(nonOptionalLines);
+  const diplomaOrBachelors = /diploma.*or.*bachelor|bachelor.*or.*diploma/i.test(nonOptionalLines);
+  const diplomaOrMasters   = /diploma.*or.*master|master.*or.*diploma/i.test(nonOptionalLines);
+  const mastersOrBachelors = /master.*or.*bachelor|bachelor.*or.*master/i.test(nonOptionalLines);
+
+  if (certOrDiploma || certOrBachelors || certOrMasters) {
+    requiredEdu = "certificate";
+  } else if (diplomaOrBachelors || diplomaOrMasters) {
+    requiredEdu = "diploma";
+  } else if (mastersOrBachelors) {
+    requiredEdu = "bachelors";
+  } else {
+    // Single-level checks — only on lines that aren't "added advantage" etc.
+    for (const line of lines) {
+      if (isOptionalEduLine(line)) continue; // <-- key fix: skip advantage lines
+      if (/phd|doctorate|doctoral/i.test(line)) {
+        requiredEdu = "phd"; break;
+      } else if (/master['']?s?\s+(?:degree|of)|mba|m\.sc|msc|m\.a\b|postgraduate\s+degree/i.test(line)) {
+        requiredEdu = "masters"; break;
+      } else if (/bachelor['']?s?\s+(?:degree|of)|b\.sc|bsc|b\.a\b|b\.eng|undergraduate\s+degree|degree\s+in|degree\s+is\s+required/i.test(line)) {
+        requiredEdu = "bachelors"; break;
+      } else if (/higher\s+national\s+diploma|hnd|diploma/i.test(line)) {
+        requiredEdu = "diploma"; break;
+      } else if (/certificate/i.test(line)) {
+        requiredEdu = "certificate"; break;
+      }
+    }
+  }
+
+  return { minYears, requiredEdu };
+};
+
+// ─── Estimate total years of experience from workExperience array ─────────────
+const estimateTotalExperience = (workExperience = []) => {
+  let total = 0;
+  for (const entry of workExperience.filter((w) => w.company)) {
+    const dur = (entry.duration || entry.period || "").toLowerCase();
+
+    const yearMatch  = dur.match(/(\d+)\s*(?:yr|year)/i);
+    const monthMatch = dur.match(/(\d+)\s*(?:mo|month)/i);
+    if (yearMatch || monthMatch) {
+      total += yearMatch  ? parseInt(yearMatch[1],  10) : 0;
+      total += monthMatch ? parseInt(monthMatch[1], 10) / 12 : 0;
+      continue;
+    }
+
+    // "Jan 2019 – Mar 2022" or "2019 - 2023"
+    const dateRange = dur.match(
+      /(\w{3,9}\.?\s+\d{4}|\d{4})\s*[-–—to]+\s*(\w{3,9}\.?\s+\d{4}|\d{4}|present|current|now|date)/i
+    );
+    if (dateRange) {
+      const parseYear = (s) => { const y = s.match(/\d{4}/); return y ? parseInt(y[0], 10) : null; };
+      const startYear = parseYear(dateRange[1]);
+      const endStr    = dateRange[2];
+      const endYear   = /present|current|now|date/i.test(endStr) ? new Date().getFullYear() : parseYear(endStr);
+      if (startYear && endYear && endYear >= startYear) { total += endYear - startYear; }
+      continue;
+    }
+
+    if (/\d{4}/.test(dur)) total += 1; // bare year — conservative 1yr contribution
+  }
+  return Math.round(total * 10) / 10;
+};
+
+// ─── Education rank map ───────────────────────────────────────────────────────
+const EDU_RANK = { certificate: 1, diploma: 2, bachelors: 3, masters: 4, phd: 5 };
+
+const rankApplicantEdu = (profile = {}) => {
+  // Primary: education array saved by Edit Education modal
+  const eduArray = profile?.education || profile?.educationHistory || [];
+  if (Array.isArray(eduArray) && eduArray.length > 0) {
+    let highest = 0;
+    for (const entry of eduArray) {
+      const level = (
+        entry.academicLevel || entry.level || entry.qualification || entry.degree || ""
+      ).toLowerCase();
+      if      (/phd|doctorate|doctoral/.test(level))              highest = Math.max(highest, EDU_RANK.phd);
+      else if (/master|mba|msc|m\.sc|postgrad/.test(level))       highest = Math.max(highest, EDU_RANK.masters);
+      else if (/bachelor|bsc|b\.sc|degree|undergraduate/.test(level)) highest = Math.max(highest, EDU_RANK.bachelors);
+      else if (/diploma|hnd|higher national/.test(level))         highest = Math.max(highest, EDU_RANK.diploma);
+      else if (/certificate/.test(level))                         highest = Math.max(highest, EDU_RANK.certificate);
+    }
+    if (highest > 0) return Object.keys(EDU_RANK).find((k) => EDU_RANK[k] === highest) || null;
+  }
+  // Fallback: legacy highestEducationLevel string
+  const s = (profile?.highestEducationLevel || "").toLowerCase();
+  if (/phd|doctorate|doctoral/.test(s))               return "phd";
+  if (/master|mba|msc|m\.sc|postgraduate/.test(s))    return "masters";
+  if (/bachelor|bsc|b\.sc|degree|undergraduate/.test(s)) return "bachelors";
+  if (/diploma|hnd/.test(s))                          return "diploma";
+  if (/certificate/.test(s))                          return "certificate";
+  return null;
+};
+
+// ─── Generic qualification checker — returns array of reason strings ──────────
+const checkJobQualification = (job, profile) => {
+  const { minYears, requiredEdu } = extractJobRequirements(job);
+  const reasons = [];
+
+  // Experience check
+  if (minYears > 0) {
+    const applicantYears = estimateTotalExperience(profile?.workExperience || []);
+    if (applicantYears < minYears) {
+      reasons.push({
+        icon: "⏱️",
+        title: "Insufficient Experience",
+        body:
+          `This role requires at least ${minYears} year${minYears !== 1 ? "s" : ""} of experience. ` +
+          `Based on your profile, we could confirm approximately ${
+            applicantYears < 1
+              ? "less than 1 year"
+              : `${Math.floor(applicantYears)} year${Math.floor(applicantYears) !== 1 ? "s" : ""}`
+          } of work experience.`,
+      });
+    }
+  }
+
+  // Education check
+  if (requiredEdu) {
+    const applicantEduKey = rankApplicantEdu(profile);
+    const requiredRank    = EDU_RANK[requiredEdu];
+    const applicantRank   = applicantEduKey ? EDU_RANK[applicantEduKey] : 0;
+
+    if (applicantRank < requiredRank) {
+      const eduLabels = {
+        phd:         "a PhD / Doctoral degree",
+        masters:     "a Master's degree or MBA",
+        bachelors:   "a Bachelor's degree",
+        diploma:     "a Higher National Diploma (HND) or equivalent",
+        certificate: "a relevant certificate",
+      };
+      const applicantLabel = applicantEduKey
+        ? `Your highest recorded qualification is ${eduLabels[applicantEduKey]}, which does not meet this requirement.`
+        : "We could not find a recognised education level on your profile. Please update your Education section.";
+
+      reasons.push({
+        icon: "🎓",
+        title: "Education Requirement Not Met",
+        body: `This role requires ${eduLabels[requiredEdu]}. ${applicantLabel}`,
+      });
+    }
+  }
+
+  // Return null (qualifies) or the array of reason objects
+  return reasons.length > 0 ? reasons : null;
+};
+const openApply = (job) => {
+  const reasons = checkJobQualification(job, profile);
+  if (reasons) {
+    setDisqualifyMessage(reasons);   
+    setDisqualifyModal(true);
+    return;
+  }
+  const missing = checkProfileMissing(profile);
+  if (missing.length > 0) {
+    setMissingFields(missing);
+    setIncompleteModal(true);
+    return;
+  }
+  setApplyModal({ job });
+  setApplyError("");
+  setApplySuccess(false);
+};
 
 const submitApplication = async () => {
   if (!applyModal) return;
@@ -585,11 +1259,13 @@ const submitApplication = async () => {
 });
 
     setApplySuccess(true);
-    setTimeout(() => {
-      setApplyModal(null);
-      setApplySuccess(false);
-      setApplyingId(null);
-    }, 2800);
+
+setAppliedIds(prev => new Set([...prev, String(applyModal.job.id)]));
+setTimeout(() => {
+  setApplyModal(null);
+  setApplySuccess(false);
+  setApplyingId(null);
+}, 2800);
 
   } catch (err) {
     const msg = err.response?.data?.message || "Error submitting. Please try again.";
@@ -626,16 +1302,26 @@ const submitApplication = async () => {
               : `${filteredJobs.length} job${filteredJobs.length !== 1 ? "s" : ""} available — apply instantly using your saved profile & CV.`}
           </div>
         </div>
-        <button onClick={() => setShowFormModal(true)} style={{
-  flexShrink: 0, padding: "12px 26px", borderRadius: 13,
-  background: "#f26722", color: "#fff", border: "none",
-  fontSize: 13.5, fontWeight: 700, cursor: "pointer",
-  boxShadow: "0 4px 18px rgba(242,103,34,0.45)",
-  transition: "transform 0.15s, box-shadow 0.15s",
-  display: "flex", alignItems: "center", gap: 7,
-  position: "relative",  
-  zIndex: 1,             
-}}
+       <button
+          onClick={() => {
+            const missing = checkProfileMissing(profile);
+            if (missing.length > 0) {
+              setMissingFields(missing);
+              setIncompleteModal(true);
+              return;
+            }
+            setShowFormModal(true);
+          }}
+          style={{
+            flexShrink: 0, padding: "12px 26px", borderRadius: 13,
+            background: "#f26722", color: "#fff", border: "none",
+            fontSize: 13.5, fontWeight: 700, cursor: "pointer",
+            boxShadow: "0 4px 18px rgba(242,103,34,0.45)",
+            transition: "transform 0.15s, box-shadow 0.15s",
+            display: "flex", alignItems: "center", gap: 7,
+            position: "relative",
+            zIndex: 1,
+          }}
           onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.04)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(242,103,34,0.5)"; }}
           onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 18px rgba(242,103,34,0.45)"; }}
         >
@@ -771,17 +1457,17 @@ const submitApplication = async () => {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: selectedJob ? "1fr" : "repeat(auto-fill, minmax(300px, 1fr))", gap: 12, animation: "fadeIn 0.2s ease" }}>
               {filteredJobs.map(job => (
-                <JobListCard
-                  key={job.id}
-                  job={job}
-                  onView={(j) => setSelectedJob(prev => prev?.id === j.id ? null : j)}
-                  onApply={openApply}
-                  applyingId={applyingId}
-                  isSelected={selectedJob?.id === job.id}
-                  // ── NEW props for save functionality ──
-                  onToggleSave={toggleSave}
-                  isSaved={isJobSaved(job.id)}
-                />
+               <JobListCard
+  key={job.id}
+  job={job}
+  onView={(j) => setSelectedJob(prev => prev?.id === j.id ? null : j)}
+  onApply={openApply}
+  applyingId={applyingId}
+  isSelected={selectedJob?.id === job.id}
+  onToggleSave={toggleSave}
+  isSaved={isJobSaved(job.id)}
+  isApplied={appliedIds.has(String(job.id))}
+/>
               ))}
             </div>
           )}
@@ -794,14 +1480,14 @@ const submitApplication = async () => {
               style={{ position: "fixed", inset: 0, zIndex: 39, background: "transparent" }}
             />
             <JobDetailPanel
-              job={selectedJob}
-              onClose={() => setSelectedJob(null)}
-              onApply={openApply}
-              applyingId={applyingId}
-              // ── NEW props for save functionality ──
-              onToggleSave={toggleSave}
-              isSaved={isJobSaved(selectedJob.id)}
-            />
+  job={selectedJob}
+  onClose={() => setSelectedJob(null)}
+  onApply={openApply}
+  applyingId={applyingId}
+  onToggleSave={toggleSave}
+  isSaved={isJobSaved(selectedJob.id)}
+  isApplied={appliedIds.has(String(selectedJob.id))}
+/>
           </>
         )}
       </div>
@@ -818,6 +1504,199 @@ const submitApplication = async () => {
           onViewTerms={onViewTerms}
         />
       )}
+      {incompleteModal && (
+  <div style={{
+    position: "fixed", inset: 0, background: "rgba(0,0,0,0.52)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 70, padding: 16,
+  }}>
+    <div style={{
+      background: "#fff", borderRadius: 20,
+      boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+      width: "100%", maxWidth: 440, overflow: "hidden",
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: "20px 24px 16px",
+        borderBottom: "1px solid rgba(0,0,0,0.07)",
+        display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12,
+            background: "#fee2e2", display: "flex",
+            alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <svg viewBox="0 0 20 20" fill="#ef4444" width="22" height="22">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e" }}>
+              Profile Incomplete
+            </div>
+            <div style={{ fontSize: 12, color: "#9090a8", marginTop: 2 }}>
+              Please complete your profile before applying
+            </div>
+          </div>
+        </div>
+        <button onClick={() => setIncompleteModal(false)}
+          style={{ background: "none", border: "none", cursor: "pointer", color: "#9090a8", padding: 4 }}>
+          {Ico.close}
+        </button>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: "20px 24px" }}>
+        <div style={{ fontSize: 13, color: "#5a5a72", marginBottom: 14, lineHeight: 1.6 }}>
+          These required fields are missing from your profile:
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {missingFields.map((field, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "10px 14px", borderRadius: 10,
+              background: "#fff7ed", border: "1px solid #fed7aa",
+            }}>
+              <span style={{
+                width: 20, height: 20, borderRadius: "50%",
+                background: "#fee2e2", display: "flex",
+                alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <svg viewBox="0 0 20 20" fill="#ef4444" width="11" height="11">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+                </svg>
+              </span>
+              <span style={{ fontSize: 13, color: "#7c2d12", fontWeight: 500 }}>{field}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{
+          marginTop: 16, padding: "12px 14px",
+          background: "#eff6ff", borderRadius: 10,
+          border: "1px solid rgba(26,110,219,0.15)",
+          fontSize: 12, color: "#1e40af", lineHeight: 1.6,
+        }}>
+          💡 <strong>Note:</strong> Only <em>Professional Qualifications &amp; Memberships</em> is optional. Everything else must be filled in.
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.07)",
+        display: "flex", gap: 10, justifyContent: "flex-end",
+      }}>
+        <button onClick={() => setIncompleteModal(false)}
+          style={{
+            padding: "9px 20px", borderRadius: 10,
+            border: "1px solid rgba(0,0,0,0.12)",
+            background: "transparent", color: "#5a5a72",
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+          }}>
+          Cancel
+        </button>
+        <button onClick={() => { setIncompleteModal(false); onNav("profile"); }}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "9px 24px", borderRadius: 10,
+            background: "#1a6edb", color: "#fff",
+            fontSize: 13, fontWeight: 650, border: "none", cursor: "pointer",
+            boxShadow: "0 3px 12px rgba(26,110,219,0.3)",
+          }}>
+          Go to Profile →
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+{disqualifyModal && (
+  <div style={{
+    position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 70, padding: 16,
+  }}>
+    <div style={{
+      background: "#fff", borderRadius: 20,
+      boxShadow: "0 24px 64px rgba(0,0,0,0.22)",
+      width: "100%", maxWidth: 460, overflow: "hidden",
+      animation: "fadeUp 0.22s ease",
+    }}>
+      <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
+
+      {/* Header */}
+      <div style={{
+        padding: "20px 24px 16px", borderBottom: "1px solid rgba(0,0,0,0.07)",
+        display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "#fee2e2",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg viewBox="0 0 20 20" fill="#ef4444" width="22" height="22">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e" }}>Not Eligible to Apply</div>
+            <div style={{ fontSize: 12, color: "#9090a8", marginTop: 2 }}>
+              Your profile does not meet the requirements for this role
+            </div>
+          </div>
+        </div>
+        <button onClick={() => setDisqualifyModal(false)}
+          style={{ background: "none", border: "none", cursor: "pointer", color: "#9090a8", padding: 4 }}>
+          {Ico.close}
+        </button>
+      </div>
+
+      {/* Body — one card per failing requirement */}
+      <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
+        {Array.isArray(disqualifyMessage) && disqualifyMessage.map((reason, i) => (
+          <div key={i} style={{
+            borderRadius: 12, border: "1px solid #fecaca",
+            background: "#fff5f5", padding: "14px 16px",
+            display: "flex", gap: 12, alignItems: "flex-start",
+          }}>
+            <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1 }}>{reason.icon}</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#991b1b", marginBottom: 4 }}>
+                {reason.title}
+              </div>
+              <div style={{ fontSize: 12.5, color: "#7f1d1d", lineHeight: 1.65 }}>
+                {reason.body}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div style={{
+          marginTop: 4, padding: "12px 14px", background: "#eff6ff",
+          borderRadius: 10, border: "1px solid rgba(26,110,219,0.15)",
+          fontSize: 12, color: "#1e40af", lineHeight: 1.6,
+        }}>
+          💡 We encourage you to apply for other roles that match your current qualifications. Your profile has been saved.
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.07)",
+        display: "flex", gap: 10, justifyContent: "flex-end",
+      }}>
+        <button onClick={() => setDisqualifyModal(false)}
+          style={{ padding: "9px 20px", borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)",
+            background: "transparent", color: "#5a5a72", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
+          Close
+        </button>
+        <button onClick={() => { setDisqualifyModal(false); }}
+          style={{ padding: "9px 24px", borderRadius: 10, background: "#1a6edb", color: "#fff",
+            fontSize: 13, fontWeight: 650, border: "none", cursor: "pointer",
+            boxShadow: "0 3px 12px rgba(26,110,219,0.3)" }}>
+          Browse Other Jobs
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {showFormModal && (
 
 <div

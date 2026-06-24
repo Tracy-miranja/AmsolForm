@@ -1,8 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://amsol-api-production.up.railway.app",
-  withCredentials: true, // sends httpOnly cookies automatically
+  
+baseURL: import.meta.env.VITE_API_URL || "https://amsol-api-production.up.railway.app",
+  withCredentials: true, 
 });
 
 let isRefreshing = false;
