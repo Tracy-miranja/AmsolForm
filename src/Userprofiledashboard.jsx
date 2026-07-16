@@ -283,7 +283,7 @@ const SectionCard = ({ dotColor = "#1a6edb", title, action, children }) => (
   </div>
 );
 
-const Modal = ({ title, subtitle, onClose, onSave, saving, children }) => (
+const Modal = ({ title, subtitle, onClose, onSave, saving, error, children }) => (
   <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
     <div className="modal-sheet bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
       <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(0,0,0,0.08)] flex-shrink-0">
@@ -300,7 +300,14 @@ const Modal = ({ title, subtitle, onClose, onSave, saving, children }) => (
           {Icon.x}
         </button>
       </div>
-      <div className="p-6 overflow-y-auto flex-1 space-y-3">{children}</div>
+      <div className="p-6 overflow-y-auto flex-1 space-y-3">
+        {error && (
+          <p className="text-sm font-medium text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
+        {children}
+      </div>
       <div className="px-6 py-4 border-t border-[rgba(0,0,0,0.06)] flex justify-end gap-3 flex-shrink-0">
         <GhostBtn onClick={onClose}>{Icon.x} Cancel</GhostBtn>
         <PrimaryBtn onClick={onSave} disabled={saving}>
@@ -2289,7 +2296,7 @@ const WorkExpModal = ({
 };
 
 // ─── Skills Edit Modal ────────────────────────────────────────────────────────
-const SkillsModal = ({ skills, onClose, onSave, saving }) => {
+const SkillsModal = ({ skills, onClose, onSave, saving, error }) => {
   const [list, setList] = useState(skills.length ? [...skills] : []);
   const [newSkill, setNewSkill] = useState("");
   const addSkill = () => {
@@ -2305,6 +2312,7 @@ const SkillsModal = ({ skills, onClose, onSave, saving }) => {
       onClose={onClose}
       onSave={() => onSave(list)}
       saving={saving}
+      error={error}
     >
       <div className="flex gap-2">
         <Inp
@@ -2483,8 +2491,22 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
   };
 
   const today = new Date().toISOString().split("T")[0];
+  const [attemptedSave, setAttemptedSave] = useState(false);
+
+  const isEntryComplete = (edu) =>
+    !!(
+      edu.academicLevel &&
+      edu.institution &&
+      edu.courseName &&
+      edu.dateStart &&
+      (edu.currentlyStudying || edu.dateEnd)
+    );
+
+  const validateAll = () => list.length > 0 && list.every(isEntryComplete);
 
  const handleSave = async () => {
+    setAttemptedSave(true);
+    if (!validateAll()) return;
     // Upload any pending certificate files before saving
     // and wait for all fileIds to be stored back in list state
     const uploadResults = await Promise.all(
@@ -2544,7 +2566,7 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
               )}
             </div>
 
-            <MF label="Academic Level *">
+           <MF label="Academic Level *">
               <Sel
                 value={edu.academicLevel}
                 onChange={(e) => ch(i, "academicLevel", e.target.value)}
@@ -2554,16 +2576,21 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
                   <option key={lvl} value={lvl}>{lvl}</option>
                 ))}
               </Sel>
+              {attemptedSave && !edu.academicLevel && (
+                <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>Academic level is required.</p>
+              )}
             </MF>
 
-        
-            <MF label="Course Name">
+        <MF label="Course Name *">
               <Inp
                 type="text"
                 placeholder="e.g. Financial Accounting, Software Engineering…"
                 value={edu.courseName || ""}
                 onChange={(e) => ch(i, "courseName", e.target.value)}
               />
+              {attemptedSave && !edu.courseName && (
+                <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>Course name is required.</p>
+              )}
             </MF>
 
             <MF label="Institution *">
@@ -2573,6 +2600,9 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
                 value={edu.institution}
                 onChange={(e) => ch(i, "institution", e.target.value)}
               />
+              {attemptedSave && !edu.institution && (
+                <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>Institution is required.</p>
+              )}
             </MF>
 
             <MF label="Duration *">
@@ -2614,7 +2644,7 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
                 <span style={{ fontSize: 12.5, color: "#5a5a72" }}>Currently studying here</span>
               </label>
 
-              {edu.dateStart && (
+            {edu.dateStart && (
                 <p style={{ fontSize: 11, color: "#9090a8", marginTop: 8 }}>
                   Preview:{" "}
                   <span style={{ color: "#1a6edb", fontWeight: 500 }}>
@@ -2623,6 +2653,14 @@ const EducationModal = ({ education, onClose, onSave, saving, token }) => {
                     {edu.currentlyStudying ? "Present" : edu.dateEnd ? formatDateDisplay(edu.dateEnd) : "…"}
                     {duration ? ` · ${duration}` : ""}
                   </span>
+                </p>
+              )}
+              {attemptedSave && !edu.dateStart && (
+                <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>Start date is required.</p>
+              )}
+              {attemptedSave && !edu.currentlyStudying && !edu.dateEnd && (
+                <p style={{ fontSize: 11, color: "#e24b4a", marginTop: 4 }}>
+                  End date is required (or check "Currently studying here").
                 </p>
               )}
             </MF>
@@ -3237,7 +3275,6 @@ const handleSave = async () => {
                   : "Attach certificate"}
               </button>
 
-              {/* Existing file indicator */}
               {/* Existing file indicator + view/download actions */}
 {q.certificateFileId && !certFiles[i] && (
   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -3466,7 +3503,6 @@ const [generalApplySuccess, setGeneralApplySuccess] = useState(false);
   setQualifications(data.professionalQualifications || []);
 setMemberships(data.professionalMemberships || []);
 
-  // academicLevel from DB is [{level, courseName, institution, ...}]
   // map it to the shape your EducationModal/display expects
  const mappedEdu = (data.academicLevel || []).map((e) => ({
     academicLevel: e.level || "",
@@ -3476,7 +3512,7 @@ setMemberships(data.professionalMemberships || []);
     dateStart: e.startDate ? new Date(e.startDate).toISOString().split("T")[0] : "",
     dateEnd: e.endDate ? new Date(e.endDate).toISOString().split("T")[0] : "",
     currentlyStudying: false,
-    certificateFileId: e.certificateFileId || null,  // ← ADD THIS
+    certificateFileId: e.certificateFileId || null,  
   }));
   setEducation(mappedEdu);
 
@@ -3690,7 +3726,8 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
       institution: e.institution || "",
       startDate: e.dateStart ? new Date(e.dateStart) : null,
       endDate: e.currentlyStudying ? null : (e.dateEnd ? new Date(e.dateEnd) : null),
-      certificateFileId: e.certificateFileId || null,  // ← ADD THIS
+      currentlyStudying: !!e.currentlyStudying,
+      certificateFileId: e.certificateFileId || null,
     }));
 
     const merged = { ...form, academicLevel };
@@ -4439,9 +4476,9 @@ profile?.highestEducationLevel ? (
           dotColor="#f26722"
           title="Skills"
           action={
-            <GhostBtn onClick={() => setModal("skills")}>
-              {Icon.edit} Edit
-            </GhostBtn>
+            <GhostBtn onClick={() => { setSaveMsg(""); setModal("skills"); }}>
+  {Icon.edit} Edit
+</GhostBtn>
           }
         >
           {skills.length > 0 ? (
@@ -4513,6 +4550,26 @@ profile?.highestEducationLevel ? (
           </AddBtn>
         }
       >
+         <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 10,
+            padding: "10px 14px",
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: 10,
+            marginBottom: 14,
+          }}
+        >
+          <span style={{ fontSize: 15, flexShrink: 0, lineHeight: 1 }}>⚠️</span>
+          <p style={{ fontSize: 12, color: "#b91c1c", lineHeight: 1.5, margin: 0 }}>
+            <strong>Strict requirement:</strong> All work experience must be listed here and must match
+            exactly what appears on your uploaded CV — company names, job titles, and dates.
+            Any mismatch between your profile and your CV may result in your application
+            being disqualified.
+          </p>
+        </div>
         {filledWE.length > 0 ? (
           <div>
             {workExperience.map((w, i) => {
@@ -4642,6 +4699,25 @@ profile?.highestEducationLevel ? (
           </GhostBtn>
         }
       >
+           <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 10,
+            padding: "10px 14px",
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: 10,
+            marginBottom: 14,
+          }}
+        >
+          <span style={{ fontSize: 15, flexShrink: 0, lineHeight: 1 }}>⚠️</span>
+          <p style={{ fontSize: 12, color: "#b91c1c", lineHeight: 1.5, margin: 0 }}>
+            <strong>Mandatory:</strong> Education details are required and must be
+            completed before your profile can be considered complete. This section
+            cannot be skipped.
+          </p>
+        </div>
         {education.filter((e) => e.degree || e.institution).length > 0 ? (
           <div>
             {education
@@ -4934,6 +5010,7 @@ profile?.highestEducationLevel ? (
             </div>
             <button
               onClick={() => setModal("cvpreview")}
+              style={{ flexShrink: 0 }}  
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-white transition"
             >
               {Icon.eye} Preview
@@ -5368,9 +5445,39 @@ span.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
 /* ══════════════════════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════════════════════ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 256px;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  z-index: 50;
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
 @media (max-width: 768px) {
-  .main-layout { grid-template-columns: 1fr; }
-  .main-content { padding-bottom: 72px; }
+  .main-layout {
+    grid-template-columns: 1fr;
+    display: block;
+  }
+  .main-content {
+    padding-bottom: 72px;
+    min-height: 100vh;
+  }
   .page-padding { padding: 16px !important; }
   .profile-grid-2col { grid-template-columns: 1fr !important; }
   .completion-card { flex-direction: column !important; gap: 14px !important; }
@@ -5385,17 +5492,71 @@ span.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
   .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
   .personal-info-inner { flex-direction: column !important; align-items: center !important; }
   .personal-info-fields { grid-template-columns: 1fr !important; }
+  /* ── CV card row — stack vertically on mobile ── */
+  .cv-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  /* Fix the saved CV green card */
+  .cv-saved-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  /* Page padding tighter on mobile */
+  .page-padding { padding: 12px !important; gap: 14px !important; }
+
+  /* Cards inner padding tighter */
+  .bg-white.rounded-\[14px\] > div:last-child {
+    padding: 14px !important;
+  }
+  .bg-white.rounded-\[14px\] > div:first-child {
+    padding: 12px 14px !important;
+  }
+
+  /* Completion card badges — wrap properly */
+  .completion-card {
+    padding: 16px !important;
+    gap: 12px !important;
+  }
+  .completion-card > div:last-child {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+  }
+
+  /* Top bar — shrink */
+  .main-content > div:first-child {
+    height: 52px !important;
+    padding: 0 12px !important;
+  }
+
+  /* Section card titles wrapping */
+  .bg-white.rounded-\[14px\] > div:first-child {
+    flex-wrap: wrap;
+    gap: 6px
+    }
 }
 @media (max-width: 480px) {
   .top-bar-label { display: none; }
   .top-bar-btn { padding: 8px 10px !important; }
 }
 @media (min-width: 769px) {
+  /* Desktop: sidebar is sticky in grid, not fixed */
   .sidebar {
     position: sticky !important;
     top: 0 !important;
     transform: translateX(0) !important;
     flex-shrink: 0 !important;
+    z-index: auto !important;
+  }
+  .main-layout {
+    display: grid;
+    grid-template-columns: 256px 1fr;
   }
   .bottom-nav { display: none !important; }
   .sidebar-overlay { display: none !important; }
@@ -5475,13 +5636,14 @@ span.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
         />
       )}
       {modal === "skills" && (
-        <SkillsModal
-          skills={skills}
-          onClose={() => setModal(null)}
-          onSave={saveSkills}
-          saving={saving}
-        />
-      )}
+  <SkillsModal
+    skills={skills}
+    onClose={() => setModal(null)}
+    onSave={saveSkills}
+    saving={saving}
+    error={saveMsg}
+  />
+)}
       {modal === "education" && (
         <EducationModal
           education={education}
@@ -5777,7 +5939,7 @@ span.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
              <button
   onClick={() => {
     // Reuse the same required fields list inline
-    const REQUIRED = [
+ const REQUIRED = [
       { key: "firstName",             label: "First Name" },
       { key: "lastName",              label: "Last Name" },
       { key: "email",                 label: "Email" },
@@ -5788,13 +5950,20 @@ span.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
       { key: "idNumber",              label: "ID Number" },
       { key: "specialization",        label: "Specialization (Professional Summary)" },
       { key: "highestEducationLevel", label: "Highest Education Level" },
+      { key: "educationDetails",      label: "Complete Education Details (Academic Level, Institution, Course Name & Dates)" },
       { key: "savedCvFileId",         label: "Uploaded CV" },
       { key: "workExperience",        label: "Work Experience (at least one entry)" },
     ];
+    const isEduEntryOk = (e) =>
+      !!(e && e.level && e.courseName && e.institution && e.startDate && (e.currentlyStudying || e.endDate));
     const missing = REQUIRED.filter(({ key }) => {
       if (key === "workExperience") {
         const we = profile?.[key];
         return !Array.isArray(we) || we.filter(w => w.company).length === 0;
+      }
+      if (key === "educationDetails") {
+        const edu = profile?.academicLevel || [];
+        return !Array.isArray(edu) || edu.length === 0 || !edu.some(isEduEntryOk);
       }
       const val = profile?.[key];
       if (Array.isArray(val)) return val.length === 0;

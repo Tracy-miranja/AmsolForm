@@ -324,6 +324,17 @@ const JobSettingsPage = ({
           .js-recent-header { flex-direction: column; align-items: flex-start; }
           .js-recent-header button { width: 100%; }
         }
+          .js-market-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+    gap:18px;
+}
+
+@media (max-width:900px){
+    .js-market-grid{
+        grid-template-columns:1fr;
+    }
+}
       `}</style>
       {error && (
         <div
@@ -506,7 +517,7 @@ const JobSettingsPage = ({
         />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.15fr) minmax(0,0.85fr)", gap: 18 }}>
+      <div className="js-market-grid">
         <div
           style={{
             background: "#fff",
