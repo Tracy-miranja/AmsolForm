@@ -163,6 +163,30 @@ const parseDescriptionHeader = (text) => {
   return { headers, remainingText };
 };
 
+// Reuses the same header keys already used by parseDescriptionHeader
+const HEADER_KEY_LIST = [
+  "Job Title", "Location", "Employment Type", "Reporting To",
+  "Department", "Contract Type", "Salary", "Deadline",
+];
+
+/** Pull the Location value out of the description text even when there's no colon
+ *  separating the label from the value (e.g. "LocationKampala, Uganda"). */
+const extractLocationFromDescription = (rawHtml) => {
+  const text = htmlToPlainForJobDescription(rawHtml);
+  if (!text) return null;
+
+  const keysPattern = HEADER_KEY_LIST.map(escapeRegExp).join("|");
+  const re = new RegExp(
+    `Location\\s*:?\\s*(.+?)(?=\\s*(?:${keysPattern})\\b|\\n|$)`,
+    "i"
+  );
+  const m = text.match(re);
+  if (!m) return null;
+
+  const value = m[1].trim().replace(/[,;\s]+$/, "");
+  return value.length > 0 && value.length < 60 ? value : null;
+};
+
 /** Turn one section body into alternating prose blocks and bullet lists */
 const chunkSectionBody = (body) => {
   if (!body) return [];
@@ -913,6 +937,21 @@ const IncompleteProfileModal = ({ missingFields, onClose, onGoToProfile }) => (
   </div>
 );
 // ─── Required profile fields for apply gate ───────────────────────────────────
+// ─── Education completeness check ──────────────────────────────────────────
+const isEducationEntryComplete = (entry) => {
+  if (!entry) return false;
+  const hasCore = entry.level && entry.courseName && entry.institution && entry.startDate;
+  const hasEnd = entry.currentlyStudying || entry.endDate;
+  return !!(hasCore && hasEnd);
+};
+
+const isEducationMissing = (profile) => {
+  const edu = profile?.academicLevel || [];
+  if (!Array.isArray(edu) || edu.length === 0) return true;
+  return !edu.some(isEducationEntryComplete);
+};
+
+// ─── Required profile fields for apply gate ───────────────────────────────────
 const REQUIRED_PROFILE_FIELDS = [
   { key: "firstName",             label: "First Name" },
   { key: "lastName",              label: "Last Name" },
@@ -924,6 +963,7 @@ const REQUIRED_PROFILE_FIELDS = [
   { key: "idNumber",              label: "ID Number" },
   { key: "specialization",        label: "Specialization (Professional Summary)" },
   { key: "highestEducationLevel", label: "Highest Education Level" },
+  { key: "educationDetails",      label: "Complete Education Details (Academic Level, Institution, Course Name & Dates)" },
   { key: "savedCvFileId",         label: "Uploaded CV" },
   { key: "workExperience",        label: "Work Experience (at least one entry)" },
 ];
@@ -933,9 +973,11 @@ const checkProfileMissing = (profile) => {
   return REQUIRED_PROFILE_FIELDS
     .filter(({ key }) => {
       if (key === "workExperience") {
-        // Must have at least one entry with a company name filled in
         const we = profile[key];
         return !Array.isArray(we) || we.filter(w => w.company).length === 0;
+      }
+      if (key === "educationDetails") {
+        return isEducationMissing(profile);
       }
       const val = profile[key];
       if (Array.isArray(val)) return val.length === 0;
@@ -943,6 +985,50 @@ const checkProfileMissing = (profile) => {
     })
     .map(f => f.label);
 };
+<style>{`
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap');
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  .job-section { transition: margin-right 0.3s ease; }
+
+  @media (max-width: 768px) {
+    .dash-banner {
+      flex-direction: column !important;
+      padding: 20px !important;
+      gap: 16px !important;
+      align-items: flex-start !important;
+    }
+    .dash-banner-btn {
+      width: 100% !important;
+      justify-content: center !important;
+      padding: 12px !important;
+    }
+    .dash-quick-links {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 10px !important;
+    }
+    .job-card-footer {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+    }
+    .job-card-footer > div {
+      justify-content: space-between !important;
+      width: 100% !important;
+    }
+    .job-card-footer button:last-child {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .dash-quick-links {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 8px !important;
+    }
+  }
+`}</style>
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 const Dashboard = ({ profile, token, onNav, onQuickApply, savedJobIds = new Set(), onToggleSave, onViewTerms }) => {
   const { jobs, loading: jobsLoading, error: jobsError } = useContext(JobContext);
@@ -1073,6 +1159,117 @@ const extractJobRequirements = (job) => {
   return { minYears, requiredEdu };
 };
 
+// ─── Country / nationality requirement extraction ─────────────────────────────
+const COUNTRY_ALIASES = {
+  "Kenya":          ["kenya", "kenyan"],
+  "Uganda":         ["uganda", "ugandan"],
+  "Tanzania":       ["tanzania", "tanzanian"],
+  "Rwanda":         ["rwanda", "rwandan"],
+  "Burundi":        ["burundi", "burundian"],
+  "South Sudan":    ["south sudan", "south sudanese"],
+  "Ethiopia":       ["ethiopia", "ethiopian"],
+  "Somalia":        ["somalia", "somali"],
+  "DR Congo":       ["democratic republic of congo", "dr congo", "drc", "congolese"],
+  "Nigeria":        ["nigeria", "nigerian"],
+  "Ghana":          ["ghana", "ghanaian"],
+  "South Africa":   ["south africa", "south african"],
+  "Zambia":         ["zambia", "zambian"],
+  "Malawi":         ["malawi", "malawian"],
+  "Mozambique":     ["mozambique", "mozambican"],
+  "Zimbabwe":       ["zimbabwe", "zimbabwean"],
+  "Egypt":          ["egypt", "egyptian"],
+  "United Kingdom": ["united kingdom", "uk", "british"],
+  "United States":  ["united states", "usa", "u.s.", "american"],
+  "India":          ["india", "indian"],
+};
+
+// City → country lookup, since most profiles/job locations use a city, not a country name
+const CITY_TO_COUNTRY = {
+  "nairobi": "Kenya", "mombasa": "Kenya", "kisumu": "Kenya", "nakuru": "Kenya",
+  "eldoret": "Kenya", "thika": "Kenya", "machakos": "Kenya", "nyeri": "Kenya",
+  "kampala": "Uganda", "entebbe": "Uganda", "jinja": "Uganda", "mbarara": "Uganda", "gulu": "Uganda",
+  "dar es salaam": "Tanzania", "dodoma": "Tanzania", "arusha": "Tanzania", "mwanza": "Tanzania", "zanzibar": "Tanzania",
+  "kigali": "Rwanda",
+  "bujumbura": "Burundi",
+  "juba": "South Sudan",
+  "addis ababa": "Ethiopia",
+  "mogadishu": "Somalia", "hargeisa": "Somalia",
+  "kinshasa": "DR Congo", "goma": "DR Congo", "lubumbashi": "DR Congo",
+  "lagos": "Nigeria", "abuja": "Nigeria", "kano": "Nigeria",
+  "accra": "Ghana", "kumasi": "Ghana",
+  "johannesburg": "South Africa", "cape town": "South Africa", "pretoria": "South Africa", "durban": "South Africa",
+  "lusaka": "Zambia",
+  "lilongwe": "Malawi", "blantyre": "Malawi",
+  "maputo": "Mozambique",
+  "harare": "Zimbabwe", "bulawayo": "Zimbabwe",
+  "cairo": "Egypt", "alexandria": "Egypt",
+  "london": "United Kingdom",
+  "new york": "United States",
+};
+
+/** Normalize a free-text nationality/location string to a canonical country name.
+ *  Tries country/nationality words first, then falls back to known city names. */
+const normalizeToCountry = (text) => {
+  if (!text) return null;
+  const s = String(text).toLowerCase();
+
+  for (const [country, aliases] of Object.entries(COUNTRY_ALIASES)) {
+    for (const alias of aliases) {
+      const re = new RegExp(`\\b${escapeRegExp(alias)}\\b`, "i");
+      if (re.test(s)) return country;
+    }
+  }
+  for (const [city, country] of Object.entries(CITY_TO_COUNTRY)) {
+    const re = new RegExp(`\\b${escapeRegExp(city)}\\b`, "i");
+    if (re.test(s)) return country;
+  }
+  return null;
+};
+
+/** Determine which country a job requires candidates to be from/based in.
+ *  Priority: 1) explicit nationality language in the description,
+ *            2) the job's structured `location` field (most job posts imply this). */
+const extractJobCountryRequirement = (job) => {
+  const text = htmlToPlainForJobDescription(job.description || "").toLowerCase();
+  const titleText = (job.title || "").toLowerCase();
+  const combined = `${titleText}\n${text}`;
+
+  // Explicit signal — but skip if the post explicitly welcomes any nationality / is remote
+const isOpenToAll = /\b(?:fully\s+remote|remote\s+(?:position|role|job|work)|any\s+nationality|open\s+to\s+all\s+nationalities|international\s+applicants\s+welcome)\b/i.test(combined);
+
+  if (!isOpenToAll) {
+    for (const [country, aliases] of Object.entries(COUNTRY_ALIASES)) {
+      const aliasPattern = aliases.map(escapeRegExp).join("|");
+      const patterns = [
+        new RegExp(`\\b(?:must\\s+be\\s+(?:a\\s+)?)?(?:${aliasPattern})\\s+(?:national|nationals|citizen|citizens)\\b`, "i"),
+        new RegExp(`\\bbased\\s+in\\s+(?:${aliasPattern})\\b`, "i"),
+        new RegExp(`\\bresiding\\s+in\\s+(?:${aliasPattern})\\b`, "i"),
+        new RegExp(`\\bopen\\s+(?:only\\s+)?to\\s+(?:${aliasPattern})\\s+(?:nationals|citizens|applicants|candidates)\\b`, "i"),
+        new RegExp(`\\b(?:${aliasPattern})\\s+(?:candidates|applicants)\\s+only\\b`, "i"),
+        new RegExp(`\\b(?:${aliasPattern})\\s+only\\b`, "i"),
+      ];
+      if (patterns.some((re) => re.test(combined))) return country;
+    }
+  }
+
+  // Fallback — use the structured job.location field most postings already have
+//   if (!isOpenToAll) {
+//     const fromLocation = normalizeToCountry(job.location);
+//     if (fromLocation) return fromLocation;
+//   }
+
+//   return null;
+// };
+// Fallback — use the structured job.location field, or extract it from the
+  // description header block when the location field itself is empty.
+  if (!isOpenToAll) {
+    const structuredLocation = extractLocationFromDescription(job.description) || job.location;
+    const fromLocation = normalizeToCountry(structuredLocation);
+    if (fromLocation) return fromLocation;
+}
+
+  return null;
+};
 // ─── Estimate total years of experience from workExperience array ─────────────
 const estimateTotalExperience = (workExperience = []) => {
   let total = 0;
@@ -1105,34 +1302,184 @@ const estimateTotalExperience = (workExperience = []) => {
   return Math.round(total * 10) / 10;
 };
 
-// ─── Education rank map ───────────────────────────────────────────────────────
-const EDU_RANK = { certificate: 1, diploma: 2, bachelors: 3, masters: 4, phd: 5 };
+// ─── Education rank map (matches your real EDUCATION_ENUM values) ─────────
+const EDU_LEVEL_RANK = {
+  "Certificate": 1,
+  "Professional Certificate": 1,
+  "Diploma": 2,
+  "Associate's Degree": 2,
+  "Postgraduate Diploma": 3,
+  "Bachelor's Degree": 3,
+  "Master's Degree": 4,
+  "Doctorate(PhD)": 5,
+};
+
+const REQUIRED_EDU_RANK = {
+  certificate: 1,
+  diploma: 2,
+  bachelors: 3,
+  masters: 4,
+  phd: 5,
+};
 
 const rankApplicantEdu = (profile = {}) => {
-  // Primary: education array saved by Edit Education modal
-  const eduArray = profile?.education || profile?.educationHistory || [];
-  if (Array.isArray(eduArray) && eduArray.length > 0) {
-    let highest = 0;
-    for (const entry of eduArray) {
-      const level = (
-        entry.academicLevel || entry.level || entry.qualification || entry.degree || ""
-      ).toLowerCase();
-      if      (/phd|doctorate|doctoral/.test(level))              highest = Math.max(highest, EDU_RANK.phd);
-      else if (/master|mba|msc|m\.sc|postgrad/.test(level))       highest = Math.max(highest, EDU_RANK.masters);
-      else if (/bachelor|bsc|b\.sc|degree|undergraduate/.test(level)) highest = Math.max(highest, EDU_RANK.bachelors);
-      else if (/diploma|hnd|higher national/.test(level))         highest = Math.max(highest, EDU_RANK.diploma);
-      else if (/certificate/.test(level))                         highest = Math.max(highest, EDU_RANK.certificate);
+  const entries = Array.isArray(profile?.academicLevel) ? profile.academicLevel : [];
+  let highestRank = 0;
+  let highestLabel = null;
+
+  for (const entry of entries) {
+    const rank = EDU_LEVEL_RANK[entry?.level] || 0;
+    if (rank > highestRank) {
+      highestRank = rank;
+      highestLabel = entry.level;
     }
-    if (highest > 0) return Object.keys(EDU_RANK).find((k) => EDU_RANK[k] === highest) || null;
   }
-  // Fallback: legacy highestEducationLevel string
-  const s = (profile?.highestEducationLevel || "").toLowerCase();
-  if (/phd|doctorate|doctoral/.test(s))               return "phd";
-  if (/master|mba|msc|m\.sc|postgraduate/.test(s))    return "masters";
-  if (/bachelor|bsc|b\.sc|degree|undergraduate/.test(s)) return "bachelors";
-  if (/diploma|hnd/.test(s))                          return "diploma";
-  if (/certificate/.test(s))                          return "certificate";
+
+  if (highestRank === 0 && profile?.highestEducationLevel) {
+    const rank = EDU_LEVEL_RANK[profile.highestEducationLevel] || 0;
+    if (rank > 0) { highestRank = rank; highestLabel = profile.highestEducationLevel; }
+  }
+
+  return { rank: highestRank, label: highestLabel };
+};
+
+// // ─── Field of study ─────────────────────────────────────────────────────────
+// const applicantFieldsOfStudy = (profile = {}) => {
+//   const entries = Array.isArray(profile?.academicLevel) ? profile.academicLevel : [];
+//   return entries.map(e => (e.courseName || "").toLowerCase()).filter(Boolean);
+// };
+
+// ─── Field of study ─────────────────────────────────────────────────────────
+const applicantFieldsOfStudy = (profile = {}) => {
+  const entries = Array.isArray(profile?.academicLevel) ? profile.academicLevel : [];
+  const courseNames = entries.map(e => (e.courseName || "").toLowerCase()).filter(Boolean);
+
+  // Also consider the applicant's stated specialization (Professional Details
+  // section) — someone with a B.Comp degree but a "Human Resource Management"
+  // specialization should still match a job asking for a related field.
+  const specializations = Array.isArray(profile?.specialization)
+    ? profile.specialization.map(s => String(s).toLowerCase())
+    : profile?.specialization
+      ? [String(profile.specialization).toLowerCase()]
+      : [];
+
+  return [...courseNames, ...specializations].filter(Boolean);
+};
+
+const extractFieldOfStudyRequirement = (job) => {
+  const text = htmlToPlainForJobDescription(job.description || "");
+  const lines = text.split(/\n/);
+  const isOptionalLine = (line) =>
+    /\b(added?\s+advantage|preferred?|desirable|bonus|plus|beneficial|an?\s+asset|ideal(?:ly)?|nice\s+to\s+have)\b/i.test(line);
+  const pattern = /degree\s+in\s+([^.;\n]+?)(?:,?\s*or\s+a?\s*related\s+field)?[.;\n]/i;
+
+  for (const line of lines) {
+    if (isOptionalLine(line)) continue;
+    const m = line.match(pattern);
+    if (m) {
+      const fields = m[1]
+        .split(/,|\band\b|\bor\b/i)
+        .map(f => f.trim().toLowerCase())
+        .filter(f => f.length > 2 && f.length < 40);
+      if (fields.length) return fields;
+    }
+  }
   return null;
+};
+
+const matchesFieldOfStudy = (requiredFields, applicantFields) => {
+  if (!requiredFields || requiredFields.length === 0) return true;
+  if (applicantFields.length === 0) return false;
+  return requiredFields.some(req => applicantFields.some(af => af.includes(req) || req.includes(af)));
+};
+
+// ─── Certifications — generic, field-agnostic extraction ──────────────────
+// Instead of a fixed whitelist, this pulls out whatever certification name
+// is actually mandated in the JD text (works for HR, IT, finance, engineering,
+// anything), then fuzzy-matches it against the applicant's own Professional
+// Qualifications & Memberships entries — never a hardcoded list.
+
+const isOptionalCertLine = (line) =>
+  /\b(highly\s+preferred|preferred?|added?\s+advantage|desirable|bonus|an?\s+asset|nice\s+to\s+have)\b/i.test(line);
+const isMandatoryCertLine = (line) =>
+  /\b(must\s+(?:hold|have|possess|be)|required\s+to\s+hold|requires?|mandatory|essential)\b/i.test(line);
+
+// Short acronyms that sometimes appear bare, without the word
+// "certification" next to them (e.g. a bullet that just says "PMP" or "CCNA").
+// This is a helper hint list, not a restriction — anything else is still
+// caught by the generic patterns below.
+const KNOWN_CERT_ACRONYMS = [
+  "cfa", "cifa", "acca", "cpa", "cim", "frm", "cima", "pmp",
+  "chrp-k", "chrp", "ccna", "ccnp", "aws", "csm", "prince2",
+  "comptia", "cissp", "itil", "pmi-acp",
+];
+
+const extractRequiredCertifications = (job) => {
+  const rawText = htmlToPlainForJobDescription(job.description || "");
+  const lines = rawText.split(/\n/);
+  const required = new Set();
+
+  // Generic capture patterns — match the certification NAME itself, not a
+  // fixed list of acronyms, so any field's mandatory cert gets picked up.
+  const NAME_PATTERNS = [
+    // "must have/hold/possess a X certification/credential/designation"
+    /(?:must\s+(?:have|hold|possess)|required\s+to\s+hold|requires?)\s+(?:a|an|the)?\s*([A-Za-z][A-Za-z0-9\-+.&\s]{1,60}?)\s+(?:certification|certificate|credential|designation)\b/i,
+    // "X certification is mandatory/required/essential"
+    /\b([A-Za-z][A-Za-z0-9\-+.&\s]{1,60}?)\s+(?:certification|certificate|credential|designation)\s+(?:is|are)?\s*(?:mandatory|required|essential)\b/i,
+    // "Certified X (ABC)" — captures either the acronym or the full name
+    /\bcertified\s+([A-Za-z][A-Za-z0-9\-+.&\s]{1,50}?)(?:\s+\(([A-Za-z0-9-]{2,10})\))?[.,;\n]/i,
+  ];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    if (!isMandatoryCertLine(line)) continue;     // only enforce mandatory lines
+    if (isOptionalCertLine(line)) continue;        // "preferred/advantage" wording wins if present
+
+    for (const pattern of NAME_PATTERNS) {
+      const match = line.match(pattern);
+      if (match) {
+        const captured = (match[2] || match[1] || "").trim().toLowerCase();
+        if (captured && captured.length >= 2 && captured.length <= 60) {
+          required.add(captured);
+        }
+      }
+    }
+
+    // Acronym in parentheses anywhere on a mandatory line, e.g. "(CHRP-K)"
+    const parenMatches = [...line.matchAll(/\(([A-Z]{2,8}(?:-[A-Za-z0-9]+)?)\)/g)];
+    parenMatches.forEach(m => required.add(m[1].toLowerCase()));
+
+    // Bare known-acronym fallback (covers short forms with no "certification" wording)
+    for (const acronym of KNOWN_CERT_ACRONYMS) {
+      const re = new RegExp(`\\b${acronym.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+      if (re.test(line)) required.add(acronym);
+    }
+  }
+
+  return required.size > 0 ? [...required] : null;
+};
+
+const applicantCertifications = (profile = {}) => {
+  const quals = Array.isArray(profile?.professionalQualifications) ? profile.professionalQualifications : [];
+  const memberships = Array.isArray(profile?.professionalMemberships) ? profile.professionalMemberships : [];
+  return [
+    ...quals.map(q => (q.name || "").toLowerCase()),
+    ...memberships.map(m => (m.organization || "").toLowerCase()),
+  ].filter(Boolean);
+};
+
+// Fuzzy match — exact substring either direction, or significant word overlap,
+// so formatting differences ("AWS Certified Solutions Architect" vs
+// "AWS Certified Solutions Architect - Associate") don't cause false negatives.
+const certMatches = (required, held) => {
+  if (!required || !held) return false;
+  if (held.includes(required) || required.includes(held)) return true;
+  const reqWords = required.split(/\s+/).filter(w => w.length > 2);
+  const heldWords = held.split(/\s+/).filter(w => w.length > 2);
+  if (reqWords.length === 0) return false;
+  const overlap = reqWords.filter(w => heldWords.includes(w));
+  return overlap.length >= Math.max(1, Math.ceil(reqWords.length * 0.5));
 };
 
 // ─── Generic qualification checker — returns array of reason strings ──────────
@@ -1158,28 +1505,86 @@ const checkJobQualification = (job, profile) => {
     }
   }
 
-  // Education check
+// Education check
   if (requiredEdu) {
-    const applicantEduKey = rankApplicantEdu(profile);
-    const requiredRank    = EDU_RANK[requiredEdu];
-    const applicantRank   = applicantEduKey ? EDU_RANK[applicantEduKey] : 0;
+    const requiredRank = REQUIRED_EDU_RANK[requiredEdu];
+    const { rank: applicantRank, label: applicantLabel } = rankApplicantEdu(profile);
 
     if (applicantRank < requiredRank) {
       const eduLabels = {
-        phd:         "a PhD / Doctoral degree",
-        masters:     "a Master's degree or MBA",
-        bachelors:   "a Bachelor's degree",
-        diploma:     "a Higher National Diploma (HND) or equivalent",
+        phd: "a PhD / Doctoral degree",
+        masters: "a Master's degree",
+        bachelors: "a Bachelor's degree",
+        diploma: "a Diploma or equivalent",
         certificate: "a relevant certificate",
       };
-      const applicantLabel = applicantEduKey
-        ? `Your highest recorded qualification is ${eduLabels[applicantEduKey]}, which does not meet this requirement.`
-        : "We could not find a recognised education level on your profile. Please update your Education section.";
-
       reasons.push({
         icon: "🎓",
         title: "Education Requirement Not Met",
-        body: `This role requires ${eduLabels[requiredEdu]}. ${applicantLabel}`,
+        body: `This role requires ${eduLabels[requiredEdu]}. ` +
+          (applicantLabel
+            ? `Your highest recorded qualification is "${applicantLabel}", which does not meet this requirement.`
+            : `We could not find a recognised education level on your profile. Please update your Education section.`),
+      });
+    }
+  }
+
+  // Field of study check
+  const requiredFields = extractFieldOfStudyRequirement(job);
+  if (requiredFields) {
+    const appliedFields = applicantFieldsOfStudy(profile);
+    if (!matchesFieldOfStudy(requiredFields, appliedFields)) {
+      reasons.push({
+        icon: "📚",
+        title: "Field of Study Not Met",
+        body:
+          `This role requires a degree in one of: ${requiredFields.join(", ")}. ` +
+          (appliedFields.length
+            ? `Your recorded course(s) (${appliedFields.join(", ")}) does not appear to match.`
+            : `We couldn't find a course/field of study on your profile — please update your Education section.`),
+      });
+    }
+  }
+
+   // Certification check
+  const requiredCerts = extractRequiredCertifications(job);
+  if (requiredCerts) {
+    const held = applicantCertifications(profile);
+    const hasMatch = requiredCerts.some(rc => held.some(h => certMatches(rc, h)));
+    if (!hasMatch) {
+      reasons.push({
+        icon: "📜",
+        title: "Certification Requirement Not Met",
+        body: `This role requires holding: ${requiredCerts.join(", ").toUpperCase()}. ` +
+          `We couldn't find a matching qualification or membership on your profile.`,
+      });
+    }
+  }
+
+  // ── Country / nationality check ──────────────────────────────────────────
+  const requiredCountry = extractJobCountryRequirement(job);
+  console.log("[country-check]", {
+    jobTitle: job.title,
+    jobLocationField: job.location,
+    descriptionLocation: extractLocationFromDescription(job.description),
+    requiredCountry,
+    profileNationality: profile?.nationality,
+    profileLocation: profile?.location,
+    homeCounty: profile?.homeCounty,
+  });
+  if (requiredCountry) {
+    const applicantCountry =
+      normalizeToCountry(profile?.nationality) ||
+      normalizeToCountry(profile?.location) ||
+      (profile?.homeCounty ? "Kenya" : null); // homeCounty field implies Kenya
+
+    if (applicantCountry && applicantCountry !== requiredCountry) {
+      reasons.push({
+        icon: "🌍",
+        title: "Location / Nationality Requirement Not Met",
+        body:
+          `This role requires candidates who are ${requiredCountry} nationals or based in ${requiredCountry}. ` +
+          `Your profile indicates you are from/based in ${applicantCountry}, which does not match this requirement.`,
       });
     }
   }
@@ -1274,17 +1679,55 @@ setTimeout(() => {
     setApplying(false);
   }
 };
-  return (
+ return (
     <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", gap: 24 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap');
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}
         @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
         .job-section { transition: margin-right 0.3s ease; }
+
+        @media (max-width: 768px) {
+          .dash-banner {
+            flex-direction: column !important;
+            padding: 20px !important;
+            gap: 16px !important;
+            align-items: flex-start !important;
+          }
+          .dash-banner-btn {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 12px !important;
+          }
+          .dash-quick-links {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+          }
+          .job-card-footer {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .job-card-footer > div {
+            justify-content: space-between !important;
+            width: 100% !important;
+          }
+          .job-card-footer button:last-child {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dash-quick-links {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+          }
+        }
       `}</style>
 
       {/* ── Welcome banner ── */}
-      <div style={{
+      <div className="dash-banner" style={{
         background: "linear-gradient(135deg, #1054b8 0%, #1a6edb 40%, #4f46e5 100%)",
         borderRadius: 18, padding: "26px 32px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1302,7 +1745,7 @@ setTimeout(() => {
               : `${filteredJobs.length} job${filteredJobs.length !== 1 ? "s" : ""} available — apply instantly using your saved profile & CV.`}
           </div>
         </div>
-       <button
+       <button className="dash-banner-btn" 
           onClick={() => {
             const missing = checkProfileMissing(profile);
             if (missing.length > 0) {
@@ -1378,10 +1821,10 @@ setTimeout(() => {
       {/* ── Quick Links ── */}
       <div>
         <div style={{ fontSize: 11, fontWeight: 700, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>Quick Links</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
+        <div  className="dash-quick-links" style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
           <QuickLink icon={Ico.profile} label="My Profile"   desc="View & edit details"      color="#1a6edb" bg="#e8f1fd"  onClick={() => onNav("profile")} />
           <QuickLink icon={Ico.cv}      label="Uploaded CV"  desc="Manage your CV file"      color="#7c3aed" bg="#ede9fe"  onClick={() => onNav("cv")} />
-          <QuickLink icon={Ico.apply}   label="Quick Apply"  desc="1-click applications"     color="#f26722" bg="#fff0e8"  onClick={onQuickApply} />
+          {/* <QuickLink icon={Ico.apply}   label="Quick Apply"  desc="1-click applications"     color="#f26722" bg="#fff0e8"  onClick={onQuickApply} /> */}
           <QuickLink icon={Ico.apps}    label="Applications" desc="Track your submissions"   color="#0d9488" bg="#ccfbf1"  onClick={() => onNav("applications")} badge="" />
           {/* Saved Jobs quick link — shows count badge when jobs are saved */}
           <QuickLink

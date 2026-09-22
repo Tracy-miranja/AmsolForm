@@ -3110,9 +3110,9 @@ const ProfessionalModal = ({ qualifications, memberships, onClose, onSave, savin
   try {
     const fd = new FormData();
     fd.append("certificate", file);
-    fd.append("name", qual.name || file.name);          // ← add this
-    fd.append("institution", qual.institution || "");   // ← add this
-    fd.append("dateObtained", qual.dateObtained || ""); // ← add this
+    fd.append("name", qual.name || file.name);          
+    fd.append("institution", qual.institution || "");   
+    fd.append("dateObtained", qual.dateObtained || "");
 
     const { data } = await api.post(`${API}/certificates`, fd, {
   headers: { "Content-Type": "multipart/form-data" },
@@ -3686,11 +3686,12 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
 
     const academicLevel = newEdu.map((e) => ({
       level: e.academicLevel || "",
-      courseName: e.degree || e.courseName || "",
+      // courseName: e.degree || e.courseName || "",
+            courseName: e.courseName || e.degree || "",
       institution: e.institution || "",
       startDate: e.dateStart ? new Date(e.dateStart) : null,
       endDate: e.currentlyStudying ? null : (e.dateEnd ? new Date(e.dateEnd) : null),
-      certificateFileId: e.certificateFileId || null,  // ← ADD THIS
+      certificateFileId: e.certificateFileId || null, 
     }));
 
     const merged = { ...form, academicLevel };
@@ -5376,6 +5377,21 @@ span.flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
   .completion-card { flex-direction: column !important; gap: 14px !important; }
   .bottom-nav { display: flex; justify-content: space-around; align-items: center; }
   .sidebar-overlay.open { display: block; }
+   .sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    max-width: 80vw;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 8px 0 24px rgba(0,0,0,0.15);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
   .modal-sheet {
     max-width: 100% !important;
     max-height: 92vh !important;
