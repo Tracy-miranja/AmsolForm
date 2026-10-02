@@ -23,6 +23,7 @@ import UserDashbaord from "./userdashboard/userDashboard";
 import Application from "./userdashboard/Application";
 import UserProfileDashboard from "./Userprofiledashboard";
 import { JobProvider } from "./JobContext";
+import EmployerLandingPage from "./employerlandingpage";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -43,7 +44,7 @@ const App = () => {
 
   const handleLoginSuccess = () => {
     toast.success("Login successful!");
-    setIsLoggedIn(true); // Set state to logged in
+    setIsLoggedIn(true); 
   };
 
   const handleLoginError = () => {
@@ -111,6 +112,9 @@ const App = () => {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/employerlandingpage"
+            element={<EmployerLandingPage />} />
           <Route
             path="/profile-details"
             element={

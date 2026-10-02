@@ -1,12 +1,10 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import api from "../api/axiosInstance";
 import { JobContext } from "./JobContext";
 import FormLayout from "./Formlayout";
 
 const API = "/api";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Decode ALL HTML entities using the browser's own parser */
 const decodeHtmlEntities = (str) => {
@@ -1067,11 +1065,16 @@ const [disqualifyMessage, setDisqualifyMessage] = useState("");
   const missingSummary = !profile?.specialization;
   const firstName      = profile?.firstName || "there";
 
-  // const openApply = (job) => {
-  //   setApplyModal({ job });
-  //   setApplyError("");
-  //   setApplySuccess(false);
-  // };
+ // Open the job the visitor clicked on the landing page
+useEffect(() => {
+  if (jobsLoading || jobs.length === 0) return;
+  const pendingId = sessionStorage.getItem("pendingJobId");
+  if (!pendingId) return;
+  sessionStorage.removeItem("pendingJobId");
+  const job = jobs.find((j) => String(j.id) === pendingId);
+  if (job) setSelectedJob(job);
+}, [jobs, jobsLoading]);
+
 // ─── Experience extraction helper ────────────────────────────────────────────
 const extractJobRequirements = (job) => {
   const text = htmlToPlainForJobDescription(job.description || "").toLowerCase();
