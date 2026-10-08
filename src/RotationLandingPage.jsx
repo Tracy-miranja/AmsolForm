@@ -1,49 +1,16 @@
 import React, { useState, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "./assets/amsolJobVacancies.png";
-import { FaBars, FaTimes, FaChevronDown, FaSearch, FaArrowRight, FaMapMarkerAlt } from "react-icons/fa";
+import { FaTimes, FaSearch, FaArrowRight, FaMapMarkerAlt } from "react-icons/fa";
 import candidateImage from "./assets/candidate.jpg";
 import employerImage from "./assets/employer.jpg";
 import { JobContext } from "./JobContext";
 import Cookies from "js-cookie";
 import HeroSection from "./HeroSection";
+import Navbar from "./navbar";
+import Footer from "./Footer";
+import ChatWidget from "./Chatwidget";
 
 const TRUSTED_BY = ["kholer", "Navitas", "Shofco", "Surge", "Nutanix", "Arbor"];
-
-const NAV_LINKS = [
-  {
-    label: "For job seekers",
-    to: "/Jobs",
-    items: [
-      { title: "Find jobs", desc: "Explore local & global opportunities", to: "/profile" },
-      { title: "Career guide", desc: "Guides & articles to advance your career", to: "/blog" },
-      { title: "Learn new skills", desc: "Stay relevant by taking our courses", to: "/courses" },
-      { title: "Remote work", desc: "Work with companies around the world", to: "/remote" },
-    ],
-  },
-  {
-    label: "For employers",
-    to: "/employerlandingpage",
-    items: [
-      { title: "Hire with Amsol", desc: "Recruit better talent, faster — on your own or with support", to: "/employerlandingpage" },
-      { title: "Pricing", desc: "Choose the plan that fits your needs", to: "/pricing" },
-      { title: "Discover talent", desc: "Access a network of validated & vetted candidates", to: "/candidates" },
-    ],
-  },
-  {
-    label: "Forum",
-    to: "/forum",
-    items: [
-      { title: "Discussions", desc: "Talk shop with jobseekers and employers", to: "/forum" },
-      { title: "Announcements", desc: "Product news and platform updates", to: "/forum/announcements" },
-    ],
-  },
-];
-
-const ACCOUNT_TYPES = [
-  { title: "Job seeker", desc: "Browse and apply for jobs and more" },
-  { title: "Employer / Recruiter", desc: "Manage jobs, review applicants, headhunt talent" },
-];
 
 const COUNTRIES = [
   "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia",
@@ -108,11 +75,7 @@ const stripHtml = (html) => {
   return txt.value;
 };
 
-const RotationPandingPage = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [openMobileDropdown, setOpenMobileDropdown] = useState(null);
-  const closeTimer = useRef(null);
+const RotationLandingPage = () => {
   const navigate = useNavigate();
   const { jobs = [], loading: jobsLoading } = useContext(JobContext);
   const [loginPrompt, setLoginPrompt] = useState(null);
@@ -169,28 +132,10 @@ const RotationPandingPage = () => {
     navigate(isLoggedIn() ? DASHBOARD_ROUTE : "/auth?as=jobseeker");
   };
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  const handleEnter = (label) => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setOpenDropdown(label);
-  };
-
-  const handleLeave = () => {
-    closeTimer.current = setTimeout(() => setOpenDropdown(null), 150);
-  };
-
-  const toggleMobileDropdown = (label) => {
-    setOpenMobileDropdown(openMobileDropdown === label ? null : label);
-  };
-
-  const accountLink = (action, type) =>
-    action === "login" ? `/auth?as=${type}` : `/register?as=${type}`;
-
   return (
     <div className="amsol-page w-full bg-white text-slate-900 overflow-x-hidden">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 
         .amsol-page { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 
@@ -201,7 +146,6 @@ const RotationPandingPage = () => {
           .amsol-section { padding-top: 48px; padding-bottom: 48px; }
         }
 
-        /* Outer solid frame — dark blue, no gradient */
         .amsol-frame {
           background:
             radial-gradient(520px 340px at 66% 0%, #BFD5FF 0%, rgba(191,213,255,0) 70%),
@@ -214,29 +158,8 @@ const RotationPandingPage = () => {
           .amsol-frame { border-radius: 0 0 32px 32px; padding-bottom: 32px; }
         }
 
-        /* Pill nav */
-        .amsol-nav-pill { background: #ffffff; border: 1px solid #E4E9EF; border-radius: 999px; }
-        .amsol-nav-link { color: #1F2A38; font-weight: 600; }
-        .amsol-nav-link.is-active { color: #F2A93B; }
-        .amsol-dropdown { border-radius: 14px; box-shadow: 0 18px 36px -14px rgba(10, 20, 35, 0.35); }
-
         .amsol-btn-solid { background: #F2A93B; color: #16233A; }
         .amsol-btn-solid:hover { background: #E39C2E; }
-        .amsol-btn-outline { background: #ffffff; color: #16233A; border: 1.5px solid #E4E9EF; }
-        .amsol-btn-outline:hover { background: #F6F8FB; }
-
-        /* Mega-menu style dropdown: title + description rows */
-        .amsol-megamenu {
-          border-radius: 18px;
-          background: #ffffff;
-          box-shadow: 0 22px 44px -16px rgba(10, 20, 35, 0.35);
-          border: 1px solid #EEF1F5;
-          padding: 10px;
-        }
-        .amsol-megamenu-item { display: block; border-radius: 12px; padding: 12px 14px; transition: background 0.15s ease; }
-        .amsol-megamenu-item:hover { background: #F6F8FB; }
-        .amsol-megamenu-title { font-weight: 700; font-size: 14.5px; color: #0E2A4D; margin-bottom: 2px; }
-        .amsol-megamenu-desc { font-size: 13px; color: #6B7686; line-height: 1.4; }
 
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -245,7 +168,6 @@ const RotationPandingPage = () => {
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-row:hover .marquee-track { animation-play-state: paused; }
 
-        /* "Who are you looking for" cards */
         .amsol-role-card {
           border-radius: 24px;
           overflow: hidden;
@@ -278,7 +200,6 @@ const RotationPandingPage = () => {
         }
         .amsol-role-body { padding: 24px 24px 28px; }
 
-        /* Open-roles search row */
         .amsol-roles-search { background: #F6F8FB; border: 1px solid #E4E9EF; border-radius: 999px; }
         .amsol-roles-search input, .amsol-roles-search select { background: transparent; outline: none; color: #1F2A38; }
 
@@ -288,167 +209,13 @@ const RotationPandingPage = () => {
         }
       `}</style>
 
-      {/* Frame: solid dark blue wrapping navbar + hero */}
+      {/* Frame: sticky navbar + hero */}
       <div className="amsol-frame relative">
-        {/* Navbar */}
-        <div className="amsol-container pt-6">
-          <div className="flex items-center justify-between gap-4">
-            <Link to="/" className="shrink-0 rounded-xl px-2.5 py-1.5">
-              <img src={logo} alt="Amsol" className="w-[110px]" />
-            </Link>
-
-            <button onClick={toggleMenu} className="md:hidden text-2xl text-[#0F1B33] focus:outline-none">
-              {isMenuOpen ? <FaTimes /> : <FaBars />}
-            </button>
-
-            <nav className="amsol-nav-pill hidden md:flex items-center gap-1 px-3 py-2.5">
-              {NAV_LINKS.map((item, i) => (
-                <div
-                  key={item.label}
-                  className="relative"
-                  onMouseEnter={() => handleEnter(item.label)}
-                  onMouseLeave={handleLeave}
-                >
-                  <Link
-                    to={item.to}
-                    className={`amsol-nav-link flex items-center gap-1.5 px-4 py-2 rounded-full text-sm transition-colors ${
-                      i === 0 ? "is-active" : ""
-                    }`}
-                    onClick={(e) => {
-                      if (item.items?.length) e.preventDefault();
-                    }}
-                  >
-                    {item.label}
-                    <FaChevronDown
-                      className={`text-[10px] transition-transform ${
-                        openDropdown === item.label ? "rotate-180" : ""
-                      }`}
-                    />
-                  </Link>
-
-                  {item.items?.length > 0 && openDropdown === item.label && (
-                    <div className="amsol-dropdown absolute left-0 top-[calc(100%+10px)] bg-white min-w-[200px] py-2 z-50">
-                      {item.items.map((sub) => (
-                        <Link key={sub.title} to={sub.to} className="amsol-megamenu-item">
-                          <p className="amsol-megamenu-title">{sub.title}</p>
-                          <p className="amsol-megamenu-desc">{sub.desc}</p>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </nav>
-
-            <div className="hidden md:flex items-center gap-3 shrink-0">
-              {[
-                { key: "login", label: "Login", cls: "amsol-btn-outline px-5", action: "login" },
-                { key: "register", label: "Join now", cls: "amsol-btn-solid px-6", action: "register" },
-              ].map((b) => (
-                <div
-                  key={b.key}
-                  className="relative"
-                  onMouseEnter={() => handleEnter(b.key)}
-                  onMouseLeave={handleLeave}
-                >
-                  <button className={`${b.cls} font-bold py-2.5 rounded-full text-sm flex items-center gap-1.5 transition-colors`}>
-                    {b.label}
-                    <FaChevronDown
-                      className={`text-[10px] transition-transform ${openDropdown === b.key ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {openDropdown === b.key && (
-                    <div className="amsol-megamenu absolute right-0 top-[calc(100%+10px)] w-[280px] z-50">
-                      {ACCOUNT_TYPES.map((acc) => (
-                        <Link
-                          key={acc.title}
-                          to={accountLink(b.action, acc.title === "Job seeker" ? "jobseeker" : "employer")}
-                          className="amsol-megamenu-item"
-                        >
-                          <p className="amsol-megamenu-title">{acc.title}</p>
-                          <p className="amsol-megamenu-desc">{acc.desc}</p>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden fixed inset-0 bg-white z-50 p-6 space-y-2 overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <img src={logo} alt="Amsol" className="w-[100px]" />
-              <button onClick={toggleMenu} className="text-2xl">
-                <FaTimes />
-              </button>
-            </div>
-
-            {NAV_LINKS.map((item) => (
-              <div key={item.label} className="border-b border-slate-100 pb-2">
-                <button
-                  onClick={() => toggleMobileDropdown(item.label)}
-                  className="w-full flex items-center justify-between text-[#0E2A4D] font-semibold py-3"
-                >
-                  {item.label}
-                  <FaChevronDown
-                    className={`text-xs transition-transform ${openMobileDropdown === item.label ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {openMobileDropdown === item.label && (
-                  <div className="pl-1 pb-2 space-y-1">
-                    {item.items.map((sub) => (
-                      <Link key={sub.title} to={sub.to} onClick={toggleMenu} className="block px-3 py-2 rounded-lg hover:bg-slate-50">
-                        <p className="text-slate-900 font-semibold text-sm">{sub.title}</p>
-                        <p className="text-slate-500 text-xs mt-0.5">{sub.desc}</p>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {[
-              { key: "login", label: "Login", border: true },
-              { key: "register", label: "Join now", border: false },
-            ].map((b) => (
-              <div key={b.key} className={b.border ? "border-b border-slate-100 pb-2" : ""}>
-                <button
-                  onClick={() => toggleMobileDropdown(b.key)}
-                  className="w-full flex items-center justify-between text-[#0E2A4D] font-semibold py-3"
-                >
-                  {b.label}
-                  <FaChevronDown
-                    className={`text-xs transition-transform ${openMobileDropdown === b.key ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {openMobileDropdown === b.key && (
-                  <div className="pl-1 pb-2 space-y-1">
-                    {ACCOUNT_TYPES.map((acc) => (
-                      <Link
-                        key={acc.title}
-                        to={accountLink(b.key, acc.title === "Job seeker" ? "jobseeker" : "employer")}
-                        onClick={toggleMenu}
-                        className="block px-3 py-2 rounded-lg hover:bg-slate-50"
-                      >
-                        <p className="text-slate-900 font-semibold text-sm">{acc.title}</p>
-                        <p className="text-slate-500 text-xs mt-0.5">{acc.desc}</p>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        <Navbar activeIndex={0} />
 
         {/* HERO */}
         <HeroSection />
       </div>
-      {/* /amsol-frame */}
 
       {/* Trusted-by sliding carousel */}
       <section className="marquee-row py-8 border-b border-slate-100 overflow-hidden">
@@ -488,7 +255,7 @@ const RotationPandingPage = () => {
             </button>
           </div>
 
-          {/* Search (moved here from the old hero) */}
+          {/* Search */}
           <form
             onSubmit={handleSearch}
             className="amsol-roles-search flex flex-col sm:flex-row items-stretch sm:items-center gap-1 px-2 py-2 mb-8 max-w-3xl"
@@ -670,15 +437,8 @@ const RotationPandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-100 py-8">
-        <div className="amsol-container flex flex-col md:flex-row items-center justify-between gap-4">
-          <img src={logo} alt="Amsol" className="w-[90px]" />
-          <p className="text-sm text-slate-400 text-center">
-            © {new Date().getFullYear()} Amsol · Staffing & HR solutions built for the next generation of work.
-          </p>
-        </div>
-      </footer>
+      <Footer />
+      <ChatWidget />
 
       {loginPrompt && (
         <div
@@ -695,7 +455,7 @@ const RotationPandingPage = () => {
                     : "Log in to browse more jobs."}
                 </p>
               </div>
-              <button onClick={() => setLoginPrompt(null)} className="text-slate-400 hover:text-slate-700">
+              <button onClick={() => setLoginPrompt(null)} className="text-slate-400 hover:text-slate-700" aria-label="Close">
                 <FaTimes />
               </button>
             </div>
@@ -721,4 +481,4 @@ const RotationPandingPage = () => {
   );
 };
 
-export default RotationPandingPage;
+export default RotationLandingPage;

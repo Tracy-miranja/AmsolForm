@@ -24,6 +24,9 @@ import Application from "./userdashboard/Application";
 import UserProfileDashboard from "./Userprofiledashboard";
 import { JobProvider } from "./JobContext";
 import EmployerLandingPage from "./employerlandingpage";
+import PricingPage from "./PricingPage";
+import CareerGuidePage from "./CareerGuidePage";
+import CoursesPage from "./CoursesPage";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -69,6 +72,8 @@ const App = () => {
               />
             }
           />
+          <Route path="/blog" element={<CareerGuidePage />} />
+<Route path="/courses" element={<CoursesPage />} />
           <Route path="/applications" element={<Application/>}/>
           <Route path="/profile" element={<UserProfileDashboard />} />
           <Route path="/dashboard" element={<UserDashbaord />} />
@@ -76,6 +81,7 @@ const App = () => {
           <Route path="/forgetPassword" element={<ForgetPassword />} />
           <Route path="/forgetPrompt" element={<ForgetPrompt />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/Profilepage" element={<Profilepage />} />
           <Route path="/Jobs" element={<JobPage />} />
 
