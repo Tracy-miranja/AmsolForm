@@ -27,7 +27,7 @@ const JobPage = () => {
   const [location, setLocation] = useState("");
 
   const fetchJobs = () => {
-    const apiUrl = "https://amsol-api-production.up.railway.app/api/jobs";
+    const apiUrl = "http://localhost:5000api/jobs";
   
     fetch(apiUrl)
       .then((response) => {

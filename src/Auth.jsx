@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useUser } from "./Context/UserContext";
 import Cookies from "js-cookie";
 import { Toaster, toast } from "react-hot-toast";
@@ -26,6 +26,21 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
   const [guidanceLoading, setGuidanceLoading] = useState(false);
   const { setUserId, setToken } = useUser();
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+useEffect(() => {
+  const err = searchParams.get("error");
+  if (!err) return;
+  const messages = {
+    google_cancelled: "Google sign-in was cancelled.",
+    google_state: "Google sign-in expired. Please try again.",
+    google_email_unverified: "Your Google email isn't verified.",
+    account_suspended: "This account is suspended.",
+    google_failed: "Google sign-in failed. Please try again.",
+  };
+  toast.error(messages[err] || "Sign-in failed.");
+}, [searchParams]);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -57,10 +72,12 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
       setToken(data.token);
 
       if (data.role === "nurse") {
-        navigate("/NurseForm");
-      } else {
-        navigate("/profile");
-      }
+  navigate("/NurseForm");
+} else if (data.role === "employer") {
+  navigate("/profile"); // change this to your employer page
+} else {
+  navigate("/profile");
+}
 
       if (typeof onSuccess === "function") onSuccess();
     } catch (error) {
@@ -78,10 +95,12 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
   };
 
   // Placeholder — wire up to your real OAuth flow when the backend endpoint exists.
-  const handleGoogleAuth = () => {
-    toast("Google sign-in isn't connected yet.", { icon: "" });
-  };
-
+const handleGoogleAuth = () => {
+  const backend = import.meta.env.DEV
+    ? "http://localhost:5001"
+    : api.defaults.baseURL || "";
+  window.location.href = `${backend}/api/auth/google`;
+};
   // Placeholder guidance — swap this for a real call to your support/AI backend,
   // sending helpMessage and returning steps tailored to what the person typed.
   const handleGetGuidance = () => {
@@ -254,8 +273,9 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
                     required
                     className="w-full rounded-lg border border-[#DDD6C7] bg-white px-4 py-2.5 text-[#1C2321] focus:outline-none focus:ring-2 focus:ring-[#E3A857]/60 focus:border-[#E3A857]"
                   >
-                    <option value="nurse">Nurse</option>
-                    <option value="job applicant">Other roles</option>
+                    <option value="nurse">Employee: Nurse</option>
+<option value="job applicant">Employee: Other roles</option>
+<option value="employer">Employer</option>
                   </select>
                 </div>
               </>

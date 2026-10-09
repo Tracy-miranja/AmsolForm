@@ -27,6 +27,8 @@ import EmployerLandingPage from "./employerlandingpage";
 import PricingPage from "./PricingPage";
 import CareerGuidePage from "./CareerGuidePage";
 import CoursesPage from "./CoursesPage";
+import GoogleSuccess from "./GoogleSuccess";
+import ChooseRole from "./ChooseRole";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -84,6 +86,8 @@ const App = () => {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/Profilepage" element={<Profilepage />} />
           <Route path="/Jobs" element={<JobPage />} />
+          <Route path="/auth/google/success" element={<GoogleSuccess />} />
+<Route path="/choose-role" element={<ChooseRole />} />
 
           {/* Private Routes */}
           <Route

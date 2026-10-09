@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   
-baseURL: import.meta.env.VITE_API_URL || "https://amsol-api-production.up.railway.app",
+baseURL: import.meta.env.DEV ? "http://localhost:5001" : "https://amsol-api-production.up.railway.app",
   withCredentials: true, 
 });
 

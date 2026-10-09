@@ -190,7 +190,6 @@ const CareerGuidePage = () => {
           </div>
         </div>
       </div>
-
       <Footer />
       <ChatWidget />
     </div>
