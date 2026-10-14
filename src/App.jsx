@@ -18,7 +18,7 @@ import Register from "./Register";
 import Profile from "./userProfile";
 import NurseForm from "./NurseForm";
 import Profilepage from "./userdashboard/ProfilePage"
-import JobPage from "./job";
+import Job from "./job";
 import UserDashbaord from "./userdashboard/userDashboard";
 import Application from "./userdashboard/Application";
 import UserProfileDashboard from "./Userprofiledashboard";
@@ -29,6 +29,9 @@ import CareerGuidePage from "./CareerGuidePage";
 import CoursesPage from "./CoursesPage";
 import GoogleSuccess from "./GoogleSuccess";
 import ChooseRole from "./ChooseRole";
+import Discussions from "./Discussions";
+import Announcements from "./Forum";
+import RemoteJobs from "./RemoteJobs";
 
 const PrivateRoute = ({ isAuthenticated, children }) => {
   return isAuthenticated ? children : <Navigate to="/auth" replace />;
@@ -85,9 +88,12 @@ const App = () => {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/Profilepage" element={<Profilepage />} />
-          <Route path="/Jobs" element={<JobPage />} />
+          <Route path="/Jobs" element={<Job />} />
           <Route path="/auth/google/success" element={<GoogleSuccess />} />
 <Route path="/choose-role" element={<ChooseRole />} />
+<Route path="/forum/discussions" element={<Discussions />} />
+<Route path="/forum/announcements" element={<Announcements />} />
+<Route path="/remote-jobs" element={<RemoteJobs />} />
 
           {/* Private Routes */}
           <Route
@@ -99,10 +105,10 @@ const App = () => {
             }
           />
           <Route
-            path="/update-profile"
+            path="/profile"
             element={
               <PrivateRoute isAuthenticated={isLoggedIn}>
-                <ProfilePage />
+                <UserProfileDashboard />
               </PrivateRoute>
             }
           />

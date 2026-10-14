@@ -167,6 +167,10 @@ const RotationLandingPage = () => {
         }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-row:hover .marquee-track { animation-play-state: paused; }
+        .marquee-row {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
 
         .amsol-role-card {
           border-radius: 24px;
@@ -204,9 +208,15 @@ const RotationLandingPage = () => {
         .amsol-roles-search input, .amsol-roles-search select { background: transparent; outline: none; color: #1F2A38; }
 
         @media (prefers-reduced-motion: reduce) {
-          .marquee-track { animation: none; }
-          .amsol-role-card, .amsol-role-photo img { transition: none; }
-        }
+  .marquee-track {
+    animation: none;
+    width: 100% !important;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .marquee-track span[aria-hidden="true"] { display: none; }
+  .amsol-role-card, .amsol-role-photo img { transition: none; }
+}
       `}</style>
 
       {/* Frame: sticky navbar + hero */}
@@ -217,16 +227,22 @@ const RotationLandingPage = () => {
         <HeroSection />
       </div>
 
-      {/* Trusted-by sliding carousel */}
-      <section className="marquee-row py-8 border-b border-slate-100 overflow-hidden">
-        <div className="marquee-track flex items-center gap-16 w-max">
-          {[...TRUSTED_BY, ...TRUSTED_BY].map((name, i) => (
-            <span key={`${name}-${i}`} className="text-slate-400 font-semibold text-base whitespace-nowrap">
-              {name}
-            </span>
-          ))}
-        </div>
-      </section>
+{/* Trusted-by sliding carousel */}
+<section className="border-b border-slate-100 py-8">
+  <div className="amsol-container marquee-row overflow-hidden">
+    <div className="marquee-track flex w-max items-center">
+      {[...TRUSTED_BY, ...TRUSTED_BY].map((name, i) => (
+        <span
+          key={`${name}-${i}`}
+          aria-hidden={i >= TRUSTED_BY.length}
+          className="px-8 text-slate-400 font-semibold text-base whitespace-nowrap"
+        >
+          {name}
+        </span>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* Open roles */}
       <section ref={openRolesRef} className="amsol-section bg-white">

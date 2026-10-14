@@ -5,16 +5,16 @@ import logo from "./assets/amsolJobVacancies.png";
 
 const NAV_LINKS = [
   { label: "For job seekers", to: "/Jobs", items: [
-    { title: "Find jobs", desc: "Explore local & global opportunities", to: "/auth" },
+    { title: "Find jobs", desc: "Explore local & global opportunities", to: "/jobs" },
     { title: "Career guide", desc: "Guides & articles to advance your career", to: "/blog" },
     { title: "Learn new skills", desc: "Stay relevant by taking our courses", to: "/courses" },
-    { title: "Remote work", desc: "Work with companies around the world", to: "/remote" } ] },
+    { title: "Remote work", desc: "Work with companies around the world", to: "/remote-jobs" } ] },
   { label: "For employers", to: "/auth", items: [
     { title: "Hire with Amsol", desc: "Recruit better talent, faster — on your own or with support", to: "/employerlandingpage" },
     { title: "Pricing", desc: "Choose the plan that fits your needs", to: "/pricing" },
     { title: "Discover talent", desc: "Access a network of validated & vetted candidates", to: "/candidates" } ] },
   { label: "Forum", to: "/forum", items: [
-    { title: "Discussions", desc: "Talk shop with jobseekers and employers", to: "/forum" },
+    { title: "Discussions", desc: "Talk shop with jobseekers and employers", to: "/forum/discussions" },
     { title: "Announcements", desc: "Product news and platform updates", to: "/forum/announcements" } ] },
 ];
 const ACCOUNT_TYPES = [

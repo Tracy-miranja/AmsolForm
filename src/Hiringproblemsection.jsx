@@ -1,14 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaWhatsapp, FaFileExcel, FaRegEnvelope, FaRegCalendarAlt } from "react-icons/fa";
 
-/* ------------------------------------------------------------------
-   Hiring problem section
-   Left: headline + pain points.  Right: a "scattered hiring tools" stage
-   made of animated cards (emails, WhatsApp, Candidates.xlsx, pipeline,
-   schedule-interview form) wired together by flowing dashed lines.
-   Uses the page's existing .el-wrap / .el-sec / .el-h classes.
-------------------------------------------------------------------- */
-
 const useTick = (start, max, ms, step = 1) => {
   const [n, setN] = useState(start);
   useEffect(() => {

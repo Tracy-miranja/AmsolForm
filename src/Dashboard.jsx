@@ -2,6 +2,8 @@ import { useState, useContext, useEffect } from "react";
 import api from "../api/axiosInstance";
 import { JobContext } from "./JobContext";
 import FormLayout from "./Formlayout";
+import DashboardHome from "./DashboardHome";
+import JobsPage from "./JobsPage";
 
 const API = "/api";
 
@@ -1028,7 +1030,7 @@ const checkProfileMissing = (profile) => {
   }
 `}</style>
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
-const Dashboard = ({ profile, token, onNav, onQuickApply, savedJobIds = new Set(), onToggleSave, onViewTerms }) => {
+const Dashboard = ({ page, profile, token, onNav, onQuickApply, savedJobIds = new Set(), onToggleSave, onViewTerms }) => {
   const { jobs, loading: jobsLoading, error: jobsError } = useContext(JobContext);
 
   const [filter, setFilter]           = useState("All");
@@ -1047,6 +1049,11 @@ const toggleSave = (job) => onToggleSave({ ...job, _id: String(job._id ?? job.id
 const isJobSaved = (jobId) => savedJobIds.has(String(jobId));
 const [disqualifyModal, setDisqualifyModal]     = useState(false);
 const [disqualifyMessage, setDisqualifyMessage] = useState("");
+// const [view, setView] = useState("home"); 
+const view = page === "jobs" ? "jobs" : "home";
+
+const [focusJobId, setFocusJobId] = useState(null);
+const [jobsSort, setJobsSort] = useState("Recommended");
 
   const locations = [...new Set(jobs.map(j => j.location).filter(Boolean))].slice(0, 6);
 
@@ -1072,7 +1079,7 @@ useEffect(() => {
   if (!pendingId) return;
   sessionStorage.removeItem("pendingJobId");
   const job = jobs.find((j) => String(j.id) === pendingId);
-  if (job) setSelectedJob(job);
+  if (job) { setFocusJobId(job.id); onNav("jobs"); }
 }, [jobs, jobsLoading]);
 
 // ─── Experience extraction helper ────────────────────────────────────────────
@@ -1396,21 +1403,12 @@ const matchesFieldOfStudy = (requiredFields, applicantFields) => {
   return requiredFields.some(req => applicantFields.some(af => af.includes(req) || req.includes(af)));
 };
 
-// ─── Certifications — generic, field-agnostic extraction ──────────────────
-// Instead of a fixed whitelist, this pulls out whatever certification name
-// is actually mandated in the JD text (works for HR, IT, finance, engineering,
-// anything), then fuzzy-matches it against the applicant's own Professional
-// Qualifications & Memberships entries — never a hardcoded list.
 
 const isOptionalCertLine = (line) =>
   /\b(highly\s+preferred|preferred?|added?\s+advantage|desirable|bonus|an?\s+asset|nice\s+to\s+have)\b/i.test(line);
 const isMandatoryCertLine = (line) =>
   /\b(must\s+(?:hold|have|possess|be)|required\s+to\s+hold|requires?|mandatory|essential)\b/i.test(line);
 
-// Short acronyms that sometimes appear bare, without the word
-// "certification" next to them (e.g. a bullet that just says "PMP" or "CCNA").
-// This is a helper hint list, not a restriction — anything else is still
-// caught by the generic patterns below.
 const KNOWN_CERT_ACRONYMS = [
   "cfa", "cifa", "acca", "cpa", "cim", "frm", "cima", "pmp",
   "chrp-k", "chrp", "ccna", "ccnp", "aws", "csm", "prince2",
@@ -1422,8 +1420,6 @@ const extractRequiredCertifications = (job) => {
   const lines = rawText.split(/\n/);
   const required = new Set();
 
-  // Generic capture patterns — match the certification NAME itself, not a
-  // fixed list of acronyms, so any field's mandatory cert gets picked up.
   const NAME_PATTERNS = [
     // "must have/hold/possess a X certification/credential/designation"
     /(?:must\s+(?:have|hold|possess)|required\s+to\s+hold|requires?)\s+(?:a|an|the)?\s*([A-Za-z][A-Za-z0-9\-+.&\s]{1,60}?)\s+(?:certification|certificate|credential|designation)\b/i,
@@ -1436,8 +1432,8 @@ const extractRequiredCertifications = (job) => {
   for (const rawLine of lines) {
     const line = rawLine.trim();
     if (!line) continue;
-    if (!isMandatoryCertLine(line)) continue;     // only enforce mandatory lines
-    if (isOptionalCertLine(line)) continue;        // "preferred/advantage" wording wins if present
+    if (!isMandatoryCertLine(line)) continue;     
+    if (isOptionalCertLine(line)) continue;       
 
     for (const pattern of NAME_PATTERNS) {
       const match = line.match(pattern);
@@ -1472,9 +1468,6 @@ const applicantCertifications = (profile = {}) => {
   ].filter(Boolean);
 };
 
-// Fuzzy match — exact substring either direction, or significant word overlap,
-// so formatting differences ("AWS Certified Solutions Architect" vs
-// "AWS Certified Solutions Architect - Associate") don't cause false negatives.
 const certMatches = (required, held) => {
   if (!required || !held) return false;
   if (held.includes(required) || required.includes(held)) return true;
@@ -1595,6 +1588,21 @@ const checkJobQualification = (job, profile) => {
   // Return null (qualifies) or the array of reason objects
   return reasons.length > 0 ? reasons : null;
 };
+
+const renderDescription = (job) => {
+  const secs = parseJobDescriptionSections(job.description || "");
+  return secs.map((sec, i) => {
+    const chunks = chunkSectionBody(sec.body);
+    if (!chunks.length) return null;
+    return (
+      <div key={i} style={{ marginBottom: 20 }}>
+        {sec.title && <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>{sec.title}</div>}
+        <JobDescriptionSectionChunks chunks={chunks} />
+      </div>
+    );
+  });
+};
+
 const openApply = (job) => {
   const reasons = checkJobQualification(job, profile);
   if (reasons) {
@@ -1729,214 +1737,48 @@ setTimeout(() => {
         }
       `}</style>
 
-      {/* ── Welcome banner ── */}
-      <div className="dash-banner" style={{
-        background: "linear-gradient(135deg, #1054b8 0%, #1a6edb 40%, #4f46e5 100%)",
-        borderRadius: 18, padding: "26px 32px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        color: "#fff", overflow: "hidden", position: "relative",
-      }}>
-        <div style={{ position: "absolute", right: -50, top: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
-        <div style={{ position: "absolute", right: 100, bottom: -80, width: 170, height: 170, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
-        <div style={{ position: "absolute", left: "35%", top: -30, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.03)" }} />
-        <div style={{ position: "relative" }}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.7, marginBottom: 6 }}>Welcome back</div>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 25, fontWeight: 600, lineHeight: 1.2, letterSpacing: "-0.01em" }}>Hello, {firstName}!</div>
-          <div style={{ fontSize: 13.5, opacity: 0.82, marginTop: 7, maxWidth: 440, lineHeight: 1.55 }}>
-            {missingCv
-              ? "Upload your CV to start applying to jobs with one click."
-              : `${filteredJobs.length} job${filteredJobs.length !== 1 ? "s" : ""} available — apply instantly using your saved profile & CV.`}
-          </div>
-        </div>
-       <button className="dash-banner-btn" 
-          onClick={() => {
-            const missing = checkProfileMissing(profile);
-            if (missing.length > 0) {
-              setMissingFields(missing);
-              setIncompleteModal(true);
-              return;
-            }
-            setShowFormModal(true);
-          }}
-          style={{
-            flexShrink: 0, padding: "12px 26px", borderRadius: 13,
-            background: "#f26722", color: "#fff", border: "none",
-            fontSize: 13.5, fontWeight: 700, cursor: "pointer",
-            boxShadow: "0 4px 18px rgba(242,103,34,0.45)",
-            transition: "transform 0.15s, box-shadow 0.15s",
-            display: "flex", alignItems: "center", gap: 7,
-            position: "relative",
-            zIndex: 1,
-          }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.04)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(242,103,34,0.5)"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 18px rgba(242,103,34,0.45)"; }}
-        >
-          {Ico.lightning} Apply using form
-        </button>
-      </div>
-
-      {/* ── Completion alerts ── */}
-      {(missingProfile || missingCv || missingExp || missingSummary) && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px,1fr))", gap: 12, animation: "fadeIn 0.3s ease" }}>
-          {missingProfile && (
-            <div style={{ padding: "14px 16px", background: "#fff7ed", borderRadius: 12, border: "1px solid #fed7aa", display: "flex", gap: 10 }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>👤</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 650, color: "#7c2d12" }}>Complete profile</div>
-                <div style={{ fontSize: 12, color: "#9a3412", marginTop: 2, lineHeight: 1.5 }}>Add personal details to get found.</div>
-                <button onClick={() => onNav("profile")} style={{ marginTop: 7, fontSize: 12, fontWeight: 650, color: "#ea580c", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Go to Profile →</button>
-              </div>
-            </div>
-          )}
-          {missingSummary && (
-            <div style={{ padding: "14px 16px", background: "#eff6ff", borderRadius: 12, border: "1px solid #bfdbfe", display: "flex", gap: 10 }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>📝</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 650, color: "#1e3a8a" }}>Add specialization</div>
-                <div style={{ fontSize: 12, color: "#1d4ed8", marginTop: 2, lineHeight: 1.5 }}>Tell employers what role you seek.</div>
-                <button onClick={() => onNav("profile")} style={{ marginTop: 7, fontSize: 12, fontWeight: 650, color: "#2563eb", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Add now →</button>
-              </div>
-            </div>
-          )}
-          {missingExp && (
-            <div style={{ padding: "14px 16px", background: "#f0fdf4", borderRadius: 12, border: "1px solid #bbf7d0", display: "flex", gap: 10 }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>💼</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 650, color: "#14532d" }}>Add work experience</div>
-                <div style={{ fontSize: 12, color: "#166534", marginTop: 2, lineHeight: 1.5 }}>3× more views with experience.</div>
-                <button onClick={() => onNav("profile")} style={{ marginTop: 7, fontSize: 12, fontWeight: 650, color: "#16a34a", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Add experience →</button>
-              </div>
-            </div>
-          )}
-          {missingCv && (
-            <div style={{ padding: "14px 16px", background: "#fefce8", borderRadius: 12, border: "1px solid #fef08a", display: "flex", gap: 10 }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>📄</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 650, color: "#713f12" }}>Upload your CV</div>
-                <div style={{ fontSize: 12, color: "#92400e", marginTop: 2, lineHeight: 1.5 }}>Required for Quick Apply.</div>
-                <button onClick={() => onNav("cv")} style={{ marginTop: 7, fontSize: 12, fontWeight: 650, color: "#d97706", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Upload CV →</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Quick Links ── */}
-      <div>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>Quick Links</div>
-        <div  className="dash-quick-links" style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
-          <QuickLink icon={Ico.profile} label="My Profile"   desc="View & edit details"      color="#1a6edb" bg="#e8f1fd"  onClick={() => onNav("profile")} />
-          <QuickLink icon={Ico.cv}      label="Uploaded CV"  desc="Manage your CV file"      color="#7c3aed" bg="#ede9fe"  onClick={() => onNav("cv")} />
-          {/* <QuickLink icon={Ico.apply}   label="Quick Apply"  desc="1-click applications"     color="#f26722" bg="#fff0e8"  onClick={onQuickApply} /> */}
-          <QuickLink icon={Ico.apps}    label="Applications" desc="Track your submissions"   color="#0d9488" bg="#ccfbf1"  onClick={() => onNav("applications")} badge="" />
-          {/* Saved Jobs quick link — shows count badge when jobs are saved */}
-          <QuickLink
-            icon={Ico.saved}
-            label="Saved Jobs"
-            desc="Jobs you bookmarked"
-            color="#d97706"
-            bg="#fef3c7"
-            onClick={() => onNav("saved")}
-            badge={savedJobIds.size > 0 ? savedJobIds.size : undefined}
-          />
-          <QuickLink icon={Ico.msg}     label="Messages"     desc="Recruiter conversations"  color="#6366f1" bg="#eef2ff"  onClick={() => onNav("messages")} />
-        </div>
-      </div>
-
-      {/* ── Job Listings ── */}
-      <div style={{ display: "flex", gap: 0, position: "relative" }}>
-        <div style={{ flex: 1, minWidth: 0, transition: "all 0.3s ease", marginRight: selectedJob ? 540 : 0 }}>
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#9090a8", textTransform: "uppercase", letterSpacing: "0.12em" }}>
-              Available Jobs
-              {!jobsLoading && (
-                <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 500, color: "#b0b0c0", textTransform: "none", letterSpacing: 0 }}>
-                  — {filteredJobs.length} listing{filteredJobs.length !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#9090a8", pointerEvents: "none" }}>{Ico.search}</span>
-              <input
-                type="text" placeholder="Search jobs…" value={search}
-                onChange={e => setSearch(e.target.value)}
-                style={{
-                  paddingLeft: 32, paddingRight: 12, paddingTop: 8, paddingBottom: 8,
-                  borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)",
-                  fontSize: 13, color: "#1a1a2e", background: "#fff",
-                  outline: "none", width: 210,
-                  transition: "border-color 0.18s, box-shadow 0.18s",
-                }}
-                onFocus={e => { e.target.style.borderColor = "#1a6edb"; e.target.style.boxShadow = "0 0 0 3px rgba(26,110,219,0.12)"; }}
-                onBlur={e => { e.target.style.borderColor = "rgba(0,0,0,0.12)"; e.target.style.boxShadow = "none"; }}
-              />
-            </div>
-          </div>
-
-          {locations.length > 0 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
-              {["All", ...locations].map(loc => (
-                <Pill key={loc} active={filter === loc} onClick={() => setFilter(loc)}>{loc}</Pill>
-              ))}
-            </div>
-          )}
-
-          {jobsLoading ? (
-            <div style={{ display: "grid", gridTemplateColumns: selectedJob ? "1fr" : "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
-              {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
-            </div>
-          ) : jobsError ? (
-            <div style={{ textAlign: "center", padding: "48px 0", color: "#9090a8" }}>
-              <div style={{ fontSize: 28, marginBottom: 10 }}>⚠️</div>
-              <div style={{ fontSize: 13.5, fontWeight: 500 }}>Could not load jobs. Please try again later.</div>
-            </div>
-          ) : filteredJobs.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "48px 0", color: "#9090a8" }}>
-              <div style={{ fontSize: 28, marginBottom: 10 }}>🔍</div>
-              <div style={{ fontSize: 13.5, fontWeight: 500 }}>No jobs match your search</div>
-              <button onClick={() => { setSearch(""); setFilter("All"); }}
-                style={{ marginTop: 10, fontSize: 13, color: "#1a6edb", background: "none", border: "none", cursor: "pointer" }}>
-                Clear filters
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: selectedJob ? "1fr" : "repeat(auto-fill, minmax(300px, 1fr))", gap: 12, animation: "fadeIn 0.2s ease" }}>
-              {filteredJobs.map(job => (
-               <JobListCard
-  key={job.id}
-  job={job}
-  onView={(j) => setSelectedJob(prev => prev?.id === j.id ? null : j)}
-  onApply={openApply}
-  applyingId={applyingId}
-  isSelected={selectedJob?.id === job.id}
+  {view === "home" ? (
+<DashboardHome
+  profile={profile}
+  jobs={jobs}
+  savedJobIds={savedJobIds}
   onToggleSave={toggleSave}
-  isSaved={isJobSaved(job.id)}
-  isApplied={appliedIds.has(String(job.id))}
+  onNav={onNav}
+  onOpenJob={(j) => { setFocusJobId(j.id); setJobsSort("Recommended"); onNav("jobs"); }}
+  onSeeAllJobs={(sort) => { setJobsSort(sort); setFocusJobId(null); onNav("jobs"); }}
+  onApplyForm={() => {
+    const missing = checkProfileMissing(profile);
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      setIncompleteModal(true);
+      return;
+    }
+    setShowFormModal(true);
+  }}
 />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {selectedJob && (
-          <>
-            <div
-              onClick={() => setSelectedJob(null)}
-              style={{ position: "fixed", inset: 0, zIndex: 39, background: "transparent" }}
-            />
-            <JobDetailPanel
-  job={selectedJob}
-  onClose={() => setSelectedJob(null)}
-  onApply={openApply}
-  applyingId={applyingId}
-  onToggleSave={toggleSave}
-  isSaved={isJobSaved(selectedJob.id)}
-  isApplied={appliedIds.has(String(selectedJob.id))}
-/>
-          </>
-        )}
-      </div>
+) : (
+  <>
+    {/* <button
+      onClick={() => setView("home")}
+      style={{ margin: "12px 20px", background: "none", border: "none", cursor: "pointer", fontSize: 14 }}
+    >
+      ← Back to home
+    </button> */}
+    <JobsPage
+      profile={profile}
+      initialSort={jobsSort}
+      jobs={jobs}
+      loading={jobsLoading}
+      savedJobIds={savedJobIds}
+      onToggleSave={toggleSave}
+      onApply={openApply}
+      appliedIds={appliedIds}
+      applyingId={applyingId}
+      initialJobId={focusJobId}
+      renderDescription={renderDescription}
+    />
+  </>
+)}
 
      {applyModal && (
         <ApplyConfirmModal
