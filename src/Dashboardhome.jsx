@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { matchingJobs, sortLatest, locationOf } from "./jobUtils";
+import CareerServices from "./CareerServices";
 
 // AMSOL palette
 const BLUE = "#1a6edb", BLUE_DK = "#0d4fa3", ORANGE = "#f26722", INK = "#1a1a2e", MUTED = "#9090a8", BG = "#f7f8fa", LINE = "rgba(0,0,0,0.08)";
@@ -156,6 +157,11 @@ const DashboardHome = ({ profile, jobs = [], savedJobIds, onToggleSave, onNav, o
             <QuickLink icon={Ico.msg} label="Messages" desc="Recruiter conversations" color="#6366f1" bg="#eef2ff" onClick={() => onNav("messages")} />
           </div>
         </div>
+
+          <CareerServices
+          onSelect={(id) => onNav && onNav("services", id)}
+          onSeeAll={() => onNav && onNav("services")}
+        />
 
         {best.length > 0 && (
           <Section title="Best matching jobs for you" onSeeAll={() => seeAll("Recommended")}>

@@ -1,0 +1,68 @@
+/* wallet + billing */
+.ed-badge{margin-left:auto;background:var(--amber);color:var(--ink);font-size:11px;font-weight:700;border-radius:99px;min-width:22px;height:20px;display:grid;place-items:center;padding:0 6px}
+.ep-h4{margin:22px 0 10px;font:700 14px 'Space Grotesk',sans-serif;color:var(--navy)}
+.ep-h4.first{margin-top:0}
+.ep-wallet{background:linear-gradient(135deg,#0E2A4D,#1F5BFF);color:#fff;border-radius:16px;padding:24px 26px;display:grid;gap:4px;margin-bottom:16px}
+.ep-wallet small{opacity:.75;font-size:12px;text-transform:uppercase;letter-spacing:.07em}
+.ep-wallet b{font:700 34px 'Space Grotesk',sans-serif}
+.ep-wallet span{font-size:13px;opacity:.85}
+.ep-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.ep-step{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;color:var(--muted)}
+.ep-step svg{margin-top:3px;font-size:17px;flex-shrink:0}
+.ep-step.done{color:#16A34A}
+.ep-step b{color:var(--navy);font-size:13.5px}
+.ep-step p{margin:3px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.ep-step a,.ep-note a{color:var(--blue);font-weight:600}
+.ep-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ep-presets button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 16px;font:600 13px 'Inter',sans-serif;color:var(--navy);cursor:pointer;transition:background .2s,border-color .2s}
+.ep-presets button:hover{background:#F3F6FB}
+.ep-presets button.on{background:#E6EFFC;border-color:var(--blue);color:var(--blue)}
+.ep-row.ep-act{grid-template-columns:minmax(0,1.6fr) auto minmax(0,1fr);}
+.ep-amt{font:700 15px 'Space Grotesk',sans-serif;white-space:nowrap}
+.ep-amt.plus{color:#166534}.ep-amt.minus{color:#991B1B}
+.ep-opt{display:flex;justify-content:space-between;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:10px}
+.ep-opt.rec{border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,91,255,.08)}
+.ep-opt h4{margin:0;font-size:14.5px;color:var(--navy)}
+
+/* notifications */
+.ep-notif{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:8px;cursor:pointer;transition:box-shadow .3s}
+.ep-notif:hover{box-shadow:0 12px 26px -18px rgba(14,42,77,.4)}
+.ep-notif.unread{border-left:3px solid var(--blue);background:#F8FAFF}
+.ep-notif-i{width:38px;height:38px;border-radius:50%;background:#E6EFFC;color:var(--blue);display:grid;place-items:center}
+.ep-notif b{font-size:14px}.ep-notif p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.ep-notif small{color:var(--muted);font-size:12px;white-space:nowrap}
+
+/* chat */
+.ep-chat{display:grid;grid-template-columns:320px minmax(0,1fr);height:calc(100vh - 220px);min-height:460px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ep-convs{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.ep-convs-top{padding:12px;border-bottom:1px solid var(--line)}
+.ep-convs-list{overflow-y:auto;flex:1}
+.ep-conv{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:12px 14px;cursor:pointer;font-family:inherit;border-bottom:1px solid #F0F3F8;transition:background .2s}
+.ep-conv:hover{background:#F8FAFF}.ep-conv.on{background:#E6EFFC}
+.ep-conv-t{min-width:0;flex:1}
+.ep-conv-t b{display:block;font-size:13.5px;color:var(--navy)}
+.ep-conv-t small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.ep-thread{display:flex;flex-direction:column;min-height:0;min-width:0}
+.ep-thread-empty{display:grid;place-items:center}
+.ep-thread>header{display:flex;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line)}
+.ep-thread>header b{display:block;font-size:14px;color:var(--navy)}.ep-thread>header small{color:var(--muted);font-size:12px}
+.ep-back{display:none}
+.ep-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;background:#F8FAFD}
+.ep-msg{max-width:74%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.5}
+.ep-msg p{margin:0;white-space:pre-wrap;word-break:break-word}
+.ep-msg small{display:block;margin-top:4px;font-size:11px;opacity:.7}
+.ep-msg.employer{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
+.ep-msg.candidate{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+.ep-compose{display:flex;gap:10px;padding:12px;border-top:1px solid var(--line);align-items:flex-end}
+.ep-compose textarea{resize:none}
+
+@media(max-width:900px){
+  .ep-steps{grid-template-columns:1fr}
+  .ep-opt{flex-direction:column;align-items:stretch}
+  .ep-row.ep-act{grid-template-columns:1fr}
+  .ep-chat{grid-template-columns:1fr;height:calc(100vh - 200px)}
+  .ep-chat .ep-thread{display:none}
+  .ep-chat.open .ep-convs{display:none}
+  .ep-chat.open .ep-thread{display:flex}
+  .ep-back{display:grid}
+}

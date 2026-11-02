@@ -7,11 +7,11 @@ import { FiEye, FiEyeOff, FiArrowRight, FiSearch } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import { FcGoogle } from "react-icons/fc";
 import api from "../api/axiosInstance";
-import axios from "axios";
 import heroImage from "./assets/amsol-career-portrait.jpg";
 import logo from "./assets/Amsollogo.png";
+import { getSession, homeFor, saveSession } from "./employer/employerAuth";
 
-const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
+const Auth = ({ isLogin = true, onSuccess, onError }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,23 +29,24 @@ const Auth = ({ isLogin = true, setIsLoggedIn, onSuccess, onError }) => {
 
   const [searchParams] = useSearchParams();
 
-useEffect(() => {
-  const err = searchParams.get("error");
-  if (!err) return;
-  const messages = {
-    google_cancelled: "Google sign-in was cancelled.",
-    google_state: "Google sign-in expired. Please try again.",
-    google_email_unverified: "Your Google email isn't verified.",
-    account_suspended: "This account is suspended.",
-    google_failed: "Google sign-in failed. Please try again.",
-  };
-  toast.error(messages[err] || "Sign-in failed.");
-}, [searchParams]);
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (!err) return;
+    const messages = {
+      google_cancelled: "Google sign-in was cancelled.",
+      google_state: "Google sign-in expired. Please try again.",
+      google_email_unverified: "Your Google email isn't verified.",
+      account_suspended: "This account is suspended.",
+      google_failed: "Google sign-in failed. Please try again.",
+    };
+    toast.error(messages[err] || "Sign-in failed.");
+  }, [searchParams]);
 
+  // Already signed in? Send each role to its own home.
   useEffect(() => {
     const token = Cookies.get("token");
     if (token) {
-      navigate("/profile");
+      navigate(homeFor(getSession()?.role) === "/NurseForm" ? "/profile" : homeFor(getSession()?.role), { replace: true });
     }
   }, [navigate]);
 
@@ -71,13 +72,12 @@ useEffect(() => {
       setUserId(data.id);
       setToken(data.token);
 
-      if (data.role === "nurse") {
-  navigate("/NurseForm");
-} else if (data.role === "employer") {
-  navigate("/profile"); // change this to your employer page
-} else {
-  navigate("/profile");
-}
+      // Remember the role (and name) so the employer guard and sidebar can use them
+      const finalRole = data.role || role;
+      saveSession({ role: finalRole, name: data.username || data.name || username });
+
+      // Employers go to their dashboard, nurses to the nurse form, everyone else to the profile
+      navigate(homeFor(finalRole), { replace: true });
 
       if (typeof onSuccess === "function") onSuccess();
     } catch (error) {
@@ -95,12 +95,13 @@ useEffect(() => {
   };
 
   // Placeholder — wire up to your real OAuth flow when the backend endpoint exists.
-const handleGoogleAuth = () => {
-  const backend = import.meta.env.DEV
-    ? "http://localhost:5001"
-    : api.defaults.baseURL || "";
-  window.location.href = `${backend}/api/auth/google`;
-};
+  const handleGoogleAuth = () => {
+    const backend = import.meta.env.DEV
+      ? "http://localhost:5001"
+      : api.defaults.baseURL || "";
+    window.location.href = `${backend}/api/auth/google`;
+  };
+
   // Placeholder guidance — swap this for a real call to your support/AI backend,
   // sending helpMessage and returning steps tailored to what the person typed.
   const handleGetGuidance = () => {
@@ -137,36 +138,34 @@ const handleGoogleAuth = () => {
         />
         {/* Navy overlay: lighter over the window on the right, darker on the left and along the bottom for text contrast */}
         <div
-  className="pointer-events-none absolute inset-0"
-  style={{
-    backgroundImage: `
-      linear-gradient(90deg,
-        rgba(10, 28, 52, 0.94) 0%,
-        rgba(14, 42, 77, 0.82) 30%,
-        rgba(14, 42, 77, 0.35) 58%,
-        rgba(14, 42, 77, 0.06) 82%,
-        rgba(14, 42, 77, 0) 100%),
-      linear-gradient(180deg,
-        rgba(14, 42, 77, 0) 0%,
-        rgba(14, 42, 77, 0) 45%,
-        rgba(10, 28, 52, 0.55) 78%,
-        rgba(10, 28, 52, 0.85) 100%)
-    `,
-  }}
-/>
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(90deg,
+                rgba(10, 28, 52, 0.94) 0%,
+                rgba(14, 42, 77, 0.82) 30%,
+                rgba(14, 42, 77, 0.35) 58%,
+                rgba(14, 42, 77, 0.06) 82%,
+                rgba(14, 42, 77, 0) 100%),
+              linear-gradient(180deg,
+                rgba(14, 42, 77, 0) 0%,
+                rgba(14, 42, 77, 0) 45%,
+                rgba(10, 28, 52, 0.55) 78%,
+                rgba(10, 28, 52, 0.85) 100%)
+            `,
+          }}
+        />
 
-        <Link to="/" className="relative flex items-center gap-2">
-          {/* <span className="grid h-8 w-8 place-items-center rounded-full bg-[#ffff] text-sm font-bold text-[#0E2A4D]">
-            A
-          </span> */}
-           <Link to="/" className="shrink-0 rounded-xl px-2.5 py-1.5">
-                        <img src={logo} alt="Amsol" className="w-[110px]" />
-                      </Link>
+        {/* Logo row (was a Link nested inside a Link, which is invalid HTML) */}
+        <div className="relative flex items-center gap-2">
+          <Link to="/" className="shrink-0 rounded-xl px-2.5 py-1.5">
+            <img src={logo} alt="Amsol" className="w-[110px]" />
+          </Link>
           <span className="font-medium tracking-wide text-[#ffff]">|</span>
           <span className="ml-1 rounded-full border border-[#2C4A78] px-2 py-0.5 text-[10px] tracking-wide text-[#C9D6EA]">
             JOBS
           </span>
-        </Link>
+        </div>
 
         <div className="relative max-w-md">
           <p className="flex items-center gap-2 text-sm text-[#E3A857]">
@@ -274,8 +273,8 @@ const handleGoogleAuth = () => {
                     className="w-full rounded-lg border border-[#DDD6C7] bg-white px-4 py-2.5 text-[#1C2321] focus:outline-none focus:ring-2 focus:ring-[#E3A857]/60 focus:border-[#E3A857]"
                   >
                     <option value="nurse">Employee: Nurse</option>
-<option value="job applicant">Employee: Other roles</option>
-<option value="employer">Employer</option>
+                    <option value="job applicant">Employee: Other roles</option>
+                    <option value="employer">Employer</option>
                   </select>
                 </div>
               </>

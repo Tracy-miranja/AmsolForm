@@ -4,6 +4,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { FiArrowRight } from "react-icons/fi";
 import api from "../api/axiosInstance";
 import { useUser } from "./Context/UserContext";
+import { getSession, homeFor, saveSession } from "./employer/employerAuth";
 
 const ChooseRole = () => {
   const [email, setEmail] = useState("");
@@ -40,7 +41,15 @@ const ChooseRole = () => {
       );
       setUserId(data.id);
       setToken(data.token);
-      navigate(data.role === "nurse" ? "/NurseForm" : data.role === "employer" ? "/profile" : "/profile", { replace: true });
+
+      const finalRole = data.role || role;
+      saveSession({
+        role: finalRole,
+        name: data.username || data.name || getSession()?.name || "",
+      });
+
+      // employer -> /employer/dashboard, nurse -> /NurseForm, everyone else -> /profile
+      navigate(homeFor(finalRole), { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong!");
     } finally {
@@ -75,8 +84,8 @@ const ChooseRole = () => {
               className="w-full rounded-lg border border-[#DDD6C7] bg-white px-4 py-2.5 text-[#1C2321] focus:outline-none focus:ring-2 focus:ring-[#E3A857]/60 focus:border-[#E3A857]"
             >
               <option value="nurse">Employee: Nurse</option>
-<option value="job applicant">Employee: Other roles</option>
-<option value="employer">Employer</option>
+              <option value="job applicant">Employee: Other roles</option>
+              <option value="employer">Employer</option>
             </select>
           </div>
 

@@ -3705,7 +3705,7 @@ const saveProfessional = async ({ qualifications: newQuals, memberships: newMems
     const p = data.profile || data;
     setProfile(p);
     setForm(p);
-    setEducation(newEdu); // keep frontend shape in state
+    setEducation(newEdu); 
     setModal(null);
     flashMsg("Education saved!");
   } catch (err) {
