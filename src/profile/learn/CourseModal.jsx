@@ -43,7 +43,7 @@ export default function CourseModal({ course, completed, onToggle, onClose }) {
               </ul>
             )}
             <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
-              {lesson.videoUrl && <a href={lesson.videoUrl} target="_blank" rel="noreferrer" className="text-[#1a6edb] text-[13px] underline">▶ Watch video</a>}
+              {lesson.videoUrl && <a href={lesson.videoUrl} target="_blank" rel="noreferrer" className="text-[#1a6edb] text-[13px] underline">Watch video</a>}
               {lesson.linkUrl && <a href={lesson.linkUrl} target="_blank" rel="noreferrer" className="text-[#1a6edb] text-[13px] underline">{Icon.externalLink} Open resource</a>}
             </div>
           </div>

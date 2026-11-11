@@ -6,9 +6,9 @@ import CvRevamp from "../career/CvRevamp";
 import QuickTools from "../career/QuickTools";
 
 const TABS = [
-  { id: "coach", label: "🧭 AI Career Coach", dot: "#1a6edb" },
-  { id: "cv", label: "📄 CV Revamp", dot: "#7c3aed" },
-  { id: "quick", label: "⚡ Quick Tools", dot: "#f26722" },
+  { id: "coach", label: "AI Career Coach", dot: "#1a6edb" },
+  { id: "cv", label: "CV Revamp", dot: "#7c3aed" },
+  { id: "quick", label: "Quick Tools", dot: "#f26722" },
 ];
 
 export default function CareerServicesPage({ profile, skills, workExperience }) {
@@ -27,7 +27,7 @@ export default function CareerServicesPage({ profile, skills, workExperience }) 
         ))}
       </div>
 
-      <SectionCard dotColor={active.dot} title={active.label.replace(/^\S+\s/, "")}>
+      <SectionCard dotColor={active.dot} title={active.label}>
         {tab === "coach" && <CareerCoach context={context} />}
         {tab === "cv" && <CvRevamp profile={profile} />}
         {tab === "quick" && <QuickTools context={context} />}

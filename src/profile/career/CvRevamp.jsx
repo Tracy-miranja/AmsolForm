@@ -3,25 +3,9 @@ import { Icon } from "../shared/Icons";
 import { MF, Inp, FL } from "../shared/ui";
 import { revampCv, downloadSavedCv, errMsg } from "./careerApi";
 import CopyButton from "./CopyButton";
+import CvBuilder from "./CvBuilder";
 
 const list = (arr) => (Array.isArray(arr) ? arr.filter(Boolean) : []);
-
-// Word opens HTML saved as .doc — simple way to give a downloadable, editable CV
-function downloadAsWord(text) {
-  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const body = text.split("\n").map((ln) => {
-    const t = ln.trim();
-    if (!t) return "<br/>";
-    if (/^[A-Z][A-Z &/,-]{3,}$/.test(t)) return `<h3 style="margin:14px 0 4px;border-bottom:1px solid #999">${esc(t)}</h3>`;
-    if (t.startsWith("- ")) return `<p style="margin:2px 0 2px 18px">• ${esc(t.slice(2))}</p>`;
-    return `<p style="margin:2px 0">${esc(t)}</p>`;
-  }).join("");
-  const html = `<html><head><meta charset="utf-8"></head><body style="font-family:Calibri,Arial;font-size:11pt">${body}</body></html>`;
-  const url = URL.createObjectURL(new Blob([html], { type: "application/msword" }));
-  const a = document.createElement("a");
-  a.href = url; a.download = "Revamped_CV.doc"; a.click();
-  URL.revokeObjectURL(url);
-}
 
 const Block = ({ title, children, copy }) => (
   <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: 16 }}>
@@ -154,16 +138,7 @@ export default function CvRevamp({ profile }) {
             <Block title="Beat the CV scanners">{r.atsTips.map((s, i) => <p key={i} style={{ fontSize: 13, color: "#3a3a52", marginBottom: 4 }}>• {s}</p>)}</Block>
           )}
 
-          {r.revampedCvText && (
-            <Block title="Your revamped CV (review before using!)" copy={r.revampedCvText}>
-              <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.65, color: "#1a1a2e", maxHeight: 380, overflowY: "auto", background: "#f8f9fc", padding: 12, borderRadius: 8 }}>{r.revampedCvText}</div>
-              <button onClick={() => downloadAsWord(r.revampedCvText)}
-                className="flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.13)] text-[#5a5a72] text-[12.5px] hover:bg-[#f4f6fb] transition">
-                {Icon.download} Download as Word
-              </button>
-              <p style={{ fontSize: 11.5, color: "#9090a8", marginTop: 8 }}>Replace any [add figure] placeholders with your real numbers and check every detail is correct before you apply.</p>
-            </Block>
-          )}
+          {r.revampedCv && <CvBuilder cv={r.revampedCv} />}
         </div>
       )}
     </div>

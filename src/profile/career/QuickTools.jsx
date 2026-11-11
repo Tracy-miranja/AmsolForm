@@ -5,11 +5,11 @@ import { runQuick, errMsg } from "./careerApi";
 import CopyButton from "./CopyButton";
 
 const TOOLS = [
-  { id: "cover_letter", emoji: "✉️", title: "Cover letter", desc: "A tailored letter for one job", needs: ["jobTitle", "company", "notes"] },
-  { id: "interview_prep", emoji: "🎤", title: "Interview prep", desc: "Likely questions + how to answer", needs: ["jobTitle", "company"] },
-  { id: "linkedin", emoji: "💼", title: "LinkedIn headline & About", desc: "Stand out to recruiters", needs: ["jobTitle", "notes"] },
-  { id: "elevator_pitch", emoji: "⏱️", title: "Elevator pitch", desc: "Your 30-second intro", needs: ["jobTitle", "notes"] },
-  { id: "follow_up", emoji: "📧", title: "Thank-you email", desc: "Follow up after an interview", needs: ["jobTitle", "company", "notes"] },
+  { id: "cover_letter", title: "Cover letter", desc: "A tailored letter for one job", needs: ["jobTitle", "company", "notes"] },
+  { id: "interview_prep", title: "Interview prep", desc: "Likely questions + how to answer", needs: ["jobTitle", "company"] },
+  { id: "linkedin", title: "LinkedIn headline & About", desc: "Stand out to recruiters", needs: ["jobTitle", "notes"] },
+  { id: "elevator_pitch", title: "Elevator pitch", desc: "Your 30-second intro", needs: ["jobTitle", "notes"] },
+  { id: "follow_up", title: "Thank-you email", desc: "Follow up after an interview", needs: ["jobTitle", "company", "notes"] },
 ];
 const LABELS = {
   jobTitle: ["Job title", "e.g. Senior Accountant"],
@@ -39,8 +39,7 @@ export default function QuickTools({ context }) {
           <button key={t.id} onClick={() => pick(t)}
             style={{ textAlign: "left", padding: 14, borderRadius: 12, cursor: "pointer",
               border: "1.5px solid " + (tool?.id === t.id ? "#1a6edb" : "rgba(0,0,0,0.08)"), background: tool?.id === t.id ? "#f0f5ff" : "#fff" }}>
-            <div style={{ fontSize: 20 }}>{t.emoji}</div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: "#1a1a2e", marginTop: 6 }}>{t.title}</div>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: "#1a1a2e" }}>{t.title}</div>
             <div style={{ fontSize: 12, color: "#9090a8", marginTop: 2 }}>{t.desc}</div>
           </button>
         ))}
