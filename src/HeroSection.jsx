@@ -26,7 +26,7 @@ const Cursor = ({ step, p }) => {
       style={{ left: `${x}%`, top: `${y}%`, transform: p === 4 && step !== 2 ? "scale(.85)" : "scale(1)" }}
       width="18" height="22" viewBox="0 0 18 22"
     >
-      <path d="M2 1l13 10-6 1.3L12 19l-2.6 1.2L6.6 13.6 2 17z" fill="#0F1B33" stroke="#fff" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M2 1l13 10-6 1.3L12 19l-2.6 1.2L6.6 13.6 2 17z" fill="#065698" stroke="#fff" strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   );
 };
@@ -126,7 +126,7 @@ const TrackScreen = ({ p }) => (
   <div className="hf-body">
     <div className="grid grid-cols-3 gap-2.5">
       {[["1", "Submitted"], ["0", "In review"], ["0", "Interviews"]].map(([n, l], i) => (
-        <div key={l} className="hf-stat" style={i === 0 && p >= 1 ? { borderColor: "#1F5BFF", background: "#F1F6FF" } : null}>
+        <div key={l} className="hf-stat" style={i === 0 && p >= 1 ? { borderColor: "#065698", background: "#F1F6FF" } : null}>
           <p className="text-xl font-bold text-slate-900">{i === 0 ? (p >= 1 ? n : "0") : n}</p>
           <p className="hf-sub">{l}</p>
         </div>
@@ -178,25 +178,27 @@ const HeroSection = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
         .hf-hero{position:relative;font-family:'Inter',sans-serif;color:#0F1B33;background:transparent}
-        .hf-badge{display:inline-flex;align-items:center;gap:8px;background:#D3E2FA;color:#1F5BFF;font-weight:700;font-size:11.5px;letter-spacing:.14em;padding:10px 16px;border-radius:999px;text-transform:uppercase}
-        .hf-badge i{width:5px;height:5px;border-radius:50%;background:#1F5BFF}
+        .hf-badge{display:inline-flex;align-items:center;gap:8px;background:#D3E2FA;color:
+#065698;font-weight:700;font-size:11.5px;letter-spacing:.14em;padding:10px 16px;border-radius:999px;text-transform:uppercase}
+        .hf-badge i{width:5px;height:5px;border-radius:50%;background:#065698}
         .hf-h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(40px,5.2vw,68px);line-height:1.06;letter-spacing:-.025em;color:#0F1B33}
-        .hf-fits{position:relative;color:#1F5BFF;display:inline-block}
+        .hf-fits{position:relative;color:
+#065698;display:inline-block}
         .hf-fits svg{position:absolute;left:0;bottom:-6px;width:100%;height:10px}
         .hf-lead{color:#6B7C93;font-size:19px;line-height:1.55;max-width:440px}
-        .hf-cta{background:#1F5BFF;color:#fff;font-weight:600;font-size:15px;padding:16px 28px;border-radius:999px;transition:background .2s}
-        .hf-cta:hover{background:#1749D1}
+        .hf-cta{background:#065698;color:#fff;font-weight:600;font-size:15px;padding:16px 28px;border-radius:999px;transition:background .2s}
+        .hf-cta:hover{background:#0B233F}
         .hf-cta2{background:#fff;color:#0F1B33;font-weight:600;font-size:15px;padding:16px 28px;border-radius:999px;border:1px solid #E1E8F2}
         .hf-statpill{background:#fff;border-radius:999px;padding:14px 24px;box-shadow:0 6px 18px -10px rgba(31,91,255,.25)}
         .hf-statpill b{display:block;font-size:17px;font-weight:700}
         .hf-statpill span{font-size:12px;color:#6B7C93}
 
         .hf-label{display:flex;align-items:center;gap:12px;font-weight:600;font-size:17px}
-        .hf-num{width:36px;height:36px;border-radius:50%;background:#1F5BFF;color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center}
+        .hf-num{width:36px;height:36px;border-radius:50%;background:#065698;color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center}
         .hf-label-t{animation:hfFade .5s ease both}
         .hf-dots{display:flex;gap:6px;align-items:center}
         .hf-dots button{width:8px;height:8px;border-radius:99px;background:#B7CBF3;transition:all .3s}
-        .hf-dots button.on{width:24px;background:#1F5BFF}
+        .hf-dots button.on{width:24px;background:#065698}
 
         .hf-stage-wrap{position:relative;perspective:1400px;height:440px}
         .hf-under{position:absolute;left:0;right:0;top:0;height:100%;border-radius:28px;background:#fff}
@@ -211,29 +213,29 @@ const HeroSection = () => {
         .hf-avatar{width:48px;height:48px;border-radius:50%;background:#DDE9FB}
         .hf-name{font-weight:700;font-size:14.5px;color:#0F1B33;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .hf-sub{font-size:12.5px;color:#6B7C93}
-        .hf-pill-blue{background:#DDE9FB;color:#1F5BFF;font-weight:600;font-size:12px;padding:6px 14px;border-radius:999px;transition:all .3s}
-        .hf-skill{background:#E6EFFC;color:#2A3B55;font-size:12px;font-weight:500;padding:7px 14px;border-radius:999px}
-        .hf-drop{border:2px dashed #1F5BFF;border-radius:20px;background:#F4F8FF;padding:30px 24px;text-align:center}
+        .hf-pill-blue{background:#DDE9FB;color:#065698;font-weight:600;font-size:12px;padding:6px 14px;border-radius:999px;transition:all .3s}
+        .hf-skill{background:#E6EFFC;color:#065698;font-size:12px;font-weight:500;padding:7px 14px;border-radius:999px}
+        .hf-drop{border:2px dashed #065698;border-radius:20px;background:#F4F8FF;padding:30px 24px;text-align:center}
         .hf-drop-t{font-weight:700;font-size:14.5px}
         .hf-bar{height:5px;border-radius:99px;background:#DCE6F5;width:56%;margin:14px auto 0;overflow:hidden}
-        .hf-bar-fill{height:100%;background:#1F5BFF;border-radius:99px;transition-property:width;transition-timing-function:linear}
+        .hf-bar-fill{height:100%;background:#065698;border-radius:99px;transition-property:width;transition-timing-function:linear}
         .hf-btn-white,.hf-btn-blue,.hf-btn-done{font-weight:600;font-size:12.5px;padding:9px 18px;border-radius:999px;transition:all .25s;white-space:nowrap}
         .hf-btn-white{background:#fff;border:1px solid #DDE5F0;color:#0F1B33}
-        .hf-btn-blue{background:#1F5BFF;color:#fff}
+        .hf-btn-blue{background:#065698;color:#fff}
         .hf-btn-done{background:#DCFCE7;color:#166534}
         .hf-search{display:flex;align-items:center;gap:10px;border:1px solid #DDE5F0;background:#F7FAFE;border-radius:999px;padding:12px 16px;font-size:13.5px}
         .hf-job{display:flex;align-items:center;gap:12px;border:1px solid #E7EDF5;border-radius:16px;padding:12px 14px;transition:all .5s ease}
         .hf-job>div:nth-child(2){flex:1}
-        .hf-logo{width:38px;height:38px;border-radius:12px;background:#DDE9FB;color:#1F5BFF;font-weight:700;display:grid;place-items:center;flex-shrink:0}
-        .hf-fit{font-size:11.5px;font-weight:600;color:#1F5BFF;background:#E6EFFC;padding:4px 10px;border-radius:99px;white-space:nowrap}
+        .hf-logo{width:38px;height:38px;border-radius:12px;background:#DDE9FB;color:#065698;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+        .hf-fit{font-size:11.5px;font-weight:600;color:#065698;background:#E6EFFC;padding:4px 10px;border-radius:99px;white-space:nowrap}
         .hf-stat{border:1px solid #E7EDF5;border-radius:16px;padding:14px;transition:all .4s}
-        .hf-status{font-size:12px;font-weight:600;color:#1F5BFF;background:#DDE9FB;padding:6px 12px;border-radius:99px}
+        .hf-status{font-size:12px;font-weight:600;color:#065698;background:#DDE9FB;padding:6px 12px;border-radius:99px}
         .hf-track{position:relative;display:flex;justify-content:space-between}
         .hf-stage{display:flex;flex-direction:column;align-items:center;gap:8px;z-index:1;flex:1}
         .hf-stage-l{font-size:11.5px;color:#6B7C93;font-weight:500}
         .hf-dot{width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid #CBD8EC;transition:all .4s}
-        .hf-dot.on{background:#1F5BFF;border-color:#1F5BFF}
-        .hf-dot.pulse{border-color:#1F5BFF;animation:hfPulse 1.4s infinite}
+        .hf-dot.on{background:#065698;border-color:#065698}
+        .hf-dot.pulse{border-color:#065698;animation:hfPulse 1.4s infinite}
         .hf-track-line{position:absolute;left:12.5%;right:12.5%;top:6px;height:2px;background:#DCE6F5}
         .hf-cursor{position:absolute;z-index:5;transition:left .9s cubic-bezier(.4,.1,.2,1),top .9s cubic-bezier(.4,.1,.2,1),transform .2s;filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));pointer-events:none}
         .hf-chip{position:absolute;z-index:6;background:#fff;border:1px solid #E7EDF5;border-radius:22px;padding:12px 20px;box-shadow:0 14px 30px -14px rgba(15,27,51,.3);animation:hfFade .6s .5s ease both}
@@ -302,7 +304,7 @@ const HeroSection = () => {
                 <div className="hf-chrome">
                   <i style={{ background: "#EF4444" }} />
                   <i style={{ background: "#F59E0B" }} />
-                  <i style={{ background: "#7FA3F5" }} />
+                  <i style={{ background: "#065698" }} />
                   <span className="hf-url">hirefield.app/{["profile", "jobs", "applications"][step]}</span>
                 </div>
                 <Screen p={p} />

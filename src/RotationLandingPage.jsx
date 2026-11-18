@@ -245,7 +245,7 @@ const RotationLandingPage = () => {
 </section>
 
       {/* Open roles */}
-      <section ref={openRolesRef} className="amsol-section bg-white">
+      <section ref={openRolesRef} className="amsol-section bg-gray-50">
         <div className="amsol-container">
           <div className="flex items-end justify-between mb-6">
             <div>
@@ -321,7 +321,7 @@ const RotationLandingPage = () => {
                 const plain = stripHtml(job.description);
                 const preview = plain.length > 110 ? plain.slice(0, 110) + "…" : plain;
                 return (
-                  <div key={job.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col">
+                  <div key={job.id} className="bg-gray-100 rounded-2xl border border-slate-100 p-6 flex flex-col">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-xs font-semibold text-slate-400">AMSOL Careers</span>
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
@@ -377,7 +377,7 @@ const RotationLandingPage = () => {
                 </p>
                 <Link
                   to="/register"
-                  className="inline-flex items-center gap-2 bg-[#0E2A4D] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#0B233F] w-fit"
+                  className="inline-flex items-center gap-2 bg-[#065698] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#0B233F] w-fit"
                 >
                   Create my profile <FaArrowRight className="text-sm" />
                 </Link>
@@ -414,7 +414,7 @@ const RotationLandingPage = () => {
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { n: "01", title: "Tell us who you are", body: "A two-minute profile — skills, pace, salary band, deal-breakers. No endless forms." },
+              { n: "01", title: "Tell us who you are", body: "A two-minute profile,No endless forms." },
               { n: "02", title: "Get matched, not listed", body: "Our matching reads intent on both sides, so every intro is worth replying to." },
               { n: "03", title: "Say yes to the right one", body: "Interview with employers that already fit your criteria, and get an offer faster." },
             ].map((step) => (
@@ -431,7 +431,7 @@ const RotationLandingPage = () => {
       {/* CTA banner */}
       <section className="amsol-section">
         <div className="amsol-container">
-          <div className="bg-[#0E2A4D] rounded-3xl text-center px-6 py-16">
+          <div className="bg-[#065698] rounded-3xl text-center px-6 py-16">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white max-w-2xl mx-auto">
               Your next chapter is one signup away.
             </h2>

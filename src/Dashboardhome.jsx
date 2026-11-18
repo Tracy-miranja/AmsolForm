@@ -134,7 +134,7 @@ const DashboardHome = ({ profile, jobs = [], savedJobIds, onToggleSave, onNav, o
             <div style={{ fontSize: 13.5, opacity: 0.82, marginTop: 7, maxWidth: 440, lineHeight: 1.55 }}>
               {missingCv
                 ? "Upload your CV to start applying to jobs with one click."
-                : `${jobs.length} job${jobs.length !== 1 ? "s" : ""} available — apply instantly using your saved profile & CV.`}
+                : `${jobs.length} job${jobs.length !== 1 ? "s" : ""} available — Apply instantly using your saved profile and CV. Don't have a profile yet? Upload your CV to automatically fill in your profile`}
             </div>
           </div>
           <button onClick={onApplyForm} style={{

@@ -189,7 +189,7 @@ export default function useProfileData(token, { onNoProfile } = {}) {
   };
 
   const uploadCv = async () => {
-    if (!cvFile) return;
+    if (!cvFile) return false;
     setCvUploading(true);
     setCvMsg("");
     try {
@@ -198,18 +198,30 @@ export default function useProfileData(token, { onNoProfile } = {}) {
       const { data } = await api.post(`${API}/profile/cv`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setProfile((p) => ({ ...p, savedCvFileId: data.cvFileId, savedCvName: data.cvName, savedCvUrl: data.cvUrl }));
+      const cvFields = { savedCvFileId: data.cvFileId, savedCvName: data.cvName, savedCvUrl: data.cvUrl };
+      setProfile((p) => ({ ...p, ...cvFields }));
+      setForm((f) => ({ ...f, ...cvFields }));
       setCvMsg(`CV "${data.cvName}" saved to your profile.`);
       setCvFile(null);
+      return true;
     } catch (err) {
       setCvMsg(err.response?.data?.message || "Error uploading CV.");
+      return false;
     } finally {
       setCvUploading(false);
     }
   };
 
+  // One save for everything picked in the "fill my profile from CV" review screen
+  const applyCvImport = (patch) =>
+    saveProfile(patch, {
+      errorMsg: "Couldn't save the imported details. Please try again.",
+      successMsg: "Your profile was filled from your CV!",
+      after: (p) => applyProfile(p),
+    });
+
   return {
-    profile, form, setForm, changeForm, loading, saving, saveMsg, setSaveMsg, flashMsg,
+    applyCvImport, profile, form, setForm, changeForm, loading, saving, saveMsg, setSaveMsg, flashMsg,
     skills, education, workExperience, qualifications, memberships, avatarUrl, applicationsCount,
     cvFile, setCvFile, cvUploading, cvMsg, uploadCv,
     savePersonal, saveSummary, saveSkills, saveWorkExp, deleteWorkExp, importWorkExp,

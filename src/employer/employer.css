@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-.ed{--navy:#0E2A4D;--navy2:#143760;--blue:#1F5BFF;--amber:#F2A93B;--ink:#16233A;--muted:#6B7C93;--line:#E4EAF3;
+.ed{--navy:#065698;--navy2:#065698;--blue:#065698;--amber:#F2A93B;--ink:#16233A;--muted:#6B7C93;--line:#E4EAF3;
   font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:#F3F6FB;min-height:100vh;display:grid;grid-template-columns:248px 1fr}
 .ed *{box-sizing:border-box}
 .ed a{text-decoration:none;color:inherit}

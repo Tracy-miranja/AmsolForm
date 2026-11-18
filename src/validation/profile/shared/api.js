@@ -4,5 +4,5 @@
 import api from "../../../api/axiosInstance";
 
 export const API = "/api";
-export const API_ORIGIN = "https://amsol-api-production.up.railway.app";
+export const API_ORIGIN = "http://localhost:5001";
 export default api;

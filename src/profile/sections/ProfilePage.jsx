@@ -6,11 +6,14 @@ import WorkExperienceSection from "./WorkExperienceSection";
 import EducationSection from "./EducationSection";
 import QualificationsSection from "./QualificationsSection";
 import CvSection from "./CvSection";
+import CvImportBanner from "./CvImportBanner";
 
 /** Composes the profile page. All state lives in the parent / hooks. */
-export default function ProfilePage({ data, displayAvatar, token, saveMsg, modalOpen, openModal, cv, onPreviewCv, onImportWork }) {
+export default function ProfilePage({ data, displayAvatar, token, saveMsg, modalOpen, openModal, cv, onPreviewCv, onImportWork, onImportFromCv }) {
   const { profile, skills, education, workExperience, qualifications, memberships } = data;
   const hasWork = workExperience.some((w) => w.company);
+  const sparse = !hasWork || education.length === 0 || skills.length === 0 || !profile?.specialization;
+  const showImport = !!profile?.savedCvFileId && sparse;
   const ok = saveMsg && (saveMsg.includes("success") || saveMsg.includes("saved") || saveMsg.includes("!"));
 
   return (
@@ -20,6 +23,8 @@ export default function ProfilePage({ data, displayAvatar, token, saveMsg, modal
           {saveMsg}
         </div>
       )}
+
+      {showImport && <CvImportBanner onImport={onImportFromCv} />}
 
       <CompletionCard profile={profile} hasWorkExperience={hasWork} />
 

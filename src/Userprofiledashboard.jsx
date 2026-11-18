@@ -39,6 +39,9 @@ import AvatarModal from "./profile/modals/AvatarModal";
 import CvPreviewModal from "./profile/modals/CvPreviewModal";
 import QuickApplyModal from "./profile/modals/QuickApplyModal";
 import GeneralApplyModal from "./profile/modals/GeneralApplyModal";
+import WhatsNewModal from "./profile/modals/WhatsNewModal";
+import CvImportFlow from "./profile/cv/CvImportFlow";
+import useWhatsNew from "./profile/hooks/useWhatsNew";
 
 const UserProfileDashboard = () => {
   const { token, userId, logout } = useUser();
@@ -50,11 +53,15 @@ const UserProfileDashboard = () => {
   const [showApply, setShowApply] = useState(false);
   const [generalApply, setGeneralApply] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [importReq, setImportReq] = useState(null);
 
   const socketRef = useProfileSocket(token);
   const { savedJobIds, savedJobs, loadingSaved, toggleSave } = useSavedJobs(userId, token);
   const data = useProfileData(token, { onNoProfile: () => setModal("personal") });
   const { profile, form, setForm, saving, saveMsg, setSaveMsg, flashMsg } = data;
+
+  const profileReady = !data.loading && !!profile && Object.keys(profile).length > 0;
+  const whatsNew = useWhatsNew(userId, profileReady);
 
   const closeModal = () => setModal(null);
   const openModal = (name, opts = {}) => {
@@ -100,9 +107,18 @@ const UserProfileDashboard = () => {
     setGeneralApply(true);
   };
 
+  const requestImport = (file = null) => setImportReq({ id: Date.now(), file });
+
+  // Upload the CV, then immediately read it and offer to fill the whole profile
+  const uploadAndImport = async () => {
+    const file = data.cvFile;
+    const ok = await data.uploadCv();
+    if (ok) requestImport(file);
+  };
+
   const cvProps = {
     cvFile: data.cvFile, setCvFile: data.setCvFile, cvUploading: data.cvUploading,
-    cvMsg: data.cvMsg, onUpload: data.uploadCv,
+    cvMsg: data.cvMsg, onUpload: uploadAndImport,
   };
 
   // ── pages ──
@@ -145,7 +161,7 @@ const UserProfileDashboard = () => {
         return (
           <ProfilePage data={data} displayAvatar={displayAvatar} token={token} saveMsg={saveMsg}
             modalOpen={!!modal} openModal={openModal} cv={cvProps} onPreviewCv={() => setModal("cvpreview")}
-            onImportWork={data.importWorkExp} />
+            onImportWork={data.importWorkExp} onImportFromCv={() => requestImport(null)} />
         );
     }
   };
@@ -186,6 +202,12 @@ const UserProfileDashboard = () => {
         <AvatarModal currentUrl={displayAvatar} saving={saving} onClose={closeModal} onSave={(f) => data.saveAvatar(f, closeModal)} />
       )}
       {modal === "cvpreview" && <CvPreviewModal cvUrl={cvPreviewUrl} cvName={profile?.savedCvName} onClose={closeModal} />}
+
+      <CvImportFlow data={data} request={importReq} onClose={() => setImportReq(null)} />
+
+      {whatsNew.open && !modal && !showApply && !generalApply && (
+        <WhatsNewModal hasCv={!!profile?.savedCvFileId} onNav={setActiveNav} onClose={whatsNew.dismiss} />
+      )}
 
       {/* ── Layout ── */}
       <div className="main-layout" style={{ fontFamily: "'DM Sans', sans-serif" }}>
